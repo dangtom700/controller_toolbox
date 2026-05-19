@@ -53,6 +53,7 @@ private:
     double    Ts_;
     double    e_prev_;
     double    s_prev_;
+    double    u_prev_;
 };
 
 } // namespace ctrl

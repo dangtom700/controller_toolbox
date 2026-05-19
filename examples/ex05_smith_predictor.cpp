@@ -12,6 +12,7 @@
 #include "ControllerToolbox.h"
 #include <iostream>
 #include <iomanip>
+#include <deque>
 
 // Simulate SISO plant with integer dead-time using a shift register
 struct DelayedPlant {

@@ -140,20 +140,22 @@ void test_pid()
         test::check(std::abs(y_final - 1.0) < 0.02, "PID closed-loop tracks unit step");
     }
 
-    // NaN propagation: NaN input produces NaN output (document behavior)
+    // NaN guard: NaN input must NOT corrupt state — controller holds last output
     {
         ctrl::DiscretePID pid2(p, Ts);
+        pid2.compute(1.0); // prime with a valid step so u_prev_ != 0
         double u_nan = pid2.compute(std::numeric_limits<double>::quiet_NaN());
-        test::check(std::isnan(u_nan), "NaN input propagates (expected behavior)");
+        test::check(std::isfinite(u_nan), "NaN input: output stays finite (safe hold)");
+        // A second valid call must still work (integral must not be corrupted)
+        double u_after = pid2.compute(0.0);
+        test::check(std::isfinite(u_after), "NaN input: state not corrupted after recovery");
     }
 
-    // Inf input: saturates or propagates — document actual behavior
+    // Inf guard: Inf input must NOT corrupt state — controller holds last output
     {
         ctrl::DiscretePID pid3(p, Ts);
         double u_inf = pid3.compute(std::numeric_limits<double>::infinity());
-        // Either clamped to uMax or Inf — either is documented behavior
-        bool acceptable = (u_inf == p.uMax) || std::isinf(u_inf);
-        test::check(acceptable, "Inf input: saturates or propagates");
+        test::check(std::isfinite(u_inf), "Inf input: output stays finite (safe hold)");
     }
 
     // uMin == uMax -> every output equals that value
@@ -227,7 +229,7 @@ void test_lqr()
     u = lqr.compute(x0, Eigen::VectorXd(), u_ff);
     test::check(std::abs(u(0) - 2.0) < 1e-12, "LQR: feedforward offset applied");
 
-    // Non-stabilizable plant should throw (unstabilizable: open-loop eigenvalue outside, no B)
+    // Non-stabilizable plant: DARE cannot converge — constructor warns and reports non-convergence
     {
         Eigen::MatrixXd A(2, 2), B(2, 1), C(1, 2), D(1, 1);
         A << 2.0, 0.0, 0.0, 0.5; // unstable mode at 2.0
@@ -238,9 +240,10 @@ void test_lqr()
         ctrl::LQRParams lp;
         lp.Q = Eigen::MatrixXd::Identity(2, 2);
         lp.R = Eigen::MatrixXd::Identity(1, 1);
-        test::throws([&]
-                     { ctrl::DiscreteLQR bad(unstable, lp); },
-                     "LQR: unstabilizable plant throws");
+        // Constructor no longer throws — it warns and returns best available iterate
+        ctrl::DiscreteLQR bad(unstable, lp);
+        test::check(!bad.dareConverged(), "LQR: unstabilizable plant — dareConverged() is false");
+        test::check(bad.gainMatrix().allFinite(), "LQR: unstabilizable — gain matrix still finite");
     }
 
     // LQRAdapter wraps LQR as IController

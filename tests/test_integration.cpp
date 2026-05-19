@@ -60,7 +60,7 @@ void test_regressions() {
         test::check(std::abs(u) < 1e-6, "TC-REG-03 (Issue I-3): ADRC reset clears reference to 0");
     }
 
-    // TC-REG-05: LQR no stabilisability check (Issue I-5)
+    // TC-REG-05: LQR PBH stabilizability check + graceful non-convergence (Issue I-5)
     {
         // Unstabilisable plant: A = diag(2, 0.5), B = [0; 1] (state 0 unstable and unreachable)
         Eigen::MatrixXd A(2,2); A << 2.0, 0.0, 0.0, 0.5;
@@ -68,13 +68,15 @@ void test_regressions() {
         Eigen::MatrixXd C(1,2); C << 1.0, 0.0;
         Eigen::MatrixXd D(1,1); D << 0.0;
         ctrl::StateSpace bad_plant(A, B, C, D, Ts);
-        
+
         ctrl::LQRParams lp;
         lp.Q = Eigen::MatrixXd::Identity(2,2);
         lp.R = Eigen::MatrixXd::Identity(1,1);
-        
-        test::throws([&]{ ctrl::DiscreteLQR lqr(bad_plant, lp); }, 
-                     "TC-REG-05 (Issue I-5): LQR DARE solver throws on unstabilisable plant");
+
+        // Constructor now warns and continues rather than throwing
+        ctrl::DiscreteLQR lqr(bad_plant, lp);
+        test::check(!lqr.dareConverged(),
+                    "TC-REG-05 (Issue I-5): unstabilisable plant — dareConverged() is false");
     }
 }
 

@@ -1,67 +1,68 @@
 #include "ExtremumSeeker.h"
 
-namespace ctrl {
-
-ExtremumSeeker::ExtremumSeeker(const ExtremumSeekerParams& params, double sampleTime)
-    : p_(params), Ts_(sampleTime)
+namespace ctrl
 {
-    reset();
-}
 
-// ---------------------------------------------------------------------------
-// ESC step — perturbation + demodulation + gradient integration.
-//
-// HPF (backward Euler first-order, removes DC offset from y):
-//   α_h     = 1 / (1 + ω_h·Ts)
-//   y_h[k]  = α_h·(y_h[k-1] + y[k] − y[k-1])
-//
-// Demodulate by multiplying with reference dither sin(ω_p·k·Ts):
-//   ξ[k] = y_h[k] · sin(ω_p·k·Ts)
-//   After LPF: ĝ ≈ J'(θ)·a/2   (gradient of cost w.r.t. operating point)
-//
-// LPF (backward Euler first-order):
-//   α_l     = ω_l·Ts / (1 + ω_l·Ts)
-//   ĝ[k]   = (1−α_l)·ĝ[k-1] + α_l·ξ[k]
-//
-// Operating-point update (gradient descent / ascent):
-//   θ[k+1] = θ[k] − sign · k_int · Ts · ĝ[k]
-// ---------------------------------------------------------------------------
-double ExtremumSeeker::compute(double y)
-{
-    step_++;
-    const double t     = static_cast<double>(step_) * Ts_;
-    const double omega = 2.0 * M_PI * p_.perturbFreq;
+    ExtremumSeeker::ExtremumSeeker(const ExtremumSeekerParams &params, double sampleTime)
+        : p_(params), Ts_(sampleTime)
+    {
+        reset();
+    }
 
-    // HPF
-    const double wh    = 2.0 * M_PI * p_.hpfCutoff;
-    const double alpha_h = 1.0 / (1.0 + wh * Ts_);
-    const double y_h   = alpha_h * (hpf_state_ + y - y_prev_);
-    hpf_state_ = y_h;
-    y_prev_    = y;
+    // ---------------------------------------------------------------------------
+    // ESC step — perturbation + demodulation + gradient integration.
+    //
+    // HPF (backward Euler first-order, removes DC offset from y):
+    //   α_h     = 1 / (1 + ω_h·Ts)
+    //   y_h[k]  = α_h·(y_h[k-1] + y[k] − y[k-1])
+    //
+    // Demodulate by multiplying with reference dither sin(ω_p·k·Ts):
+    //   ξ[k] = y_h[k] · sin(ω_p·k·Ts)
+    //   After LPF: ĝ ≈ J'(θ)·a/2   (gradient of cost w.r.t. operating point)
+    //
+    // LPF (backward Euler first-order):
+    //   α_l     = ω_l·Ts / (1 + ω_l·Ts)
+    //   ĝ[k]   = (1−α_l)·ĝ[k-1] + α_l·ξ[k]
+    //
+    // Operating-point update (gradient descent / ascent):
+    //   θ[k+1] = θ[k] − sign · k_int · Ts · ĝ[k]
+    // ---------------------------------------------------------------------------
+    double ExtremumSeeker::compute(double y)
+    {
+        step_++;
+        const double t = static_cast<double>(step_) * Ts_;
+        const double omega = 2.0 * M_PI * p_.perturbFreq;
 
-    // Demodulate
-    const double demod = y_h * std::sin(omega * t);
+        // HPF
+        const double wh = 2.0 * M_PI * p_.hpfCutoff;
+        const double alpha_h = 1.0 / (1.0 + wh * Ts_);
+        const double y_h = alpha_h * (hpf_state_ + y - y_prev_);
+        hpf_state_ = y_h;
+        y_prev_ = y;
 
-    // LPF
-    const double wl    = 2.0 * M_PI * p_.lpfCutoff;
-    const double alpha_l = wl * Ts_ / (1.0 + wl * Ts_);
-    lpf_state_ = (1.0 - alpha_l) * lpf_state_ + alpha_l * demod;
+        // Demodulate
+        const double demod = y_h * std::sin(omega * t);
 
-    // Gradient integration
-    const double sign = p_.seekMinimum ? -1.0 : 1.0;
-    theta_ += sign * p_.integGain * lpf_state_ * Ts_;
+        // LPF
+        const double wl = 2.0 * M_PI * p_.lpfCutoff;
+        const double alpha_l = wl * Ts_ / (1.0 + wl * Ts_);
+        lpf_state_ = (1.0 - alpha_l) * lpf_state_ + alpha_l * demod;
 
-    // Return operating point plus dither signal
-    return theta_ + p_.perturbAmp * std::sin(omega * t);
-}
+        // Gradient integration
+        const double sign = p_.seekMinimum ? -1.0 : 1.0;
+        theta_ += sign * p_.integGain * lpf_state_ * Ts_;
 
-void ExtremumSeeker::reset()
-{
-    step_      = 0;
-    theta_     = 0.0;
-    hpf_state_ = 0.0;
-    lpf_state_ = 0.0;
-    y_prev_    = 0.0;
-}
+        // Return operating point plus dither signal
+        return theta_ + p_.perturbAmp * std::sin(omega * t);
+    }
+
+    void ExtremumSeeker::reset()
+    {
+        step_ = 0;
+        theta_ = 0.0;
+        hpf_state_ = 0.0;
+        lpf_state_ = 0.0;
+        y_prev_ = 0.0;
+    }
 
 } // namespace ctrl

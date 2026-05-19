@@ -23,37 +23,40 @@
 //
 // Ref: Franklin, Powell & Emami-Naeini "Feedback Control of Dynamic Systems";
 //      MATLAB c2d() with 'tustin' method.
-namespace ctrl {
+namespace ctrl
+{
 
-struct LeadLagParams {
-    double continuousZero = 1.0;  // z_c [rad/s] — zero of C(s)
-    double continuousPole = 10.0; // p_c [rad/s] — pole of C(s)
-    double gain           = 1.0;  // DC gain K
-};
+    struct LeadLagParams
+    {
+        double continuousZero = 1.0;  // z_c [rad/s] — zero of C(s)
+        double continuousPole = 10.0; // p_c [rad/s] — pole of C(s)
+        double gain = 1.0;            // DC gain K
+    };
 
-class DiscreteLeadLag : public IController {
-public:
-    DiscreteLeadLag(const LeadLagParams& params, double sampleTime);
+    class DiscreteLeadLag : public IController
+    {
+    public:
+        DiscreteLeadLag(const LeadLagParams &params, double sampleTime);
 
-    // Filter input signal u (typically the error or plant output).
-    double compute(double u) override;
+        // Filter input signal u (typically the error or plant output).
+        double compute(double u) override;
 
-    void   reset()             override;
-    double sampleTime()  const override { return Ts_; }
+        void reset() override;
+        double sampleTime() const override { return Ts_; }
 
-    void                 setParams(const LeadLagParams& p);
-    const LeadLagParams& params()  const { return p_; }
+        void setParams(const LeadLagParams &p);
+        const LeadLagParams &params() const { return p_; }
 
-    // Phase lead/lag at frequency omega [rad/s] (continuous-domain approximation).
-    double phaseAt(double omega_rad_s) const;
+        // Phase lead/lag at frequency omega [rad/s] (continuous-domain approximation).
+        double phaseAt(double omega_rad_s) const;
 
-private:
-    LeadLagParams p_;
-    double        Ts_;
-    double        b0_, b1_, a1_; // difference-equation coefficients
-    double        u_prev_, y_prev_;
+    private:
+        LeadLagParams p_;
+        double Ts_;
+        double b0_, b1_, a1_; // difference-equation coefficients
+        double u_prev_, y_prev_;
 
-    void computeCoeffs();
-};
+        void computeCoeffs();
+    };
 
 } // namespace ctrl

@@ -19,6 +19,8 @@ add_library(controller_toolbox STATIC
     TunerSuite.cpp
     MetricsAnalyzer.cpp
     SystemAnalysis.cpp
+    # HAL simulation adapters
+    hal/SimPlant.cpp
 )
 
 # Expose lib/ as the public include root so consumers write:

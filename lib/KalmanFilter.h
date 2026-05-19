@@ -22,41 +22,43 @@
 //
 // Ref: Kalman "A New Approach to Linear Filtering" (1960);
 //      MATLAB kalman(), kalmd(); Simulink Kalman Filter block.
-namespace ctrl {
+namespace ctrl
+{
 
-class KalmanFilter {
-public:
-    // plant:   linear discrete-time model (A,B,C,D)
-    // Q_noise: process noise covariance  (n×n, positive semi-definite)
-    // R_noise: measurement noise covariance (p×p, positive definite)
-    // P0:      initial error covariance (n×n, default = I)
-    KalmanFilter(const StateSpace&       plant,
-                 const Eigen::MatrixXd&  Q_noise,
-                 const Eigen::MatrixXd&  R_noise,
-                 const Eigen::MatrixXd&  P0 = Eigen::MatrixXd());
+    class KalmanFilter
+    {
+    public:
+        // plant:   linear discrete-time model (A,B,C,D)
+        // Q_noise: process noise covariance  (n×n, positive semi-definite)
+        // R_noise: measurement noise covariance (p×p, positive definite)
+        // P0:      initial error covariance (n×n, default = I)
+        KalmanFilter(const StateSpace &plant,
+                     const Eigen::MatrixXd &Q_noise,
+                     const Eigen::MatrixXd &R_noise,
+                     const Eigen::MatrixXd &P0 = Eigen::MatrixXd());
 
-    // Predict: advance state estimate with control input u[k-1].
-    void predict(const Eigen::VectorXd& u);
+        // Predict: advance state estimate with control input u[k-1].
+        void predict(const Eigen::VectorXd &u);
 
-    // Update: incorporate measurement y[k] and current input u[k].
-    void update(const Eigen::VectorXd& y, const Eigen::VectorXd& u_current);
+        // Update: incorporate measurement y[k] and current input u[k].
+        void update(const Eigen::VectorXd &y, const Eigen::VectorXd &u_current);
 
-    // Combined predict + update (most common usage pattern).
-    void step(const Eigen::VectorXd& y,
-              const Eigen::VectorXd& u_prev);
+        // Combined predict + update (most common usage pattern).
+        void step(const Eigen::VectorXd &y,
+                  const Eigen::VectorXd &u_prev);
 
-    void reset();
+        void reset();
 
-    const Eigen::VectorXd& state()       const { return x_hat_; }
-    const Eigen::MatrixXd& covariance()  const { return P_; }
-    double                 sampleTime()  const { return Ts_; }
+        const Eigen::VectorXd &state() const { return x_hat_; }
+        const Eigen::MatrixXd &covariance() const { return P_; }
+        double sampleTime() const { return Ts_; }
 
-private:
-    StateSpace      plant_;
-    Eigen::MatrixXd Q_, R_;
-    Eigen::VectorXd x_hat_; // x̂[k|k]
-    Eigen::MatrixXd P_;     // P[k|k]
-    double          Ts_;
-};
+    private:
+        StateSpace plant_;
+        Eigen::MatrixXd Q_, R_;
+        Eigen::VectorXd x_hat_; // x̂[k|k]
+        Eigen::MatrixXd P_;     // P[k|k]
+        double Ts_;
+    };
 
 } // namespace ctrl

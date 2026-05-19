@@ -48,23 +48,25 @@
 //  Dependencies: Eigen 3.4+, C++17
 // ============================================================
 
-#include "IController.h"        // Abstract interface
-#include "PlantModel.h"         // TransferFunction, StateSpace, tf2ss, ssStep
-#include "DiscretePID.h"        // PID  — backward-Euler, derivative filter, anti-windup
-#include "DiscreteMPC.h"        // MPC  — condensed receding-horizon QP
-#include "DiscreteLQR.h"        // LQR  — DARE optimal gain, LQRAdapter
-#include "ExtremumSeeker.h"     // ESC  — perturbation-based extremum seeking
-#include "SmithPredictor.h"     // Smith predictor — dead-time compensation
-#include "DiscreteLeadLag.h"    // Lead / Lag / Lead-Lag — Tustin biquad compensator
-#include "DiscreteSMC.h"        // SMC  — first-order sliding mode, boundary layer
-#include "DiscreteADRC.h"       // ADRC — ESO + PD, disturbance rejection
-#include "KalmanFilter.h"       // Kalman filter — optimal linear state estimator
-#include "DiscreteLQG.h"        // LQG  — LQR + Kalman (output-feedback optimal)
-#include "ControllerTraits.h"   // Compile-time controller↔tuner compatibility metadata
-#include "ControllerTuner.h"    // RelayAutoTuner, StepResponseTuner, LQRWeightTuner, MPCHorizonTuner
-                                //   + ZieglerNicholsTuner, CohenCoonTuner,
-                                //   + LoopShapingTuner, KalmanWeightTuner
-#include "ControllerStack.h"    // Supervisory / Additive / Weighted controller stacks
-#include "TunerSuite.h"         // All tuning methods (runtime soft-warning dispatch, Nelder-Mead)
-#include "MetricsAnalyzer.h"    // Time-domain metric extraction
-#include "SystemAnalysis.h"     // Frequency-domain & stability analysis
+#include "IController.h"      // Abstract interface
+#include "PlantModel.h"       // TransferFunction, StateSpace, tf2ss, ssStep
+#include "DiscretePID.h"      // PID  — backward-Euler, derivative filter, anti-windup
+#include "DiscreteMPC.h"      // MPC  — condensed receding-horizon QP
+#include "DiscreteLQR.h"      // LQR  — DARE optimal gain, LQRAdapter
+#include "ExtremumSeeker.h"   // ESC  — perturbation-based extremum seeking
+#include "SmithPredictor.h"   // Smith predictor — dead-time compensation
+#include "DiscreteLeadLag.h"  // Lead / Lag / Lead-Lag — Tustin biquad compensator
+#include "DiscreteSMC.h"      // SMC  — first-order sliding mode, boundary layer
+#include "DiscreteADRC.h"     // ADRC — ESO + PD, disturbance rejection
+#include "KalmanFilter.h"     // Kalman filter — optimal linear state estimator
+#include "DiscreteLQG.h"      // LQG  — LQR + Kalman (output-feedback optimal)
+#include "ControllerTraits.h" // Compile-time controller↔tuner compatibility metadata
+#include "ControllerTuner.h"  // RelayAutoTuner, StepResponseTuner, LQRWeightTuner, MPCHorizonTuner
+                              //   + ZieglerNicholsTuner, CohenCoonTuner,
+                              //   + LoopShapingTuner, KalmanWeightTuner
+#include "ControllerStack.h"  // Supervisory / Additive / Weighted controller stacks
+#include "TunerSuite.h"       // All tuning methods (runtime soft-warning dispatch, Nelder-Mead)
+#include "MetricsAnalyzer.h"     // Time-domain metric extraction
+#include "SystemAnalysis.h"      // Frequency-domain & stability analysis
+#include "hal/HAL.h"             // ISensor, IActuator, SimPlant, SimSensor, SimActuator
+#include "AtomicParamBuffer.h"   // Lock-free double-buffer for RT parameter updates

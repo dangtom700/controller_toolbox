@@ -7,3 +7,15 @@ add_subdirectory(examples)
 add_subdirectory(tests)
 add_subdirectory(scripts)
 add_subdirectory(case-study)
+add_subdirectory(benchmarks)
+
+# Optional: generate Doxygen HTML docs with  cmake --build build --target docs
+find_package(Doxygen QUIET)
+if(DOXYGEN_FOUND)
+    add_custom_target(docs
+        COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_SOURCE_DIR}/Doxyfile
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Generating API documentation with Doxygen"
+        VERBATIM
+    )
+endif()
