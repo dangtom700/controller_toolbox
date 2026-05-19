@@ -1,0 +1,69 @@
+#include "DiscreteADRC.h"
+#include <algorithm>
+
+namespace ctrl {
+
+DiscreteADRC::DiscreteADRC(const ADRCParams& params, double sampleTime)
+    : p_(params), Ts_(sampleTime), r_(0.0), u_prev_(0.0)
+{
+    updateGains();
+    reset();
+}
+
+void DiscreteADRC::updateGains()
+{
+    beta1_ = 3.0 * p_.omega_o;
+    beta2_ = 3.0 * p_.omega_o * p_.omega_o;
+    beta3_ =       p_.omega_o * p_.omega_o * p_.omega_o;
+}
+
+void DiscreteADRC::setParams(const ADRCParams& p)
+{
+    p_ = p;
+    updateGains();
+}
+
+// ESO forward-Euler update (Gao 2003 bandwidth-parameterisation):
+//   ε    = y − z₁
+//   z₁  += Ts·(z₂ + β₁·ε)
+//   z₂  += Ts·(z₃ + β₂·ε + b₀·u)
+//   z₃  += Ts·β₃·ε
+//
+// PD + disturbance cancellation:
+//   u₀   = ω_c²·(r − z₁) − 2·ω_c·z₂
+//   u    = (u₀ − z₃) / b₀
+double DiscreteADRC::computeTracking(double y, double r)
+{
+    // ESO observation error
+    const double eps  = y - z_(0);
+
+    // Observer update (forward Euler)
+    const double z1n  = z_(0) + Ts_ * (z_(1) + beta1_ * eps);
+    const double z2n  = z_(1) + Ts_ * (z_(2) + beta2_ * eps + p_.b0 * u_prev_);
+    const double z3n  = z_(2) + Ts_ * beta3_ * eps;
+    z_ << z1n, z2n, z3n;
+
+    // PD setpoint control
+    const double u0  = p_.omega_c * p_.omega_c * (r - z_(0)) - 2.0 * p_.omega_c * z_(1);
+
+    // Active disturbance cancellation
+    double u = (u0 - z_(2)) / p_.b0;
+    u = std::max(p_.uMin, std::min(p_.uMax, u));
+
+    u_prev_ = u;
+    return u;
+}
+
+double DiscreteADRC::compute(double y)
+{
+    return computeTracking(y, r_);
+}
+
+void DiscreteADRC::reset()
+{
+    z_.setZero();
+    u_prev_ = 0.0;
+    r_      = 0.0;
+}
+
+} // namespace ctrl
