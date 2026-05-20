@@ -403,13 +403,13 @@ namespace ctrl
     //
     // Derivation (lead, phase_add_deg > 0):
     //   beta = sin(φ),   alpha = (1+beta)/(1-beta)
-    //   z = omega_c/√alpha,   p = omega_c.√alpha,   K = √alpha / |G(j.omega_c)|
+    //   z = omega_c/\sqrtalpha,   p = omega_c.\sqrtalpha,   K = \sqrtalpha / |G(j.omega_c)|
     //
     // where |G(j.omega_c)| = gain_at_wc (open-loop plant magnitude before
     // adding the compensator).
     //
     // Ref: Franklin, Powell & Emami-Naeini "Feedback Control of Dynamic
-    //      Systems" §9.3.
+    //      Systems" Section 9.3.
     // ============================================================
     class LoopShapingTuner
     {
@@ -461,7 +461,7 @@ namespace ctrl
     // The separation principle guarantees that the LQR and Kalman gains
     // can be tuned independently; use LQRWeightTuner for the LQR part.
     //
-    // Ref: Bryson & Ho "Applied Optimal Control" (1975) §14.3.
+    // Ref: Bryson & Ho "Applied Optimal Control" (1975) Section 14.3.
     // ============================================================
     class KalmanWeightTuner
     {

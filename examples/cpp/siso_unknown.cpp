@@ -12,7 +12,7 @@
  *   5. Apply ALL PID tuning rules (ZN, IMC*3 lambda, Cohen-Coon, NM) to FOPDT.
  *   6. Apply SMC tuned from ARX bandwidth estimate + NM-optimised variant.
  *   7. Apply ADRC with b0 from ARX high-frequency gain + NM-optimised.
- *   8. Rank by composite cost J = ISE + 0.1.ITAE + 0.01.∫u^2 dt.
+ *   8. Rank by composite cost J = ISE + 0.1.ITAE + 0.01.\intu^2 dt.
  *   9. Fuzzy performance evaluation on every controller.
  *
  * Identification tolerances:
@@ -535,7 +535,7 @@ int main() {
     }
 
     size_t best = rank_idx[0];
-    std::cout << "\n  ★ Optimal controller: " << labels[best]
+    std::cout << "\n  * Optimal controller: " << labels[best]
               << "  J=" << std::setprecision(5) << results[best].J
               << "  Grade: " << fuzzy_score(results[best]).grade << "\n";
 

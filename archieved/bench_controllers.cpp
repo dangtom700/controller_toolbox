@@ -22,7 +22,7 @@
 namespace
 {
 
-    // ── helpers ────────────────────────────────────────────────────────────────
+    // -- helpers ----------------------------------------------------------------
 
     using Clock = std::chrono::steady_clock;
     using Ns = std::chrono::nanoseconds;
@@ -77,7 +77,7 @@ namespace
         return {name, sum / timed, lo, hi, timed};
     }
 
-    // ── build a generic n-state SISO stable plant for testing ──────────────────
+    // -- build a generic n-state SISO stable plant for testing ------------------
     // Chain of integrators with unit damping coefficients so the plant is stable.
     ctrl::StateSpace makePlant(int n, double Ts = 0.01)
     {
@@ -101,7 +101,7 @@ namespace
 
 } // anonymous namespace
 
-// ── main ───────────────────────────────────────────────────────────────────
+// -- main -------------------------------------------------------------------
 
 int main()
 {
@@ -116,8 +116,8 @@ int main()
 
     for (int n : {2, 4, 8})
     {
-        std::cout << "── State dimension n = " << n
-                  << " ────────────────────────────────────────\n";
+        std::cout << "-- State dimension n = " << n
+                  << " ----------------------------------------\n";
 
         ctrl::StateSpace sys = makePlant(n, Ts);
 

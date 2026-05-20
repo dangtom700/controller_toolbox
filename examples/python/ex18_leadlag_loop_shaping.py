@@ -8,7 +8,7 @@ Goal     : Design a lead compensator using the loop-shaping tuner (beta=sin(φ),
 Data generation : Bode data from open-loop frequency response; 2 000-sample sim.
 Verification    :
   - |omega_crossover_measured - omega_c_design| / omega_c_design < 20%.
-  - Phase margin > 30°.
+  - Phase margin > 30^\circ.
   - Closed loop stable.
 
 Run:
@@ -35,7 +35,7 @@ phi_deg = 50.0          # desired phase margin (deg)
 print("=" * 60)
 print("ex18 - Lead-Lag Loop Shaping")
 print("=" * 60)
-print(f"\n  Design: omega_c = {omega_c} rad/s, φ_m = {phi_deg}°")
+print(f"\n  Design: omega_c = {omega_c} rad/s, φ_m = {phi_deg}^\circ")
 
 # Compute lead compensator zero/pole (C++ LoopShapingTuner formula)
 phi_rad = np.radians(phi_deg)
@@ -86,7 +86,7 @@ wc_meas = w_rad[cross_idx]
 pm_meas = phase[cross_idx] + 180.0
 
 print(f"\n  Measured crossover: omega_c = {wc_meas:.3f} rad/s  (design: {omega_c})")
-print(f"  Phase margin: {pm_meas:.1f}°  (design: >{phi_deg}°)")
+print(f"  Phase margin: {pm_meas:.1f}^\circ  (design: >{phi_deg}^\circ)")
 
 results["crossover_20pct"] = abs(wc_meas - omega_c) / omega_c < 0.20
 results["phase_margin"]    = pm_meas > 30.0

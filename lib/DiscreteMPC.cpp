@@ -82,7 +82,7 @@ namespace ctrl
         for (int i = 0; i < Np; ++i)
             R_stack_.segment(i * p, p) = r_ref;
 
-        // Unconstrained optimal ΔU* = -H⁻¹.Φ'.Q_y.(F.x - R_stack)
+        // Unconstrained optimal ΔU* = -H^-¹.Φ'.Q_y.(F.x - R_stack)
         pred_err_.noalias() = F_ * x - R_stack_;
         const auto ldlt = H_.ldlt();
         if (ldlt.info() != Eigen::Success)

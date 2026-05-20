@@ -67,7 +67,7 @@ else:
 print(f"\n  Relay measured: Ku={Ku_meas:.4f}, Pu={Pu_meas:.4f} s")
 
 # --- Analytic: phase-crossover frequency of G(s)=1/(s^2+1.5s+1) ---
-# phase(G(jomega)) = -pi  ->  ∠G(jomega) = -180°
+# phase(G(jomega)) = -pi  ->  ∠G(jomega) = -180^\circ
 # G(jomega) = 1 / (1 - omega^2 + j.1.5omega)
 # Im/Re = -1.5omega / (1-omega^2) -> 0 at omega->inf (no real phase crossover for this stable plant)
 # Use Bode to find phase margin via scipy
@@ -75,7 +75,7 @@ num_ct = [1.0]
 den_ct = [1.0, 1.5, 1.0]
 w, H = sig.freqs(num_ct, den_ct, worN=np.logspace(-2, 2, 2000))
 phase_deg = np.degrees(np.angle(H))
-# Find omega where phase nearest -180°
+# Find omega where phase nearest -180^\circ
 idx180 = np.argmin(np.abs(phase_deg + 180.0))
 w_pc = w[idx180]
 Pu_analytic = 2.0 * np.pi / w_pc if w_pc > 0 else np.nan

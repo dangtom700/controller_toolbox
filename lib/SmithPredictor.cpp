@@ -41,7 +41,7 @@ namespace ctrl
         // Compute control action via the inner controller
         const double u = inner_->compute(e_sp);
 
-        // Advance internal model state: x̂[k+1] = A.x̂[k] + B.u[k]
+        // Advance internal model state: x^[k+1] = A.x^[k] + B.u[k]
         Eigen::VectorXd uv(model_.inputSize());
         uv.fill(u);
         x_model_ = model_.A * x_model_ + model_.B * uv;

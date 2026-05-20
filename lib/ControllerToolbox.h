@@ -60,7 +60,7 @@
 #include "DiscreteADRC.h"     // ADRC - ESO + PD, disturbance rejection
 #include "KalmanFilter.h"     // Kalman filter - optimal linear state estimator
 #include "DiscreteLQG.h"      // LQG  - LQR + Kalman (output-feedback optimal)
-#include "ControllerTraits.h" // Compile-time controller↔tuner compatibility metadata
+#include "ControllerTraits.h" // Compile-time controller\leftrightarrowtuner compatibility metadata
 #include "ControllerTuner.h"  // RelayAutoTuner, StepResponseTuner, LQRWeightTuner, MPCHorizonTuner
                               //   + ZieglerNicholsTuner, CohenCoonTuner,
                               //   + LoopShapingTuner, KalmanWeightTuner

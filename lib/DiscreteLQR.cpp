@@ -38,9 +38,9 @@ namespace ctrl
 
     // ---------------------------------------------------------------------------
     // Value-iteration DARE solver
-    //   P_{t+1} = A'P_t A - (A'P_t B)(R + B'P_t B)⁻¹(B'P_t A) + Q
+    //   P_{t+1} = A'P_t A - (A'P_t B)(R + B'P_t B)^-¹(B'P_t A) + Q
     // Converges to the stabilising solution Pinf for stabilisable (A,B) + detectable (A,Q½).
-    // Ref: Bertsekas "Dynamic Programming and Optimal Control" Vol 1, §1.3.
+    // Ref: Bertsekas "Dynamic Programming and Optimal Control" Vol 1, Section 1.3.
     // ---------------------------------------------------------------------------
     DareResult DiscreteLQR::solveDARE(const Eigen::MatrixXd &A,
                                       const Eigen::MatrixXd &B,

@@ -15,20 +15,20 @@
  * elements of A couple position-like and velocity-like states, causing
  * every control action to excite both modes simultaneously.
  *
- * All controllers evaluated on unit-step reference, u ∈ [-10, 10]:
+ * All controllers evaluated on unit-step reference, u \in [-10, 10]:
  *   PID:  ZN (relay), IMC (lambda=0.3,0.5,1.0), Cohen-Coon, NM-optimised
  *   LQR:  Bryson, NM-optimised
  *   SMC:  default params, NM-optimised
  *   ADRC: Gao bandwidth params, NM-optimised
- *   LeadLag: loop-shaping (omegac=2, φ=50°)
+ *   LeadLag: loop-shaping (omegac=2, φ=50^\circ)
  *   Smith Predictor: IMC inner PID + 3-step delay model
  *
- * Cost: J = ISE + 0.1.ITAE + 0.01.∫u^2dt
+ * Cost: J = ISE + 0.1.ITAE + 0.01.\intu^2dt
  * Pareto analysis: ranks all methods by J, fuzzy score for each.
  *
  * Expected output:
  *   - System equations and eigenvalues
- *   - Per-method table: ISE, ITAE, OS[%], T_settle, ∫u^2, J
+ *   - Per-method table: ISE, ITAE, OS[%], T_settle, \intu^2, J
  *   - Pareto-optimal highlighted
  *   - Fuzzy score for each method
  *   - Results -> siso_coupled_results.csv
@@ -236,7 +236,7 @@ static StepResponseTuner::FOPDTModel identify_fopdt(double step_mag = 1.0,
 int main() {
     std::cout << "=================================================================\n";
     std::cout << " Coupled SISO - All Tuning Methods\n";
-    std::cout << " G(s) = 1/(s^2+1.5s+1), Ts=0.01s, u ∈ [-10,10]\n";
+    std::cout << " G(s) = 1/(s^2+1.5s+1), Ts=0.01s, u \in [-10,10]\n";
     std::cout << "=================================================================\n";
     std::cout << "\n  Plant discrete SS (ZOH, Ts=0.01 s):\n"
               << "    A = [1.98511, -0.98522; 1.0, 0.0]\n"
@@ -502,11 +502,11 @@ int main() {
     }
 
     // -----------------------------------------------------------------------
-    // E. Lead-Lag - frequency-domain loop shaping (omegac=2 rad/s, φ=50°)
+    // E. Lead-Lag - frequency-domain loop shaping (omegac=2 rad/s, φ=50^\circ)
     // -----------------------------------------------------------------------
     {
         // |G(j.2)| for G(s)=1/(s^2+1.5s+1): |G(j2)| = 1/|((j2)^2+1.5(j2)+1)|
-        // = 1/|(-4+1+3j)| = 1/|(-3+3j)| = 1/(3√2) approx = 0.2357
+        // = 1/|(-4+1+3j)| = 1/|(-3+3j)| = 1/(3\sqrt2) approx = 0.2357
         LoopShapingTuner::Input lsin;
         lsin.omega_c       = 2.0;
         lsin.phase_add_deg = 50.0;
@@ -562,7 +562,7 @@ int main() {
               [&](size_t a, size_t b){ return results[a].J < results[b].J; });
     for (size_t r=0; r<rank_idx.size(); ++r) {
         size_t i = rank_idx[r];
-        std::cout << (r==0?"  ★ ":"    ") << "#" << (r+1) << " "
+        std::cout << (r==0?"  * ":"    ") << "#" << (r+1) << " "
                   << std::setw(22) << labels[i]
                   << "  J=" << std::setprecision(5) << results[i].J << "\n";
     }

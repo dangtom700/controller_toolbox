@@ -179,7 +179,7 @@ inline Eigen::MatrixXd lqr_gain(const Eigen::MatrixXd& A, const Eigen::MatrixXd&
 // -------------------------------------------------------------------------
 struct MIMOMetrics {
     double ISE_y1, ISE_y2, ITAE_y1, ITAE_y2;
-    double E_u1, E_u2;   // control energy ∫u^2dt
+    double E_u1, E_u2;   // control energy \intu^2dt
     double OS_y1, OS_y2; // overshoot [%]
 
     double total_cost(double w_ise  = 1.0,

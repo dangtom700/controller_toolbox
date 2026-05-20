@@ -157,7 +157,7 @@ bandwidth graphically on a Bode plot.
 | Parameter | Meaning & Effect |
 |---|---|
 | Gain crossover frequency omegac | Frequency where \|L(jomega)\| = 1 (0 dB). Determines closed-loop bandwidth; higher omegac -> faster response. |
-| Phase margin (PM) | How far the phase is from -180° at omegac. PM > 45° typically ensures adequate damping. |
+| Phase margin (PM) | How far the phase is from -180^\circ at omegac. PM > 45^\circ typically ensures adequate damping. |
 | Gain margin (GM) | How much gain can increase before instability. GM > 6 dB is a common minimum. |
 | Lead compensator (zero/pole pair) | Adds phase at the crossover frequency; improves PM. Zero < pole (in magnitude). |
 | Lag compensator (zero/pole pair) | Increases low-frequency gain to reduce steady-state error without destabilising the loop. |
@@ -191,7 +191,7 @@ performance bounds across all plant variations.
 | Population size | Number of candidate solutions per generation. Larger -> better global search but slower. |
 | Crossover rate | Probability of combining two solutions. Higher -> more exploration of combinations. |
 | Mutation rate | Probability of random perturbation. Prevents premature convergence; too high -> random walk. |
-| Cost function (IAE, ISE, ITAE) | IAE = ∫\|e\|. ISE = ∫e^2. ITAE = ∫t.\|e\| (penalises lingering errors more). |
+| Cost function (IAE, ISE, ITAE) | IAE = \int\|e\|. ISE = \inte^2. ITAE = \intt.\|e\| (penalises lingering errors more). |
 
 ---
 

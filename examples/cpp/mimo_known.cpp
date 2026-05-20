@@ -549,7 +549,7 @@ int main() {
         results[i].print(labels[i]);
         if (results[i].total_cost() < results[best_idx].total_cost()) best_idx = i;
     }
-    std::cout << "\n  ★ Best method (minimum J): " << labels[best_idx]
+    std::cout << "\n  * Best method (minimum J): " << labels[best_idx]
               << "  J=" << std::setprecision(4) << results[best_idx].total_cost() << "\n";
 
     // Cost breakdown analysis

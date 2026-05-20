@@ -31,7 +31,7 @@
 
 namespace {
 
-// ── Plant model (second-order example: G(s)=1/(s^2+1.5s+1), ZOH Ts=0.01s) ──
+// -- Plant model (second-order example: G(s)=1/(s^2+1.5s+1), ZOH Ts=0.01s) --
 constexpr double Ts = 0.01;
 
 ctrl::StateSpace buildExamplePlant()
@@ -43,7 +43,7 @@ ctrl::StateSpace buildExamplePlant()
     return ctrl::tf2ss(tf);
 }
 
-// ── Relay test helper (simulates relay on the given plant) ──
+// -- Relay test helper (simulates relay on the given plant) --
 ctrl::RelayAutoTuner runRelayTest(const ctrl::StateSpace& plant,
                                   double relayAmp   = 0.5,
                                   int    cyclesReq  = 4)
@@ -63,9 +63,9 @@ ctrl::RelayAutoTuner runRelayTest(const ctrl::StateSpace& plant,
     return tuner;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 //  Controller design descriptors
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 
 struct PIDDesign {
     ctrl::PIDTuningRule rule = ctrl::PIDTuningRule::TyreusLuyben;
@@ -137,9 +137,9 @@ using ControllerDesign = std::variant<
     ESCDesign
 >;
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 //  Tuning dispatcher
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 
 void tuneAndPrint(const ControllerDesign& design, const ctrl::StateSpace& plant)
 {
@@ -151,7 +151,7 @@ void tuneAndPrint(const ControllerDesign& design, const ctrl::StateSpace& plant)
     std::visit([&](auto&& d) {
         using T = std::decay_t<decltype(d)>;
 
-        // ── PID ──────────────────────────────────────────────────────────────
+        // -- PID --------------------------------------------------------------
         if constexpr (std::is_same_v<T, PIDDesign>) {
             std::cout << "=== DiscretePID - Relay Auto-Tuner ===\n";
             auto tuner = runRelayTest(plant);
@@ -171,7 +171,7 @@ void tuneAndPrint(const ControllerDesign& design, const ctrl::StateSpace& plant)
             std::cout << "  uMin=" << pp.uMin << "  uMax=" << pp.uMax << "\n\n";
         }
 
-        // ── LQR ──────────────────────────────────────────────────────────────
+        // -- LQR --------------------------------------------------------------
         else if constexpr (std::is_same_v<T, LQRDesign>) {
             std::cout << "=== DiscreteLQR - Bryson's Method ===\n";
             ctrl::LQRParams lp = ctrl::LQRWeightTuner::brysonMethodFor<ctrl::DiscreteLQR>(
@@ -182,7 +182,7 @@ void tuneAndPrint(const ControllerDesign& design, const ctrl::StateSpace& plant)
             std::cout << "  Gain K =\n" << lqr.gainMatrix() << "\n\n";
         }
 
-        // ── LQG ──────────────────────────────────────────────────────────────
+        // -- LQG --------------------------------------------------------------
         else if constexpr (std::is_same_v<T, LQGDesign>) {
             std::cout << "=== DiscreteLQG - Bryson + Kalman Noise Tuner ===\n";
             ctrl::LQRParams lp = ctrl::LQRWeightTuner::brysonMethodFor<ctrl::DiscreteLQG>(
@@ -197,7 +197,7 @@ void tuneAndPrint(const ControllerDesign& design, const ctrl::StateSpace& plant)
             std::cout << "  LQR Gain K =\n" << lqg.gainMatrix() << "\n\n";
         }
 
-        // ── MPC ──────────────────────────────────────────────────────────────
+        // -- MPC --------------------------------------------------------------
         else if constexpr (std::is_same_v<T, MPCDesign>) {
             std::cout << "=== DiscreteMPC - MPCHorizonTuner ===\n";
             auto rec = ctrl::MPCHorizonTuner::recommendFor<ctrl::DiscreteMPC>(
@@ -208,7 +208,7 @@ void tuneAndPrint(const ControllerDesign& design, const ctrl::StateSpace& plant)
             std::cout << "  uMin=" << d.uMin << "  uMax=" << d.uMax << "\n\n";
         }
 
-        // ── Lead-Lag ──────────────────────────────────────────────────────────
+        // -- Lead-Lag ----------------------------------------------------------
         else if constexpr (std::is_same_v<T, LeadLagDesign>) {
             std::cout << "=== DiscreteLeadLag - LoopShapingTuner ===\n";
             ctrl::LoopShapingTuner::Input in;
@@ -225,7 +225,7 @@ void tuneAndPrint(const ControllerDesign& design, const ctrl::StateSpace& plant)
                       << ll.phaseAt(d.omega_c) * 180.0 / M_PI << " deg\n\n";
         }
 
-        // ── SMC ──────────────────────────────────────────────────────────────
+        // -- SMC --------------------------------------------------------------
         else if constexpr (std::is_same_v<T, SMCDesign>) {
             std::cout << "=== DiscreteSMC - Relay-Heuristic ===\n";
             auto tuner = runRelayTest(plant);
@@ -244,7 +244,7 @@ void tuneAndPrint(const ControllerDesign& design, const ctrl::StateSpace& plant)
             std::cout << "  uMin=" << sp.uMin << "  uMax=" << sp.uMax << "\n\n";
         }
 
-        // ── ADRC ─────────────────────────────────────────────────────────────
+        // -- ADRC -------------------------------------------------------------
         else if constexpr (std::is_same_v<T, ADRCDesign>) {
             std::cout << "=== DiscreteADRC - Bandwidth Parameterisation ===\n";
             ctrl::ADRCParams ap;
@@ -263,7 +263,7 @@ void tuneAndPrint(const ControllerDesign& design, const ctrl::StateSpace& plant)
             std::cout << "  uMin=" << ap.uMin << "  uMax=" << ap.uMax << "\n\n";
         }
 
-        // ── Smith Predictor ──────────────────────────────────────────────────
+        // -- Smith Predictor --------------------------------------------------
         else if constexpr (std::is_same_v<T, SmithPredictorDesign>) {
             std::cout << "=== SmithPredictor - Inner PID via Relay ===\n";
             auto tuner = runRelayTest(plant);
@@ -277,7 +277,7 @@ void tuneAndPrint(const ControllerDesign& design, const ctrl::StateSpace& plant)
                       << d.delaySteps << ")\n\n";
         }
 
-        // ── ESC ──────────────────────────────────────────────────────────────
+        // -- ESC --------------------------------------------------------------
         else if constexpr (std::is_same_v<T, ESCDesign>) {
             std::cout << "=== ExtremumSeeker - Manual Bandwidth Parameterisation ===\n";
             std::cout << "  perturbAmp="  << d.perturbAmp
@@ -294,12 +294,12 @@ void tuneAndPrint(const ControllerDesign& design, const ctrl::StateSpace& plant)
 
 } // anonymous namespace
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 //  main - edit this list to select which controllers to tune
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 int main()
 {
-    // ── Plant model ──────────────────────────────────────────────────────────
+    // -- Plant model ----------------------------------------------------------
     ctrl::StateSpace plant = buildExamplePlant();
     const int n = plant.stateSize();
     const int m = plant.inputSize();
@@ -308,7 +308,7 @@ int main()
     std::cout << "Plant: n=" << n << " states, m=" << m << " inputs, Ts=" << Ts << "s\n";
     std::cout << std::string(60, '=') << "\n\n";
 
-    // ── Controller design list ───────────────────────────────────────────────
+    // -- Controller design list -----------------------------------------------
     // Edit this vector to select which controllers to tune.
     std::vector<ControllerDesign> designList;
 
@@ -351,7 +351,7 @@ int main()
     // ESC
     designList.push_back(ESCDesign{ 0.1, 1.0, 0.1, 0.05, 1.0, true });
 
-    // ── Tune and print ───────────────────────────────────────────────────────
+    // -- Tune and print -------------------------------------------------------
     for (const auto& d : designList)
         tuneAndPrint(d, plant);
 

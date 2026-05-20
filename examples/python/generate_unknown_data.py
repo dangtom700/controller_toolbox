@@ -38,7 +38,7 @@ sys.path.insert(0, _THIS_DIR)
 
 from utils.data_gen import prbs
 
-# ── Parameters (must match expectations in siso_unknown.cpp) ─────────────────
+# -- Parameters (must match expectations in siso_unknown.cpp) -----------------
 N_STEPS   = 3000    # 30 s of open-loop excitation at Ts = 0.01 s
 Ts        = 0.01
 AMPLITUDE = 1.0     # +/-1.0 - sufficient PE for the example plant gain approx = 1

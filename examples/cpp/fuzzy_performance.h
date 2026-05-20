@@ -6,9 +6,9 @@
  * analytical performance bound cannot be derived.
  *
  * Inputs (all normalized to fixed ranges):
- *   ise_norm  ∈ [0, 1]   - ISE / ISE_worst  (worst = open-loop drift)
- *   os_pct    ∈ [0, 100] - percentage overshoot
- *   st_norm   ∈ [0, 1]   - settling_time / simulation_duration
+ *   ise_norm  \in [0, 1]   - ISE / ISE_worst  (worst = open-loop drift)
+ *   os_pct    \in [0, 100] - percentage overshoot
+ *   st_norm   \in [0, 1]   - settling_time / simulation_duration
  *
  * Linguistic variables:
  *   ISE:       Low [0,0,0.2],   Medium [0.1,0.3,0.5],   High [0.4,1,1]
@@ -16,20 +16,20 @@
  *   Settling:  Fast [0,0,0.3],  Medium [0.2,0.5,0.8],   Slow [0.6,1,1]
  *
  * Rules (Mamdani AND, min-activation, centroid defuzzification):
- *   1. ISE=Low  ∧ OS=Low  ∧ ST=Fast   -> 95  (Excellent)
- *   2. ISE=Low  ∧ OS=Low  ∧ ST=Med    -> 80  (Good)
- *   3. ISE=Low  ∧ OS=Med  ∧ ST=Fast   -> 75  (Good)
- *   4. ISE=Med  ∧ OS=Low  ∧ ST=Fast   -> 70  (Good)
- *   5. ISE=Low  ∧ OS=Low  ∧ ST=Slow   -> 65  (Fair)
- *   6. ISE=Med  ∧ OS=Med  ∧ ST=Med    -> 55  (Fair)
- *   7. ISE=Med  ∧ OS=High ∧ ST=Med    -> 40  (Poor)
- *   8. ISE=High ∧ OS=Low  ∧ ST=Med    -> 45  (Poor)
- *   9. ISE=High ∧ OS=Med  ∧ ST=Slow   -> 25  (Bad)
- *  10. ISE=High ∧ OS=High ∧ ST=Slow   -> 10  (Bad)
- *  11. ISE=Med  ∧ OS=Low  ∧ ST=Slow   -> 50  (Fair)
- *  12. ISE=Low  ∧ OS=High ∧ ST=any    -> 35  (Poor)
+ *   1. ISE=Low  && OS=Low  && ST=Fast   -> 95  (Excellent)
+ *   2. ISE=Low  && OS=Low  && ST=Med    -> 80  (Good)
+ *   3. ISE=Low  && OS=Med  && ST=Fast   -> 75  (Good)
+ *   4. ISE=Med  && OS=Low  && ST=Fast   -> 70  (Good)
+ *   5. ISE=Low  && OS=Low  && ST=Slow   -> 65  (Fair)
+ *   6. ISE=Med  && OS=Med  && ST=Med    -> 55  (Fair)
+ *   7. ISE=Med  && OS=High && ST=Med    -> 40  (Poor)
+ *   8. ISE=High && OS=Low  && ST=Med    -> 45  (Poor)
+ *   9. ISE=High && OS=Med  && ST=Slow   -> 25  (Bad)
+ *  10. ISE=High && OS=High && ST=Slow   -> 10  (Bad)
+ *  11. ISE=Med  && OS=Low  && ST=Slow   -> 50  (Fair)
+ *  12. ISE=Low  && OS=High && ST=any    -> 35  (Poor)
  *
- * Output: score ∈ [0,100], grade string.
+ * Output: score \in [0,100], grade string.
  *
  * Defuzzification: weighted centroid over rule consequents (Sugeno-style
  * singleton consequents are equivalent here and are computationally simpler).

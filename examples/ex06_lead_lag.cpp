@@ -3,7 +3,7 @@
 //  Phase-lead compensator for a slow first-order plant.
 //  Compares step response: proportional only vs P + Lead.
 //
-//  Design goal: add ~45° phase lead at crossover to improve
+//  Design goal: add ~45^\circ phase lead at crossover to improve
 //  phase margin and reduce rise time.
 //
 //  MATLAB equivalent:
@@ -21,12 +21,12 @@ int main()
     const double Ts = 0.05;
 
     // ---- Plant G(s) = 1/(s+0.2) -> ZOH ----
-    // G(z⁻¹) approx = (0.00995) / (1 - 0.99z⁻¹)
+    // G(z^-¹) approx = (0.00995) / (1 - 0.99z^-¹)
     ctrl::TransferFunction tf({ 0.0, 0.00995 }, { 1.0, -0.990 }, Ts);
     ctrl::StateSpace plant = ctrl::tf2ss(tf);
 
     // ---- Lead compensator C(s) = K*(s+z_c)/(s+p_c) ----
-    // z_c=2, p_c=20, K=1 -> adds ~45° at ~6 rad/s crossover
+    // z_c=2, p_c=20, K=1 -> adds ~45^\circ at ~6 rad/s crossover
     ctrl::LeadLagParams llp;
     llp.continuousZero = 2.0;
     llp.continuousPole = 20.0;

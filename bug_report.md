@@ -53,7 +53,7 @@ double gain_dB = 20.0 * std::log10(mag);
 
 **File:** `lib/SystemAnalysis.cpp`  
 **Severity:** Medium - returns incorrect margins on resonant or non-minimum-phase plants  
-**Description:** The current implementation finds the first frequency where the gain crosses 0 dB (for phase margin) or the phase crosses -180° (for gain margin), using a single threshold comparison. Systems with multiple gain crossovers - common in lightly damped plants, non-minimum-phase systems, or higher-order loops - will report the first crossover instead of the worst-case (smallest) margin, giving an overly optimistic stability assessment.  
+**Description:** The current implementation finds the first frequency where the gain crosses 0 dB (for phase margin) or the phase crosses -180^\circ (for gain margin), using a single threshold comparison. Systems with multiple gain crossovers - common in lightly damped plants, non-minimum-phase systems, or higher-order loops - will report the first crossover instead of the worst-case (smallest) margin, giving an overly optimistic stability assessment.  
 **Recommended Fix:** Collect all sign-change pairs across the frequency grid and report the minimum margin found across all crossovers. Flag systems with more than one crossover in the output struct.
 
 ---
@@ -104,7 +104,7 @@ u_opt = ldlt.solve(rhs);
 **File:** `lib/KalmanFilter.cpp`  
 **Severity:** High - silent state estimate corruption  
 **Description:** The innovation covariance `S = H*P*H' + R` is inverted via `S.ldlt().solve()` without checking for conditioning. When the measurement noise `R` is set very small (aggressive tuning), `S` becomes nearly singular and the Kalman gain `K` diverges, immediately corrupting all state estimates and covariance propagation.  
-**Recommended Fix:** Apply the same LDLT health check as in §2.6. Additionally, enforce a minimum diagonal floor on `R` (`R.diagonal().array() = R.diagonal().array().max(1e-12)`) to prevent near-singular innovation matrices.
+**Recommended Fix:** Apply the same LDLT health check as in Section 2.6. Additionally, enforce a minimum diagonal floor on `R` (`R.diagonal().array() = R.diagonal().array().max(1e-12)`) to prevent near-singular innovation matrices.
 
 ---
 
@@ -180,7 +180,7 @@ The following areas have measurable performance deficiencies that should be addr
 ### 3.2 `KalmanFilter::update()` - Per-Step O(n^3) Matrix Inversion
 
 **File:** `lib/KalmanFilter.cpp`  
-**Impact:** Full covariance update `P⁺ = (I - KH)P` involves an n*n matrix multiply each step. For n >= 8, this becomes the dominant cost in the control loop.  
+**Impact:** Full covariance update `P^+ = (I - KH)P` involves an n*n matrix multiply each step. For n >= 8, this becomes the dominant cost in the control loop.  
 **Recommendation:** For the common case of small state vectors (n <= 4), switch `MatrixXd` to `Matrix<double, n, n>` fixed-size types. Eigen automatically applies fully unrolled, inlined inversions for small fixed sizes, eliminating function-call overhead and enabling SIMD auto-vectorization.
 
 ---
@@ -254,7 +254,7 @@ The extremum seeker has no convergence criterion. Add a stagnation detector: if 
 The current test suite uses custom `test::` macros defined locally. Migrating to Catch2 or GoogleTest provides BDD-style test naming, better assertion messages, death-test support (needed to verify that `solveDARE()` throws correctly), and CI integration. The migration is straightforward since the existing test structure is already logically organized.
 
 **Benchmark Suite**  
-Add a `benchmarks/` directory with one benchmark per controller measuring per-step `compute()` latency at state dimensions n ∈ {2, 4, 8, 16}. This provides regression detection and documents the real-time budget for each controller type. Google Benchmark is a natural fit alongside GoogleTest.
+Add a `benchmarks/` directory with one benchmark per controller measuring per-step `compute()` latency at state dimensions n \in {2, 4, 8, 16}. This provides regression detection and documents the real-time budget for each controller type. Google Benchmark is a natural fit alongside GoogleTest.
 
 **Doxygen HTML API Reference**  
 All public headers contain well-written doc comments, but no HTML reference is generated. Add a `Doxyfile` and a CI step that builds the API docs on every merge to `main` and publishes them to GitHub Pages. This eliminates the need to read header files to discover method signatures.

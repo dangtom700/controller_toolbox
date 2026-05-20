@@ -9,13 +9,13 @@
 //   y[k]   = C.x[k] + D.u[k] + v[k],   v ~ N(0, R_noise)
 //
 // Predict step (called with control input u[k-1]):
-//   x̂[k|k-1]  = A.x̂[k-1|k-1] + B.u[k-1]
+//   x^[k|k-1]  = A.x^[k-1|k-1] + B.u[k-1]
 //   P[k|k-1]   = A.P[k-1|k-1].A' + Q
 //
 // Update step (called with measurement y[k]):
 //   S[k]        = C.P[k|k-1].C' + R
-//   K_kf[k]     = P[k|k-1].C'.S⁻¹
-//   x̂[k|k]     = x̂[k|k-1] + K_kf.(y[k] - C.x̂[k|k-1] - D.u[k])
+//   K_kf[k]     = P[k|k-1].C'.S^-¹
+//   x^[k|k]     = x^[k|k-1] + K_kf.(y[k] - C.x^[k|k-1] - D.u[k])
 //   P[k|k]      = (I - K_kf.C).P[k|k-1]   (Joseph form for numerical stability)
 //
 // Combined one-call step: step(y, u_prev) = predict(u_prev) + update(y)
@@ -56,7 +56,7 @@ namespace ctrl
     private:
         StateSpace plant_;
         Eigen::MatrixXd Q_, R_;
-        Eigen::VectorXd x_hat_; // x̂[k|k]
+        Eigen::VectorXd x_hat_; // x^[k|k]
         Eigen::MatrixXd P_;     // P[k|k]
         double Ts_;
     };

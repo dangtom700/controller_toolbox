@@ -14,9 +14,9 @@
 // and combined without loss of optimality (Wonham 1968).
 //
 // Control law:
-//   1. Kalman predict:  x̂[k|k-1] from u[k-1]
-//   2. Kalman update:   x̂[k|k]   from y[k]
-//   3. LQR control:     u[k]      = -K.(x̂[k|k] - x_ref)
+//   1. Kalman predict:  x^[k|k-1] from u[k-1]
+//   2. Kalman update:   x^[k|k]   from y[k]
+//   3. LQR control:     u[k]      = -K.(x^[k|k] - x_ref)
 //
 // step(y, u_prev, x_ref) performs all three in the correct order.
 //

@@ -112,8 +112,8 @@ watchdog that resets the filter if max(|residual|) > threshold for more than K c
 **Example safe parameterisation** for `Ts = 0.01 s`:
 ```cpp
 ADRCParams p;
-p.omega_o = 50.0;  // 50 < 2/0.01 = 200 ✓
-p.omega_c = 10.0;  // < 50/3 ✓
+p.omega_o = 50.0;  // 50 < 2/0.01 = 200 (check)
+p.omega_c = 10.0;  // < 50/3 (check)
 p.b0      = 1.0;
 ```
 
@@ -334,7 +334,7 @@ If you observe the output "freezing" at an unexpected value, check upstream:
 | Controller | Starting point |
 |------------|---------------|
 | PID (Ziegler-Nichols) | Use `RelayAutoTuner` - provides `Ku`, `Tu` -> `Kp = 0.6.Ku`, `Ti = 0.5.Tu`, `Td = 0.125.Tu` |
-| Lead-Lag | Phase margin < 30°: add lead. `zero = omega_c / 5`, `pole = 5.omega_c`. Adjust `gain` for 0 dB at `omega_c`. |
+| Lead-Lag | Phase margin < 30^\circ: add lead. `zero = omega_c / 5`, `pole = 5.omega_c`. Adjust `gain` for 0 dB at `omega_c`. |
 | LQR | Start with `Q = diag(1/y_max^2,...) `, `R = diag(1/u_max^2,...)` (Bryson's rule) |
 | MPC | `Np = round(4.τ / Ts)`, `Nc = max(1, round(Np/3))`, `rho_u = 0.01.rho_y` |
 | ADRC | `omega_c approx = desired_bandwidth`, `omega_o = 5.omega_c`, `b0 = plant_DC_gain` |

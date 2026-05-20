@@ -124,7 +124,7 @@ namespace ctrl
     {
     public:
         // ----------------------------------------------------------
-        //  1 & 3.  Relay Ziegler-Nichols  (cheatsheet §1)
+        //  1 & 3.  Relay Ziegler-Nichols  (cheatsheet Section 1)
         // ----------------------------------------------------------
         //  DEDICATED: PID
         //  SOFT WARN: Smith (tune the inner PID separately)
@@ -141,7 +141,7 @@ namespace ctrl
                                      double lambda = -1.0);
 
         // ----------------------------------------------------------
-        //  2.  IMC-PID  (cheatsheet §2)
+        //  2.  IMC-PID  (cheatsheet Section 2)
         // ----------------------------------------------------------
         //  DEDICATED: PID
         //  SOFT WARN: Smith (inner), LeadLag (use Kp as gain hint only)
@@ -155,9 +155,9 @@ namespace ctrl
                                     double lambda = -1.0);
 
         // ----------------------------------------------------------
-        //  3.  Cohen-Coon  (cheatsheet §2 variant)
+        //  3.  Cohen-Coon  (cheatsheet Section 2 variant)
         // ----------------------------------------------------------
-        //  DEDICATED: PID  (especially when theta/tau ∈ [0.1, 1.0])
+        //  DEDICATED: PID  (especially when theta/tau \in [0.1, 1.0])
         //  SOFT WARN: Smith (inner)
         //  FALLBACK:  all others
         //
@@ -167,7 +167,7 @@ namespace ctrl
                                        double Ts);
 
         // ----------------------------------------------------------
-        //  4.  LQR Bryson's Rule  (cheatsheet §3)
+        //  4.  LQR Bryson's Rule  (cheatsheet Section 3)
         // ----------------------------------------------------------
         //  DEDICATED: LQR, LQG
         //  SOFT WARN: MPC (different Q/R convention - Np*p * Np*p vs n*n),
@@ -181,7 +181,7 @@ namespace ctrl
                                     const Eigen::VectorXd &umax);
 
         // ----------------------------------------------------------
-        //  5.  Kalman noise weights  (cheatsheet §4 - LQG observer part)
+        //  5.  Kalman noise weights  (cheatsheet Section 4 - LQG observer part)
         // ----------------------------------------------------------
         //  DEDICATED: LQG
         //  SOFT WARN: Generic (standalone KalmanFilter)
@@ -195,7 +195,7 @@ namespace ctrl
                                             double sigmaMeas);
 
         // ----------------------------------------------------------
-        //  6.  MPC Horizon / Weight Tuner  (cheatsheet §5)
+        //  6.  MPC Horizon / Weight Tuner  (cheatsheet Section 5)
         // ----------------------------------------------------------
         //  DEDICATED: MPC
         //  SOFT WARN: LQR (settling-time estimate is still useful as Np guidance)
@@ -210,7 +210,7 @@ namespace ctrl
                                         double rho_u = 0.1);
 
         // ----------------------------------------------------------
-        //  7.  Frequency-domain Loop Shaping  (cheatsheet §6)
+        //  7.  Frequency-domain Loop Shaping  (cheatsheet Section 6)
         // ----------------------------------------------------------
         //  DEDICATED: LeadLag
         //  SOFT WARN: PID (omega_c used as a bandwidth / N-filter hint)
@@ -222,7 +222,7 @@ namespace ctrl
                                              const LoopShapingTuner::Input &in);
 
         // ----------------------------------------------------------
-        //  8.  Optimisation-based tuner - Nelder-Mead ISE  (cheatsheet §7)
+        //  8.  Optimisation-based tuner - Nelder-Mead ISE  (cheatsheet Section 7)
         // ----------------------------------------------------------
         //  Applies to: ALL controller types  (Generic, PID, LQR, ...)
         //  No warnings emitted regardless of target - this method is truly

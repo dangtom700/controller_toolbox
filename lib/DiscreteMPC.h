@@ -5,7 +5,7 @@
 
 // Discrete-time Model Predictive Controller (condensed incremental QP formulation).
 //
-// Cost: J = Σ_{i=1}^{Np} ρ_y.‖y[k+i|k] - r‖^2 + Σ_{j=0}^{Nc-1} ρ_u.‖Δu[k+j]‖^2
+// Cost: J = Σ_{i=1}^{Np} ρ_y.||y[k+i|k] - r||^2 + Σ_{j=0}^{Nc-1} ρ_u.||Δu[k+j]||^2
 //
 // Prediction (condensed form):
 //   Y_pred = F.x[k] + Φ.ΔU
@@ -13,7 +13,7 @@
 //   Φ(i,j,:) = C.A^(i-j).B         j <= i, else 0
 //
 // Unconstrained optimal solution (receding horizon, apply first move only):
-//   ΔU* = -(Φ'.Q_y.Φ + R_u)⁻¹.Φ'.Q_y.(F.x[k] - R_stacked)
+//   ΔU* = -(Φ'.Q_y.Φ + R_u)^-¹.Φ'.Q_y.(F.x[k] - R_stacked)
 //   u[k] = u[k-1] + ΔU*[0:m]
 //
 // Box constraints on Δu and u are handled by element-wise clamping of ΔU*.

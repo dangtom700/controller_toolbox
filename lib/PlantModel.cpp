@@ -7,7 +7,7 @@ namespace ctrl
     // ---------------------------------------------------------------------------
     // tf2ss - controllable canonical form
     //
-    // For H(z⁻¹) = (b₀ + b₁z⁻¹ + ... + bₙz⁻ⁿ) / (1 + a₁z⁻¹ + ... + aₙz⁻ⁿ):
+    // For H(z^-¹) = (b₀ + b₁z^-¹ + ... + bₙz^-ⁿ) / (1 + a₁z^-¹ + ... + aₙz^-ⁿ):
     //
     //   A = [[-a₁, -a₂, ..., -aₙ],   (companion row)
     //        [ 1,   0,  ...,  0  ],
@@ -17,7 +17,7 @@ namespace ctrl
     //   C = [[b₁-a₁b₀, b₂-a₂b₀, ..., bₙ-aₙb₀]]  (1*n)
     //   D = [[b₀]]                  (1*1)
     //
-    // Equivalent MATLAB:  [A,B,C,D] = tf2ss(num,den) in z⁻¹ convention.
+    // Equivalent MATLAB:  [A,B,C,D] = tf2ss(num,den) in z^-¹ convention.
     // ---------------------------------------------------------------------------
     StateSpace tf2ss(const TransferFunction &tf)
     {

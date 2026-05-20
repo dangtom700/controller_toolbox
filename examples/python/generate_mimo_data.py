@@ -32,7 +32,7 @@ sys.path.insert(0, _THIS_DIR)
 
 from utils.data_gen import prbs
 
-# ── Parameters ────────────────────────────────────────────────────────────────
+# -- Parameters ----------------------------------------------------------------
 N_STEPS   = 5000     # 50 s of excitation at Ts = 0.01 s
 Ts        = 0.01
 AMPLITUDE = 0.5      # +/-0.5 V - keeps plant well within +/-20 saturation limits

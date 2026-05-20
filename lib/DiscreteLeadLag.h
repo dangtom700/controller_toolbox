@@ -8,9 +8,9 @@
 //   Lag:   0 < p_c < z_c  -> adds gain at low freq, improves steady-state accuracy
 //
 // Discretised via Tustin (bilinear) substitution s = 2(z-1)/(Ts(z+1)):
-//   C(z) = b₀ + b₁.z⁻¹
-//          ────────────   (first-order IIR)
-//          1  + a₁.z⁻¹
+//   C(z) = b₀ + b₁.z^-¹
+//          ------------   (first-order IIR)
+//          1  + a₁.z^-¹
 //
 //   b₀ = K.(2/Ts + z_c) / (2/Ts + p_c)
 //   b₁ = K.(z_c - 2/Ts) / (2/Ts + p_c)

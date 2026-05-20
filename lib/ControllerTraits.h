@@ -27,7 +27,7 @@
 namespace ctrl
 {
 
-    // ── Forward declarations (no headers pulled in) ──────────────
+    // -- Forward declarations (no headers pulled in) --------------
     class DiscretePID;
     class DiscreteLQR;
     class DiscreteLQG;
@@ -38,7 +38,7 @@ namespace ctrl
     class DiscreteLeadLag;
     class SmithPredictor;
 
-    // ── Category tags ─────────────────────────────────────────────
+    // -- Category tags ---------------------------------------------
     namespace tag
     {
         struct PID
@@ -70,7 +70,7 @@ namespace ctrl
         }; // SmithPredictor
     } // namespace tag
 
-    // ── Compile-time warning stubs ────────────────────────────────
+    // -- Compile-time warning stubs --------------------------------
     // Instantiating any of these types emits a [[deprecated]] compiler
     // warning.  They are used inside `if constexpr` branches so the
     // warning is conditional on the template argument.
@@ -92,7 +92,7 @@ namespace ctrl
 
     } // namespace detail
 
-    // ── Primary template - undefined for unknown types ────────────
+    // -- Primary template - undefined for unknown types ------------
     // Any use of ControllerTraits<T> for an unregistered T triggers
     // a clear compile error that names the missing specialisation.
     template <typename C>
@@ -104,7 +104,7 @@ namespace ctrl
                       "  in lib/ControllerTraits.h before using it with any tuner.\n");
     };
 
-    // ── DiscretePID ───────────────────────────────────────────────
+    // -- DiscretePID -----------------------------------------------
     template <>
     struct ControllerTraits<DiscretePID>
     {
@@ -118,7 +118,7 @@ namespace ctrl
         static constexpr bool supports_kalman_tuning = false;
     };
 
-    // ── DiscreteLQR ───────────────────────────────────────────────
+    // -- DiscreteLQR -----------------------------------------------
     template <>
     struct ControllerTraits<DiscreteLQR>
     {
@@ -131,7 +131,7 @@ namespace ctrl
         static constexpr bool supports_kalman_tuning = false; // no observer
     };
 
-    // ── DiscreteLQG ───────────────────────────────────────────────
+    // -- DiscreteLQG -----------------------------------------------
     template <>
     struct ControllerTraits<DiscreteLQG>
     {
@@ -144,7 +144,7 @@ namespace ctrl
         static constexpr bool supports_kalman_tuning = true; // observer part: Qf / Rf
     };
 
-    // ── DiscreteMPC ───────────────────────────────────────────────
+    // -- DiscreteMPC -----------------------------------------------
     template <>
     struct ControllerTraits<DiscreteMPC>
     {
@@ -157,7 +157,7 @@ namespace ctrl
         static constexpr bool supports_kalman_tuning = false;
     };
 
-    // ── ExtremumSeeker ────────────────────────────────────────────
+    // -- ExtremumSeeker --------------------------------------------
     // ESC is self-optimising once deployed; parameters (dither amplitude,
     // frequency, integrator gain) are set from plant bandwidth knowledge,
     // not from a closed-form tuner.
@@ -173,7 +173,7 @@ namespace ctrl
         static constexpr bool supports_kalman_tuning = false;
     };
 
-    // ── DiscreteSMC ───────────────────────────────────────────────
+    // -- DiscreteSMC -----------------------------------------------
     // SMC parameters (c_e, K, phi) are derived from sliding-surface
     // theory and Lyapunov stability conditions, not from auto-tuners.
     template <>
@@ -188,7 +188,7 @@ namespace ctrl
         static constexpr bool supports_kalman_tuning = false;
     };
 
-    // ── DiscreteADRC ──────────────────────────────────────────────
+    // -- DiscreteADRC ----------------------------------------------
     // ADRC uses bandwidth parameterisation (omega_c, omega_o, b0).
     // There is no classical auto-tuner; set parameters directly via
     // the "bandwidth-parameterised LADRC" approach (Gao 2003).
@@ -204,7 +204,7 @@ namespace ctrl
         static constexpr bool supports_kalman_tuning = false;
     };
 
-    // ── DiscreteLeadLag ───────────────────────────────────────────
+    // -- DiscreteLeadLag -------------------------------------------
     template <>
     struct ControllerTraits<DiscreteLeadLag>
     {
@@ -217,7 +217,7 @@ namespace ctrl
         static constexpr bool supports_kalman_tuning = false;
     };
 
-    // ── SmithPredictor ────────────────────────────────────────────
+    // -- SmithPredictor --------------------------------------------
     // SmithPredictor is a wrapper around an inner IController.
     // Tune the inner controller (typically DiscretePID) using the
     // appropriate tuner, then construct SmithPredictor(inner, model, d).

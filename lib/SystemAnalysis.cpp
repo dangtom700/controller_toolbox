@@ -170,7 +170,7 @@ namespace ctrl
         margins.wCrossoverGain  = 0.0;
         margins.wCrossoverPhase = 0.0;
 
-        // Gain margin: locate every phase = -180° crossing; keep worst-case (smallest GM)
+        // Gain margin: locate every phase = -180^\circ crossing; keep worst-case (smallest GM)
         for (int i = 0; i + 1 < coarse; ++i)
         {
             if ((pha[i] - (-180.0)) * (pha[i + 1] - (-180.0)) >= 0.0) continue;

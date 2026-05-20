@@ -14,12 +14,12 @@
 //            = error + (current model output - d-step-delayed model output)
 //
 // Signal-flow equivalent (ref: Smith 1957):
-//   Inner loop: C(z) -> P₀(z) . z⁻ᵈ   (plant with delay)
+//   Inner loop: C(z) -> P₀(z) . z^-ᵈ   (plant with delay)
 //   Model:      ŷ    = P₀(z) . u       (model without delay)
-//   Correction: c    = ŷ - z⁻ᵈŷ       (delay-induced error cancelled)
+//   Correction: c    = ŷ - z^-ᵈŷ       (delay-induced error cancelled)
 //
 // Requirements: plant model P₀ must represent the delay-FREE dynamics.
-// Ref: Smith (1957); Åström & Wittenmark "Computer Controlled Systems" §6.4;
+// Ref: Smith (1957); Åström & Wittenmark "Computer Controlled Systems" Section 6.4;
 //      MATLAB Smith Predictor example (smithpredict documentation).
 namespace ctrl
 {
@@ -48,7 +48,7 @@ namespace ctrl
         StateSpace model_;
         int d_;
         double Ts_;
-        Eigen::VectorXd      x_model_;  // internal model state x̂
+        Eigen::VectorXd      x_model_;  // internal model state x^
         std::vector<double>  y_buf_;   // fixed circular buffer of ŷ (length d_, pre-allocated)
         int                  buf_head_; // index of the oldest slot
     };

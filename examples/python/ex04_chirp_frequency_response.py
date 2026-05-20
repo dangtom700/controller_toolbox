@@ -10,7 +10,7 @@ Goal     : Drive the plant with a log-swept chirp, estimate the frequency
 Data generation : 5 000 samples of chirp(0.01 -> 5 Hz) through ss_step().
 Verification    :
   - |H(jomegan)| at omegan = 1 rad/s approx = 1/ζ_peak (for ζ=0.75, peak approx = 0 dB).
-  - Phase at omega=0.1 rad/s approx = -arctan(1.5*0.1 / (1-0.01)) approx = -8.5°.
+  - Phase at omega=0.1 rad/s approx = -arctan(1.5*0.1 / (1-0.01)) approx = -8.5^\circ.
 
 Run:
     conda activate soft_robotics
@@ -80,13 +80,13 @@ for omega in omega_check:
     tag = "[PASS]" if ok else "[FAIL]"
     print(f"  {omega:>12.3f}  {mag_an:>14.2f} dB  {mag_est:>14.2f} dB  {err:>7.2f} dB  {tag}")
 
-# Phase at low frequency: should be near 0°
+# Phase at low frequency: should be near 0^\circ
 idx_low = np.argmin(np.abs(f_welch - 0.1/(2*np.pi)))
 phase_low = float(phase_deg_est[idx_low])
 G_low = G_analytic(0.1)
 phase_analytic = float(np.degrees(np.angle(G_low)))
-print(f"\n  Phase at omega=0.1: estimated={phase_low:.1f}°, analytic={phase_analytic:.1f}°")
+print(f"\n  Phase at omega=0.1: estimated={phase_low:.1f}^\circ, analytic={phase_analytic:.1f}^\circ")
 results["phase_low"] = abs(phase_low - phase_analytic) < 10.0
-print(f"  {'[PASS]' if results['phase_low'] else '[FAIL]'} phase error < 10°")
+print(f"  {'[PASS]' if results['phase_low'] else '[FAIL]'} phase error < 10^\circ")
 
 print_summary(results)

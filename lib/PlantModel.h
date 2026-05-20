@@ -10,8 +10,8 @@ namespace ctrl
 {
 
     // ---------------------------------------------------------------------------
-    // Discrete-time transfer function H(z⁻¹) = (b₀ + b₁z⁻¹ + ... + bₘz⁻ᵐ)
-    //                                         / (1  + a₁z⁻¹ + ... + aₙz⁻ⁿ)
+    // Discrete-time transfer function H(z^-¹) = (b₀ + b₁z^-¹ + ... + bₘz^-ᵐ)
+    //                                         / (1  + a₁z^-¹ + ... + aₙz^-ⁿ)
     //
     // num = {b0, b1, ..., bm}  - numerator coefficients
     // den = {1,  a1, ..., an}  - monic denominator (den[0] must equal 1)
@@ -68,7 +68,7 @@ namespace ctrl
 
     // ---------------------------------------------------------------------------
     // Convert SISO discrete transfer function -> state-space (controllable canonical form).
-    // Equivalent MATLAB:  [A,B,C,D] = tf2ss(num, den)  applied to the z⁻¹ polynomial.
+    // Equivalent MATLAB:  [A,B,C,D] = tf2ss(num, den)  applied to the z^-¹ polynomial.
     // Ref: Ogata "Modern Control Engineering", MATLAB tf2ss documentation.
     // ---------------------------------------------------------------------------
     StateSpace tf2ss(const TransferFunction &tf);

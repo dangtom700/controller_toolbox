@@ -35,7 +35,7 @@ namespace ctrl
     // Tuner names match the cheatsheet sections.
     static Tier tier(const char *tuner, CtrlKind k)
     {
-        // ---------- Relay / ZN (cheatsheet §1) ----------
+        // ---------- Relay / ZN (cheatsheet Section 1) ----------
         if (!strcmp(tuner, "RelayZN"))
         {
             switch (k)
@@ -50,7 +50,7 @@ namespace ctrl
                 return Tier::FALLBACK;
             }
         }
-        // ---------- IMC-PID (cheatsheet §2) ----------
+        // ---------- IMC-PID (cheatsheet Section 2) ----------
         if (!strcmp(tuner, "IMCPID"))
         {
             switch (k)
@@ -65,7 +65,7 @@ namespace ctrl
                 return Tier::FALLBACK;
             }
         }
-        // ---------- Cohen-Coon (cheatsheet §2 variant) ----------
+        // ---------- Cohen-Coon (cheatsheet Section 2 variant) ----------
         if (!strcmp(tuner, "CohenCoon"))
         {
             switch (k)
@@ -78,7 +78,7 @@ namespace ctrl
                 return Tier::FALLBACK;
             }
         }
-        // ---------- Bryson's Rule (cheatsheet §3) ----------
+        // ---------- Bryson's Rule (cheatsheet Section 3) ----------
         if (!strcmp(tuner, "Bryson"))
         {
             switch (k)
@@ -95,7 +95,7 @@ namespace ctrl
                 return Tier::FALLBACK;
             }
         }
-        // ---------- Kalman Noise (cheatsheet §4 observer part) ----------
+        // ---------- Kalman Noise (cheatsheet Section 4 observer part) ----------
         if (!strcmp(tuner, "KalmanNoise"))
         {
             switch (k)
@@ -108,7 +108,7 @@ namespace ctrl
                 return Tier::FALLBACK;
             }
         }
-        // ---------- MPC Horizon (cheatsheet §5) ----------
+        // ---------- MPC Horizon (cheatsheet Section 5) ----------
         if (!strcmp(tuner, "MPCHorizon"))
         {
             switch (k)
@@ -121,7 +121,7 @@ namespace ctrl
                 return Tier::FALLBACK;
             }
         }
-        // ---------- Loop Shaping (cheatsheet §6) ----------
+        // ---------- Loop Shaping (cheatsheet Section 6) ----------
         if (!strcmp(tuner, "LoopShaping"))
         {
             switch (k)
@@ -134,7 +134,7 @@ namespace ctrl
                 return Tier::FALLBACK;
             }
         }
-        // ---------- Optimisation-based (cheatsheet §7) ----------
+        // ---------- Optimisation-based (cheatsheet Section 7) ----------
         // Always IDEAL: the method is controller-agnostic.
         if (!strcmp(tuner, "Optimise"))
             return Tier::IDEAL;
@@ -506,7 +506,7 @@ namespace ctrl
     }
 
     // ============================================================
-    //  8. Optimisation-based Nelder-Mead  (cheatsheet §7)
+    //  8. Optimisation-based Nelder-Mead  (cheatsheet Section 7)
     // ============================================================
 
     // ---- Nelder-Mead simplex minimiser ----------------------------------------
