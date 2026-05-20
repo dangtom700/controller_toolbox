@@ -1,7 +1,7 @@
 """
-ex25 — Online Recursive Least Squares (RLS) ARX Identification
+ex25 - Online Recursive Least Squares (RLS) ARX Identification
 ================================================================
-Goal     : Implement RLS with forgetting factor λ=0.98 and identify a 2nd-order
+Goal     : Implement RLS with forgetting factor lambda=0.98 and identify a 2nd-order
            ARX model online as the plant is driven by PRBS excitation.
            Verify that identified parameters converge to true values.
 
@@ -28,9 +28,9 @@ STEPS  = 3000
 LAMBDA = 0.98    # forgetting factor
 
 print("=" * 60)
-print("ex25 — Online RLS ARX Identification")
+print("ex25 - Online RLS ARX Identification")
 print("=" * 60)
-print(f"\n  λ={LAMBDA}, na=2, nb=2, {STEPS} samples")
+print(f"\n  lambda={LAMBDA}, na=2, nb=2, {STEPS} samples")
 
 _, u = prbs(STEPS, Ts, amplitude=0.5, seed=31)
 plant = example_plant()
@@ -84,7 +84,7 @@ results["b1_converged"] = assert_close(b1_final, b1_true,
 std_mid  = float(np.std(theta_hist[HALF-250:HALF+250, 0]))
 std_late = float(np.std(theta_hist[-500:, 0]))
 results["converging"] = std_late < std_mid
-print(f"\n  a1 trace std — mid: {std_mid:.2e},  late: {std_late:.2e}")
+print(f"\n  a1 trace std - mid: {std_mid:.2e},  late: {std_late:.2e}")
 print(f"  {'[PASS]' if results['converging'] else '[FAIL]'} RLS converging (late std < mid std)")
 
 print_summary(results)

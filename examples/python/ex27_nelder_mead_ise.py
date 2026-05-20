@@ -1,7 +1,7 @@
 """
-ex27 — Nelder-Mead Optimisation of PID via ISE
+ex27 - Nelder-Mead Optimisation of PID via ISE
 ================================================
-Goal     : Implement the same Nelder-Mead simplex (α=1, γ=2, ρ=0.5, σ=0.5)
+Goal     : Implement the same Nelder-Mead simplex (alpha=1, γ=2, ρ=0.5, sigma=0.5)
            used in lib/TunerSuite.cpp and optimise PID gains to minimise ISE
            on the closed-loop step response. Verify the optimised ISE is lower
            than the initial-guess ISE.
@@ -29,7 +29,7 @@ Ts       = 0.01
 SIM_STEPS = 1000   # short sim per eval for speed
 
 print("=" * 60)
-print("ex27 — Nelder-Mead PID Optimisation (ISE)")
+print("ex27 - Nelder-Mead PID Optimisation (ISE)")
 print("=" * 60)
 
 def cost_ise(params):
@@ -115,8 +115,8 @@ results["Ki_in_bounds"]   = bounds[1][0] <= Ki_opt <= bounds[1][1]
 results["Kd_in_bounds"]   = bounds[2][0] <= Kd_opt <= bounds[2][1]
 
 print(f"\n  {'[PASS]' if results['ise_improved'] else '[FAIL]'} "
-      f"ISE improved ({ise_initial:.6f} → {ise_opt:.6f})")
+      f"ISE improved ({ise_initial:.6f} -> {ise_opt:.6f})")
 print(f"  {'[PASS]' if results['evals_within_300'] else '[FAIL]'} "
-      f"converged in {n_eval} ≤ 300 evals")
+      f"converged in {n_eval} <= 300 evals")
 
 print_summary(results)

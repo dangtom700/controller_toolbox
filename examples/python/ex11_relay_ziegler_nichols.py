@@ -1,5 +1,5 @@
 """
-ex11 — Relay Auto-Tuner (Åström–Hägglund) and Ziegler-Nichols
+ex11 - Relay Auto-Tuner (Åström-Hägglund) and Ziegler-Nichols
 ===============================================================
 Goal     : Simulate the relay feedback test to extract the ultimate gain Ku
            and ultimate period Pu, then apply the Ziegler-Nichols PID rule.
@@ -8,7 +8,7 @@ Goal     : Simulate the relay feedback test to extract the ultimate gain Ku
 
 Data generation : 3 000 samples of relay feedback (relay amplitude d=0.5).
 Verification    :
-  - |Pu_measured − Pu_analytic| / Pu_analytic < 5 %.
+  - |Pu_measured - Pu_analytic| / Pu_analytic < 5 %.
   - ZN-tuned loop is stable (y does not diverge).
 
 Run:
@@ -30,7 +30,7 @@ STEPS = 3000
 RELAY_AMP = 0.5
 
 print("=" * 60)
-print("ex11 — Relay Auto-Tuner → Ziegler-Nichols PID")
+print("ex11 - Relay Auto-Tuner -> Ziegler-Nichols PID")
 print("=" * 60)
 
 # --- Relay feedback simulation ---
@@ -66,20 +66,20 @@ else:
 
 print(f"\n  Relay measured: Ku={Ku_meas:.4f}, Pu={Pu_meas:.4f} s")
 
-# --- Analytic: phase-crossover frequency of G(s)=1/(s²+1.5s+1) ---
-# phase(G(jω)) = -π  →  ∠G(jω) = -180°
-# G(jω) = 1 / (1 - ω² + j·1.5ω)
-# Im/Re = -1.5ω / (1-ω²) → 0 at ω→∞ (no real phase crossover for this stable plant)
+# --- Analytic: phase-crossover frequency of G(s)=1/(s^2+1.5s+1) ---
+# phase(G(jomega)) = -pi  ->  ∠G(jomega) = -180°
+# G(jomega) = 1 / (1 - omega^2 + j.1.5omega)
+# Im/Re = -1.5omega / (1-omega^2) -> 0 at omega->inf (no real phase crossover for this stable plant)
 # Use Bode to find phase margin via scipy
 num_ct = [1.0]
 den_ct = [1.0, 1.5, 1.0]
 w, H = sig.freqs(num_ct, den_ct, worN=np.logspace(-2, 2, 2000))
 phase_deg = np.degrees(np.angle(H))
-# Find ω where phase nearest -180°
+# Find omega where phase nearest -180°
 idx180 = np.argmin(np.abs(phase_deg + 180.0))
 w_pc = w[idx180]
 Pu_analytic = 2.0 * np.pi / w_pc if w_pc > 0 else np.nan
-print(f"  Analytic: Pu ≈ {Pu_analytic:.4f} s  at ω_pc = {w_pc:.4f} rad/s")
+print(f"  Analytic: Pu approx = {Pu_analytic:.4f} s  at omega_pc = {w_pc:.4f} rad/s")
 
 results = {}
 if not np.isnan(Pu_meas) and not np.isnan(Pu_analytic) and Pu_analytic > 0:

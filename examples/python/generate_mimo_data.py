@@ -18,7 +18,7 @@ Expected output (consumed by mimo_unknown.cpp)
 -----------------------------------------------
     examples/data/mimo_prbs.csv
         Header: u1,u2
-        Rows:   5000 lines, amplitude ±0.5
+        Rows:   5000 lines, amplitude +/-0.5
 """
 
 from __future__ import annotations
@@ -35,7 +35,7 @@ from utils.data_gen import prbs
 # ── Parameters ────────────────────────────────────────────────────────────────
 N_STEPS   = 5000     # 50 s of excitation at Ts = 0.01 s
 Ts        = 0.01
-AMPLITUDE = 0.5      # ±0.5 V — keeps plant well within ±20 saturation limits
+AMPLITUDE = 0.5      # +/-0.5 V - keeps plant well within +/-20 saturation limits
 SEED_CH1  = 42       # channel-1 LFSR seed
 SEED_CH2  = 1023     # channel-2 LFSR seed (maximally different from 42 in 10-bit space)
 
@@ -76,9 +76,9 @@ def main() -> None:
         for i in range(N_STEPS):
             fh.write(f"{u1[i]:.6f},{u2[i]:.6f}\n")
 
-    print(f"\nWrote {N_STEPS} rows → {OUTPUT_FILE}")
+    print(f"\nWrote {N_STEPS} rows -> {OUTPUT_FILE}")
     print(f"  Columns : u1 (seed={SEED_CH1}), u2 (seed={SEED_CH2})")
-    print(f"  Amplitude: ±{AMPLITUDE}")
+    print(f"  Amplitude: +/-{AMPLITUDE}")
     print(f"  Duration : {N_STEPS * Ts:.1f} s  ({N_STEPS} steps, Ts={Ts} s)")
     print(f"  Status   : {'ALL PASS' if all_ok else 'CHECK WARNINGS ABOVE'}")
 

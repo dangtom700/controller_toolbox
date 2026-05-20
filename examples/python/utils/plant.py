@@ -1,5 +1,5 @@
 """
-Discrete-time state-space plant — Python mirror of lib/StateSpace.h.
+Discrete-time state-space plant - Python mirror of lib/StateSpace.h.
 
 tf2ss() uses controllable canonical form, matching C++ tf2ss exactly:
   A : companion matrix (nxn)
@@ -38,7 +38,7 @@ def tf2ss(num: list[float], den: list[float]) -> StateSpace:
     Convert transfer function (num, den) to controllable canonical form SS.
 
     num / den must be length-matched; leading den[0] is normalised to 1.
-    Example plant G(s)=1/(s²+1.5s+1), ZOH Ts=0.01 →
+    Example plant G(s)=1/(s^2+1.5s+1), ZOH Ts=0.01 ->
         num = [0, 4.9625e-5, 4.9125e-5]
         den = [1, -1.98511,  0.98522]
     """
@@ -88,7 +88,7 @@ def ss_step(plant: StateSpace, u: float) -> float:
 
 
 # ---------------------------------------------------------------------------
-# Convenience: build the canonical example plant (G(s)=1/(s²+1.5s+1), Ts=0.01)
+# Convenience: build the canonical example plant (G(s)=1/(s^2+1.5s+1), Ts=0.01)
 # ---------------------------------------------------------------------------
 EXAMPLE_NUM = [0.0,      4.9625e-5, 4.9125e-5]
 EXAMPLE_DEN = [1.0, -1.98511,      0.98522    ]

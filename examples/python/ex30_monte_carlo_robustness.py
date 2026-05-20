@@ -1,15 +1,15 @@
 """
-ex30 — Monte Carlo Robustness Analysis
+ex30 - Monte Carlo Robustness Analysis
 ========================================
 Goal     : Evaluate PID robustness to plant parameter uncertainty.
-           Perturb a1, a2, b1, b2 by ±10% (uniform distribution, N=200 runs)
+           Perturb a1, a2, b1, b2 by +/-10% (uniform distribution, N=200 runs)
            and record the fraction of runs that remain stable and within
            a 20% performance degradation budget relative to the nominal plant.
 
 Data generation : 200 Monte Carlo runs; PRBS excitation for each perturbed plant.
 Verification    :
-  - Stability rate > 90% for ±10% perturbation.
-  - ISE mean < 2× nominal ISE.
+  - Stability rate > 90% for +/-10% perturbation.
+  - ISE mean < 2* nominal ISE.
   - ISE std < ISE mean (moderate variability).
 
 Run:
@@ -28,13 +28,13 @@ from utils.verify import ise, print_summary
 Ts       = 0.01
 STEPS    = 800
 N_MONTE  = 200
-PERTURB  = 0.10    # ±10%
+PERTURB  = 0.10    # +/-10%
 RNG_SEED = 2024
 
 Kp, Ki, Kd = 3.0, 1.5, 0.75
 
 print("=" * 60)
-print("ex30 — Monte Carlo Robustness (±10% plant uncertainty)")
+print("ex30 - Monte Carlo Robustness (+/-10% plant uncertainty)")
 print("=" * 60)
 
 a1_nom, a2_nom = EXAMPLE_DEN[1], EXAMPLE_DEN[2]
@@ -80,7 +80,7 @@ ise_std   = float(np.std(ise_arr))
 
 print(f"  Stability rate: {stability_rate:.1%}  ({stable_count}/{N_MONTE} runs)")
 print(f"  ISE mean: {ise_mean:.6f},  std: {ise_std:.6f}")
-print(f"  ISE mean/nominal ratio: {ise_mean/ise_nom:.2f}×")
+print(f"  ISE mean/nominal ratio: {ise_mean/ise_nom:.2f}*")
 
 results = {}
 results["stability_rate"]   = stability_rate > 0.90
@@ -91,7 +91,7 @@ results["runs_completed"]   = stable_count > 0
 print(f"\n  {'[PASS]' if results['stability_rate'] else '[FAIL]'} "
       f"stability rate > 90% ({stability_rate:.1%})")
 print(f"  {'[PASS]' if results['ise_mean_bounded'] else '[FAIL]'} "
-      f"ISE mean < 2× nominal")
+      f"ISE mean < 2* nominal")
 print(f"  {'[PASS]' if results['ise_std_ok'] else '[FAIL]'} "
       f"ISE std < ISE mean")
 

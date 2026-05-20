@@ -1,5 +1,5 @@
 """
-ex05 — Noisy Measurement Data and SNR Verification
+ex05 - Noisy Measurement Data and SNR Verification
 ===================================================
 Audience : Experienced developers familiar with the C++ controller_toolbox.
 Goal     : Add white Gaussian noise at a specified SNR to a plant step
@@ -8,7 +8,7 @@ Goal     : Add white Gaussian noise at a specified SNR to a plant step
 
 Data generation : 1 500 step samples + noise at 20 dB, 30 dB, 40 dB SNR.
 Verification    :
-  - Achieved SNR within ±1 dB of target for each case.
+  - Achieved SNR within +/-1 dB of target for each case.
   - ARX coefficient error grows monotonically as SNR decreases.
 
 Run:
@@ -28,7 +28,7 @@ Ts    = 0.01
 STEPS = 1500
 
 print("=" * 60)
-print("ex05 — Noisy Data and SNR Verification")
+print("ex05 - Noisy Data and SNR Verification")
 print("=" * 60)
 
 # --- Generate clean I/O data (PRBS) ---
@@ -85,7 +85,7 @@ results["b1_clean_1pct"] = assert_close(theta_c[2], b1_true,
 # --- Check coefficient error increases as SNR decreases ---
 monotone_ok = (a1_errors[0] < a1_errors[1] < a1_errors[2])
 results["err_increases_with_noise"] = monotone_ok
-print(f"\n  a1 errors by SNR (40→30→20 dB): {[f'{e:.4f}%' for e in a1_errors]}")
+print(f"\n  a1 errors by SNR (40->30->20 dB): {[f'{e:.4f}%' for e in a1_errors]}")
 print(f"  {'[PASS]' if monotone_ok else '[FAIL]'} error monotonically increases as SNR decreases")
 
 print_summary(results)

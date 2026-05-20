@@ -1,5 +1,5 @@
 """
-ex09 — PID Anti-Windup Demonstration
+ex09 - PID Anti-Windup Demonstration
 ======================================
 Goal     : Demonstrate that back-calculation anti-windup prevents integrator
            wind-up when the actuator saturates, and verify the resulting
@@ -31,7 +31,7 @@ U_MAX = 2.0    # tight saturation limit
 Kp, Ki, Kd = 3.0, 1.5, 0.75
 
 print("=" * 60)
-print("ex09 — PID Anti-Windup")
+print("ex09 - PID Anti-Windup")
 print("=" * 60)
 print(f"\n  Reference={REF}, u_max={U_MAX}, Kp={Kp}, Ki={Ki}, Kd={Kd}")
 
@@ -69,7 +69,7 @@ print(f"  {'[PASS]' if results['antiwindup_reduces_ise'] else '[FAIL]'} "
 # Both should eventually reach steady state near REF
 ss_no_aw   = float(np.mean(y_no_aw[-200:]))
 ss_with_aw = float(np.mean(y_with_aw[-200:]))
-print(f"\n  SS with AW: {ss_with_aw:.4f}  (expect ≈ {REF:.1f}, clamped by u_max)")
+print(f"\n  SS with AW: {ss_with_aw:.4f}  (expect approx = {REF:.1f}, clamped by u_max)")
 results["ss_reachable"] = ss_with_aw > 0.0
 print(f"  {'[PASS]' if results['ss_reachable'] else '[FAIL]'} plant output positive")
 
@@ -80,7 +80,7 @@ print(f"  {'[PASS]' if results['no_aw_finite'] else '[FAIL]'} no-AW output is fi
 # Peak overshoot comparison
 peak_no_aw   = float(np.max(y_no_aw))
 peak_with_aw = float(np.max(y_with_aw))
-print(f"\n  Peak output — no AW: {peak_no_aw:.4f}, with AW: {peak_with_aw:.4f}")
+print(f"\n  Peak output - no AW: {peak_no_aw:.4f}, with AW: {peak_with_aw:.4f}")
 results["aw_peak_lower"] = peak_with_aw <= peak_no_aw + 0.1
 print(f"  {'[PASS]' if results['aw_peak_lower'] else '[FAIL]'} "
       f"anti-windup does not increase peak")

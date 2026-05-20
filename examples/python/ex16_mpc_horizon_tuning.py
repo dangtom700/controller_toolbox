@@ -1,5 +1,5 @@
 """
-ex16 — MPC Prediction Horizon Tuning
+ex16 - MPC Prediction Horizon Tuning
 ======================================
 Goal     : Show how changing the prediction horizon Np (with Nc=Np/2) affects
            MPC closed-loop performance; verify that ISE improves up to an
@@ -28,7 +28,7 @@ Ts    = 0.01
 STEPS = 1500
 
 print("=" * 60)
-print("ex16 — MPC Horizon Tuning")
+print("ex16 - MPC Horizon Tuning")
 print("=" * 60)
 
 ss = tf2ss(EXAMPLE_NUM, EXAMPLE_DEN)

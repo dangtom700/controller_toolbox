@@ -1,5 +1,5 @@
 """
-ex34 — Full ARX-to-State-Space Identification Pipeline
+ex34 - Full ARX-to-State-Space Identification Pipeline
 ========================================================
 Goal     : End-to-end pipeline:
            1. Excite plant with PRBS.
@@ -32,7 +32,7 @@ from utils.verify import rmse, ise, print_summary
 Ts = 0.01
 
 print("=" * 60)
-print("ex34 — ARX Identification → PID Tuning Pipeline")
+print("ex34 - ARX Identification -> PID Tuning Pipeline")
 print("=" * 60)
 
 # --- Step 1: Excite and collect data ---
@@ -108,8 +108,8 @@ y_id_cl = sim_closed(Kp_id, Ki_id, Kd_id)
 
 ise_t  = ise(1.0 - y_t,  Ts)
 ise_id = ise(1.0 - y_id_cl, Ts)
-print(f"\n  ISE — true-model PID: {ise_t:.6f}")
-print(f"  ISE — id-model PID:   {ise_id:.6f}")
+print(f"\n  ISE - true-model PID: {ise_t:.6f}")
+print(f"  ISE - id-model PID:   {ise_id:.6f}")
 results["ise_id_within_20pct"] = ise_id < 1.2 * ise_t or ise_id < 0.005
 print(f"  {'[PASS]' if results['ise_id_within_20pct'] else '[FAIL]'} "
       f"identified-model ISE within 20% of true-model ISE")

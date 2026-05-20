@@ -18,7 +18,7 @@ def check_alignment(*arrays: np.ndarray, labels: Optional[list[str]] = None) -> 
         detail = ", ".join(f"{l}={n}" for l, n in zip(labels, lengths))
     else:
         detail = ", ".join(str(n) for n in lengths)
-    print(f"  {tag} alignment check — lengths: {detail}")
+    print(f"  {tag} alignment check - lengths: {detail}")
     return ok
 
 
@@ -35,7 +35,7 @@ def dc_gain_check(y: np.ndarray, expected: float,
     else:
         ok = abs(measured - expected) / abs(expected) < tol
     tag = "[PASS]" if ok else "[FAIL]"
-    print(f"  {tag} DC gain — measured={measured:.6f}, expected={expected:.6f}, "
+    print(f"  {tag} DC gain - measured={measured:.6f}, expected={expected:.6f}, "
           f"rel_err={abs(measured-expected)/max(abs(expected),1e-12):.4%}")
     return ok
 
@@ -56,7 +56,7 @@ def rmse(y_true: np.ndarray, y_pred: np.ndarray) -> float:
 
 
 def ise(error: np.ndarray, Ts: float) -> float:
-    """Integral of squared error: ISE = Ts * sum(e²)."""
+    """Integral of squared error: ISE = Ts * sum(e^2)."""
     return float(Ts * np.sum(error**2))
 
 

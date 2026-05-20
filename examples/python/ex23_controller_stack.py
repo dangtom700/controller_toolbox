@@ -1,18 +1,18 @@
 """
-ex23 — Controller Stack (Supervisory / Additive / Weighted)
+ex23 - Controller Stack (Supervisory / Additive / Weighted)
 =============================================================
 Goal     : Replicate the ControllerStack composition concept in Python.
            Demonstrate three modes:
-             Supervisory  — highest-priority controller whose |u| > threshold wins.
-             Additive     — outputs summed and clamped.
-             Weighted     — convex combination (w1*u1 + w2*u2).
+             Supervisory  - highest-priority controller whose |u| > threshold wins.
+             Additive     - outputs summed and clamped.
+             Weighted     - convex combination (w1*u1 + w2*u2).
            Each mode is verified for correct output range and stability.
 
 Data generation : 2 000-sample step; stack of DiscretePID + DiscreteSMC.
 Verification    :
   - Supervisory output equals u_pid when |u_pid| > |u_smc|, else u_smc.
   - Additive output ∈ [u_min, u_max] at all times.
-  - Weighted output is convex: min(u_pid,u_smc) ≤ u_w ≤ max(u_pid,u_smc).
+  - Weighted output is convex: min(u_pid,u_smc) <= u_w <= max(u_pid,u_smc).
 
 Run:
     conda activate soft_robotics
@@ -36,7 +36,7 @@ Kp, Ki, Kd = 3.0, 1.5, 0.75
 ce, cde, k_smc, phi = 1.0, 10.0, 5.0, 0.1
 
 print("=" * 60)
-print("ex23 — Controller Stack")
+print("ex23 - Controller Stack")
 print("=" * 60)
 
 # Run both controllers independently and record u1, u2

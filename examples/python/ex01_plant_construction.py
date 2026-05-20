@@ -1,10 +1,10 @@
 """
-ex01 — Plant Construction and Transfer-Function to State-Space Conversion
+ex01 - Plant Construction and Transfer-Function to State-Space Conversion
 =========================================================================
 Audience : Experienced developers familiar with the C++ controller_toolbox.
 Goal     : Reproduce lib/StateSpace tf2ss() in Python and verify the resulting
            matrices match the analytically expected controllable canonical form
-           for the example plant G(s) = 1 / (s² + 1.5s + 1), Ts = 0.01 s.
+           for the example plant G(s) = 1 / (s^2 + 1.5s + 1), Ts = 0.01 s.
 
 Data generation: algebraically from known ZOH-discretised coefficients.
 Verification   : element-wise matrix comparison against hand-computed values.
@@ -41,7 +41,7 @@ C_expected = np.array([[b1 - a1*b0, b2 - a2*b0]])
 D_expected = np.array([[b0]])
 
 print("=" * 60)
-print("ex01 — Plant Construction (tf2ss)")
+print("ex01 - Plant Construction (tf2ss)")
 print("=" * 60)
 
 ss = tf2ss(EXAMPLE_NUM, EXAMPLE_DEN)

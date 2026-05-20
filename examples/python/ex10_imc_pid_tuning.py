@@ -1,5 +1,5 @@
 """
-ex10 — IMC-Based PID Tuning from FOPDT Model
+ex10 - IMC-Based PID Tuning from FOPDT Model
 =============================================
 Goal     : Implement the IMC-PID tuning rule, compute gains from the FOPDT
            model identified in ex02, and verify the closed-loop bandwidth
@@ -7,7 +7,7 @@ Goal     : Implement the IMC-PID tuning rule, compute gains from the FOPDT
 
 Data generation : FOPDT parameters from step-response tangent method.
 Verification    :
-  - Closed-loop -3 dB bandwidth ≈ 1/lambda.
+  - Closed-loop -3 dB bandwidth approx = 1/lambda.
   - ISE decreases as lambda decreases (faster response).
 
 Run:
@@ -28,7 +28,7 @@ Ts    = 0.01
 STEPS = 2000
 
 print("=" * 60)
-print("ex10 — IMC-PID Tuning")
+print("ex10 - IMC-PID Tuning")
 print("=" * 60)
 
 # --- FOPDT from step response ---
@@ -74,7 +74,7 @@ for lam in lambdas:
     ise_vals.append(ise_val)
     print(f"  {lam:>6.1f} | {Kp:>7.4f} | {Ki:>7.4f} | {Kd:>7.4f} | {ise_val:.6f}")
 
-# Smaller lambda → faster → lower ISE
+# Smaller lambda -> faster -> lower ISE
 results["ise_monotone"] = ise_vals[0] < ise_vals[1] < ise_vals[2]
 print(f"\n  {'[PASS]' if results['ise_monotone'] else '[FAIL]'} "
       f"ISE decreases as lambda decreases")

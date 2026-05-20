@@ -1,5 +1,5 @@
 """
-ex29 — CSV Alignment and Timestamp Verification
+ex29 - CSV Alignment and Timestamp Verification
 =================================================
 Goal     : Given two CSVs produced by different scripts (simulate_all.cpp and
            realtime_all.cpp), verify that the time columns are aligned,
@@ -32,7 +32,7 @@ Ts    = 0.01
 STEPS = 1500
 
 print("=" * 60)
-print("ex29 — CSV Alignment Verification")
+print("ex29 - CSV Alignment Verification")
 print("=" * 60)
 
 # --- Generate synthetic CSV (mimics simulate_all.cpp output) ---
@@ -62,7 +62,7 @@ df = pd.DataFrame({
     "error":     e_arr,
 })
 df.to_csv(csv_path, index=False, float_format="%.9f")
-print(f"\nWrote {len(df)} rows → {csv_path}")
+print(f"\nWrote {len(df)} rows -> {csv_path}")
 
 # --- Verification suite ---
 df_load = pd.read_csv(csv_path)

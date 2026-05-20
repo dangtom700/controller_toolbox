@@ -1,13 +1,13 @@
 """
-ex18 — Lead-Lag Controller via Loop Shaping
+ex18 - Lead-Lag Controller via Loop Shaping
 =============================================
-Goal     : Design a lead compensator using the loop-shaping tuner (β=sin(φ),
-           α=(1+β)/(1-β)), close the loop, and verify the crossover frequency
+Goal     : Design a lead compensator using the loop-shaping tuner (beta=sin(φ),
+           alpha=(1+beta)/(1-beta)), close the loop, and verify the crossover frequency
            and phase margin match the design spec.
 
 Data generation : Bode data from open-loop frequency response; 2 000-sample sim.
 Verification    :
-  - |ω_crossover_measured − ω_c_design| / ω_c_design < 20%.
+  - |omega_crossover_measured - omega_c_design| / omega_c_design < 20%.
   - Phase margin > 30°.
   - Closed loop stable.
 
@@ -33,9 +33,9 @@ omega_c = 2.0           # desired crossover frequency (rad/s)
 phi_deg = 50.0          # desired phase margin (deg)
 
 print("=" * 60)
-print("ex18 — Lead-Lag Loop Shaping")
+print("ex18 - Lead-Lag Loop Shaping")
 print("=" * 60)
-print(f"\n  Design: ω_c = {omega_c} rad/s, φ_m = {phi_deg}°")
+print(f"\n  Design: omega_c = {omega_c} rad/s, φ_m = {phi_deg}°")
 
 # Compute lead compensator zero/pole (C++ LoopShapingTuner formula)
 phi_rad = np.radians(phi_deg)
@@ -44,12 +44,12 @@ alpha = (1.0 + beta) / (1.0 - beta)
 z_c   = omega_c / np.sqrt(alpha)
 p_c   = omega_c * np.sqrt(alpha)
 
-# Compute compensator gain so |G(jωc)·C(jωc)| = 1
+# Compute compensator gain so |G(jomegac).C(jomegac)| = 1
 G_jw = 1.0 / ((1j*omega_c)**2 + 1.5*(1j*omega_c) + 1.0)
 C_jw_unnorm = (1j*omega_c + z_c) / (1j*omega_c + p_c)
 gain = 1.0 / abs(G_jw * C_jw_unnorm)
 
-print(f"  β={beta:.4f}, α={alpha:.4f}, z_c={z_c:.4f}, p_c={p_c:.4f}, gain={gain:.4f}")
+print(f"  beta={beta:.4f}, alpha={alpha:.4f}, z_c={z_c:.4f}, p_c={p_c:.4f}, gain={gain:.4f}")
 
 ll = LeadLag(gain=gain, zero=z_c, pole=p_c, Ts=Ts, u_min=-10.0, u_max=10.0)
 plant = example_plant()
@@ -80,12 +80,12 @@ L_ow = G_ow * C_ow
 mag = np.abs(L_ow)
 phase = np.degrees(np.angle(L_ow))
 
-# Crossover: |L(jω)| = 1
+# Crossover: |L(jomega)| = 1
 cross_idx = np.argmin(np.abs(mag - 1.0))
 wc_meas = w_rad[cross_idx]
 pm_meas = phase[cross_idx] + 180.0
 
-print(f"\n  Measured crossover: ω_c = {wc_meas:.3f} rad/s  (design: {omega_c})")
+print(f"\n  Measured crossover: omega_c = {wc_meas:.3f} rad/s  (design: {omega_c})")
 print(f"  Phase margin: {pm_meas:.1f}°  (design: >{phi_deg}°)")
 
 results["crossover_20pct"] = abs(wc_meas - omega_c) / omega_c < 0.20

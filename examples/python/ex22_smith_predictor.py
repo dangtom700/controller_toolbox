@@ -1,5 +1,5 @@
 """
-ex22 — Smith Predictor for Dead-Time Compensation
+ex22 - Smith Predictor for Dead-Time Compensation
 ===================================================
 Goal     : Add an artificial pure delay (5 steps) to the plant, then compare
            a plain PID (no delay compensation) against a SmithPredictor-wrapped
@@ -32,7 +32,7 @@ DELAY_STEPS = 5     # 5-step pure delay = 0.05 s
 Kp, Ki, Kd = 2.0, 1.0, 0.5
 
 print("=" * 60)
-print("ex22 — Smith Predictor vs Plain PID (with delay)")
+print("ex22 - Smith Predictor vs Plain PID (with delay)")
 print("=" * 60)
 print(f"\n  Pure delay: {DELAY_STEPS} steps ({DELAY_STEPS*Ts:.3f} s)")
 
@@ -74,8 +74,8 @@ err_smith = 1.0 - y_smith
 ise_plain = ise(err_plain, Ts)
 ise_smith = ise(err_smith, Ts)
 
-print(f"\n  ISE — plain PID:       {ise_plain:.5f}")
-print(f"  ISE — Smith Predictor: {ise_smith:.5f}")
+print(f"\n  ISE - plain PID:       {ise_plain:.5f}")
+print(f"  ISE - Smith Predictor: {ise_smith:.5f}")
 
 results = {}
 results["smith_better_ise"] = ise_smith < ise_plain

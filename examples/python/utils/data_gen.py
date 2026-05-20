@@ -23,7 +23,7 @@ def prbs(steps: int, Ts: float,
          seed: int = 42) -> tuple[np.ndarray, np.ndarray]:
     """
     Maximum-length pseudo-random binary sequence (PRBS) using a 10-bit LFSR.
-    Output values are ±amplitude.
+    Output values are +/-amplitude.
     """
     rng = np.random.default_rng(seed)
     state = int(rng.integers(1, 1023))  # non-zero 10-bit seed
@@ -58,7 +58,7 @@ def multi_sine(steps: int, Ts: float,
     """
     Sum of sinusoids at specified frequencies.
     amplitudes and phases default to 1 and 0 for each frequency.
-    Amplitudes are normalised so peak amplitude ≈ 1.
+    Amplitudes are normalised so peak amplitude approx = 1.
     """
     if amplitudes is None:
         amplitudes = [1.0] * len(frequencies)

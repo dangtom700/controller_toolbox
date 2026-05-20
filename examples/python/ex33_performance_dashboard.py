@@ -1,5 +1,5 @@
 """
-ex33 — Performance Dashboard (All Controllers)
+ex33 - Performance Dashboard (All Controllers)
 ================================================
 Goal     : Run all 9 controllers in closed-loop, collect performance metrics
            (ISE, ITAE, overshoot, rise time, settling time), and print a
@@ -31,7 +31,7 @@ Ts    = 0.01
 STEPS = 2000
 
 print("=" * 60)
-print("ex33 — Performance Dashboard")
+print("ex33 - Performance Dashboard")
 print("=" * 60)
 
 ss_ref = tf2ss(EXAMPLE_NUM, EXAMPLE_DEN)

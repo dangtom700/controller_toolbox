@@ -1,5 +1,5 @@
 """
-ex32 — Phase Portrait and State-Space Trajectory
+ex32 - Phase Portrait and State-Space Trajectory
 ==================================================
 Goal     : Simulate LQR-controlled plant from multiple initial conditions and
            plot state-space trajectories (x1 vs x2). Verify all trajectories
@@ -29,7 +29,7 @@ STEPS = 500
 N_IC  = 12
 
 print("=" * 60)
-print("ex32 — Phase Portrait (LQR State Trajectories)")
+print("ex32 - Phase Portrait (LQR State Trajectories)")
 print("=" * 60)
 
 ss = tf2ss(EXAMPLE_NUM, EXAMPLE_DEN)
@@ -42,7 +42,7 @@ A_cl = A - B @ lqr.K
 print(f"\n  LQR gain K = {lqr.K}")
 eigs = np.linalg.eigvals(A_cl)
 print(f"  Closed-loop eigenvalues: {eigs}")
-print(f"  |λ|: {[f'{abs(e):.5f}' for e in eigs]}")
+print(f"  |lambda|: {[f'{abs(e):.5f}' for e in eigs]}")
 
 angles = np.linspace(0, 2*np.pi, N_IC, endpoint=False)
 initial_conditions = np.column_stack([np.cos(angles), np.sin(angles)])

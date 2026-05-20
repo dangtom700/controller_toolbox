@@ -1,5 +1,5 @@
 """
-ex12 — Cohen-Coon PID Tuning
+ex12 - Cohen-Coon PID Tuning
 ==============================
 Goal     : Apply the Cohen-Coon tuning rule to the FOPDT model and compare
            the resulting ISE/ITAE against the IMC-tuned PID from ex10.
@@ -26,7 +26,7 @@ Ts    = 0.01
 STEPS = 2000
 
 print("=" * 60)
-print("ex12 — Cohen-Coon PID Tuning")
+print("ex12 - Cohen-Coon PID Tuning")
 print("=" * 60)
 
 # --- FOPDT identification ---

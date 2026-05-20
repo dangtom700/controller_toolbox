@@ -1,5 +1,5 @@
 """
-ex24 — Disturbance Rejection Comparison (PID vs ADRC)
+ex24 - Disturbance Rejection Comparison (PID vs ADRC)
 =======================================================
 Goal     : Apply a step load disturbance (+0.3 at k=1000) to both a PID and
            ADRC closed loop, record recovery time and ISE post-disturbance,
@@ -7,8 +7,8 @@ Goal     : Apply a step load disturbance (+0.3 at k=1000) to both a PID and
 
 Data generation : 2 000 samples; reference = 1.0 throughout.
 Verification    :
-  - Both controllers return to ±2% of reference after disturbance.
-  - ADRC recovery time ≤ PID recovery time.
+  - Both controllers return to +/-2% of reference after disturbance.
+  - ADRC recovery time <= PID recovery time.
 
 Run:
     conda activate soft_robotics
@@ -32,7 +32,7 @@ Kp, Ki, Kd = 3.0, 1.5, 0.75
 omega_o, omega_c_adrc, b0 = 20.0, 4.0, 1e-4
 
 print("=" * 60)
-print("ex24 — Disturbance Rejection: PID vs ADRC")
+print("ex24 - Disturbance Rejection: PID vs ADRC")
 print("=" * 60)
 print(f"\n  Disturbance: +{DIST} at k={DIST_K}")
 
@@ -85,7 +85,7 @@ print(f"  {'[PASS]' if results['adrc_recovers'] else '[FAIL]'} ADRC recovers")
 
 results["adrc_faster_or_equal"] = r_adrc <= r_pid
 print(f"  {'[PASS]' if results['adrc_faster_or_equal'] else '[FAIL]'} "
-      f"ADRC recovery ≤ PID recovery ({r_adrc} ≤ {r_pid})")
+      f"ADRC recovery <= PID recovery ({r_adrc} <= {r_pid})")
 
 results["both_stable"] = (np.all(np.isfinite(y_pid)) and np.all(np.isfinite(y_adrc)))
 print(f"  {'[PASS]' if results['both_stable'] else '[FAIL]'} both controllers stable")

@@ -1,5 +1,5 @@
 """
-ex35 — Full End-to-End Pipeline
+ex35 - Full End-to-End Pipeline
 =================================
 Goal     : Orchestrate the complete workflow in a single script:
            1. Excite plant (PRBS).
@@ -16,7 +16,7 @@ Data generation : 2 000 PRBS samples (identification) + 1 500 step (validation).
 Verification    :
   - ARX NRMSE < 5%.
   - LQR closed loop stable and settles.
-  - Monte Carlo: ≥ 85% of ±5% perturbed plants remain stable.
+  - Monte Carlo: >= 85% of +/-5% perturbed plants remain stable.
 
 Run:
     conda activate soft_robotics
@@ -36,7 +36,7 @@ from utils.verify import rmse, ise, print_summary
 Ts = 0.01
 
 print("=" * 60)
-print("ex35 — Full End-to-End Pipeline")
+print("ex35 - Full End-to-End Pipeline")
 print("=" * 60)
 
 results = {}
@@ -115,7 +115,7 @@ else:
 # ==========================================================================
 # Step 6: Monte Carlo robustness
 # ==========================================================================
-print("[6/7] Monte Carlo robustness (N=50, ±5% perturbation) ...")
+print("[6/7] Monte Carlo robustness (N=50, +/-5% perturbation) ...")
 N_MC = 50; PERTURB = 0.05; RNG = np.random.default_rng(1111)
 stable_count = 0
 for _ in range(N_MC):

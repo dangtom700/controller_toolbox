@@ -1,5 +1,5 @@
 """
-ex19 — Sliding Mode Controller with Boundary Layer
+ex19 - Sliding Mode Controller with Boundary Layer
 ====================================================
 Goal     : Simulate DiscreteSMC and verify that the sliding surface s converges
            to the boundary layer |s| < φ within finite time (reaching phase),
@@ -30,7 +30,7 @@ STEPS = 2000
 ce, cde, k, phi = 1.0, 10.0, 5.0, 0.1
 
 print("=" * 60)
-print("ex19 — Sliding Mode Controller")
+print("ex19 - Sliding Mode Controller")
 print("=" * 60)
 print(f"\n  ce={ce}, cde={cde}, k={k}, phi={phi}")
 
@@ -70,7 +70,7 @@ print(f"  {'[PASS]' if results['in_boundary_layer'] else '[FAIL]'} "
 chatter_reach = float(np.std(u_reach))
 chatter_ss    = float(np.std(u_ss))
 results["chattering_reduced"] = chatter_ss < chatter_reach
-print(f"  Chattering std — reaching: {chatter_reach:.4f}, steady-state: {chatter_ss:.4f}")
+print(f"  Chattering std - reaching: {chatter_reach:.4f}, steady-state: {chatter_ss:.4f}")
 print(f"  {'[PASS]' if results['chattering_reduced'] else '[FAIL]'} "
       f"boundary layer reduces chattering")
 

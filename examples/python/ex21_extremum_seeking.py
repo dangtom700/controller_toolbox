@@ -1,8 +1,8 @@
 """
-ex21 — Extremum Seeking Control
+ex21 - Extremum Seeking Control
 =================================
 Goal     : Use ExtremumSeeker to find the maximum of a static quadratic cost
-           J(θ) = -(θ - 1.5)² + 4  (optimum at θ* = 1.5).
+           J(θ) = -(θ - 1.5)^2 + 4  (optimum at θ* = 1.5).
            Verify the ESC converges within 5% of the optimum within 5 000 steps.
 
 Data generation : 5 000 ESC steps; performance function is the quadratic cost.
@@ -30,9 +30,9 @@ def cost(theta):
     return -(theta - THETA_OPT)**2 + 4.0
 
 print("=" * 60)
-print("ex21 — Extremum Seeking Control")
+print("ex21 - Extremum Seeking Control")
 print("=" * 60)
-print(f"\n  Cost: J(θ) = -(θ-{THETA_OPT})² + 4,  θ* = {THETA_OPT}")
+print(f"\n  Cost: J(θ) = -(θ-{THETA_OPT})^2 + 4,  θ* = {THETA_OPT}")
 
 esc = ExtremumSeeker(
     dither_amp=0.05,
@@ -78,6 +78,6 @@ dist_q1_end  = abs(t_q1[-1] - THETA_OPT)
 results["approaches_opt"] = dist_q1_end < dist_initial
 print(f"  {'[PASS]' if results['approaches_opt'] else '[FAIL]'} "
       f"θ moves toward θ* in 1st quarter "
-      f"(Δdist: {dist_initial:.4f} → {dist_q1_end:.4f})")
+      f"(Δdist: {dist_initial:.4f} -> {dist_q1_end:.4f})")
 
 print_summary(results)

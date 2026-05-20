@@ -1,12 +1,12 @@
 """
-ex07 — Batch Data Generation and CSV Round-Trip
+ex07 - Batch Data Generation and CSV Round-Trip
 ================================================
 Goal     : Generate a structured dataset (step + PRBS + chirp), save to CSV,
            reload, and verify every column survives the round-trip with zero
            error (no floating-point text truncation).
 
 Data generation : 3 000 samples; three separate experiments concatenated.
-Verification    : max |reloaded − original| < 1e-10 for all numeric columns.
+Verification    : max |reloaded - original| < 1e-10 for all numeric columns.
 
 Run:
     conda activate soft_robotics
@@ -26,7 +26,7 @@ Ts    = 0.01
 N_SEG = 1000   # samples per segment
 
 print("=" * 60)
-print("ex07 — Batch Data CSV Round-Trip")
+print("ex07 - Batch Data CSV Round-Trip")
 print("=" * 60)
 
 def simulate(u_arr):
@@ -57,7 +57,7 @@ out_dir = os.path.join(os.path.dirname(__file__), "data")
 os.makedirs(out_dir, exist_ok=True)
 csv_path = os.path.join(out_dir, "batch_dataset.csv")
 df_orig.to_csv(csv_path, index=False, float_format="%.15g")
-print(f"\nSaved {len(df_orig)} rows → {csv_path}")
+print(f"\nSaved {len(df_orig)} rows -> {csv_path}")
 
 df_load = pd.read_csv(csv_path)
 print(f"Reloaded {len(df_load)} rows")

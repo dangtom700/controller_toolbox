@@ -1,13 +1,13 @@
 """
-ex06 — Multi-Sine Excitation for Broadband Identification
+ex06 - Multi-Sine Excitation for Broadband Identification
 ==========================================================
 Goal     : Show how to generate a multi-sine signal whose frequencies span
            the plant bandwidth and verify spectral energy concentrates only
-           at the injected frequencies (≥ 40 dB above noise floor).
+           at the injected frequencies (>= 40 dB above noise floor).
 
 Data generation : 4 096 samples of multi-sine at [0.05, 0.1, 0.2, 0.5, 1.0,
                   2.0, 3.0, 5.0] Hz through ss_step().
-Verification    : FFT peaks at injected frequencies; no leakage > −30 dBc.
+Verification    : FFT peaks at injected frequencies; no leakage > -30 dBc.
 
 Run:
     conda activate soft_robotics
@@ -28,7 +28,7 @@ STEPS = 4096
 freqs_hz = [0.05, 0.1, 0.2, 0.5, 1.0, 2.0, 3.0, 5.0]
 
 print("=" * 60)
-print("ex06 — Multi-Sine Excitation")
+print("ex06 - Multi-Sine Excitation")
 print("=" * 60)
 
 t, u = multi_sine(STEPS, Ts, freqs_hz)

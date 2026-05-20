@@ -1,5 +1,5 @@
 """
-ex17 — MPC vs PID Performance Comparison
+ex17 - MPC vs PID Performance Comparison
 ==========================================
 Goal     : Head-to-head comparison of MPC (Np=20) and IMC-tuned PID on the
            example plant under step + disturbance scenarios. Both controllers
@@ -8,7 +8,7 @@ Goal     : Head-to-head comparison of MPC (Np=20) and IMC-tuned PID on the
 Data generation : 2 000 samples; step at k=0, load disturbance +0.2 at k=1000.
 Verification    :
   - MPC and PID both reject the disturbance (|y_ss - 1.0| < 1%).
-  - ISE comparison is logged (no pass/fail — purely informational).
+  - ISE comparison is logged (no pass/fail - purely informational).
   - Both outputs bounded: |y| < 5.
 
 Run:
@@ -31,7 +31,7 @@ DIST_MAG  = 0.2
 U_MAX = 5.0
 
 print("=" * 60)
-print("ex17 — MPC vs PID Comparison")
+print("ex17 - MPC vs PID Comparison")
 print("=" * 60)
 
 ss_ref = tf2ss(EXAMPLE_NUM, EXAMPLE_DEN)

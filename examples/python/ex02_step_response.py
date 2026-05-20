@@ -1,12 +1,12 @@
 """
-ex02 — Step Response Simulation and CSV Cross-Validation
+ex02 - Step Response Simulation and CSV Cross-Validation
 =========================================================
 Audience : Experienced developers familiar with the C++ controller_toolbox.
 Goal     : Simulate the open-loop step response of the example plant and
            cross-validate sample-by-sample against the CSV produced by the
            C++ generate_test_data.py script (tests/data/step_response.csv).
 
-Data generation : 1 500 step of unit step through ss_step() — same math as
+Data generation : 1 500 step of unit step through ss_step() - same math as
                   the existing scripts/generate_test_data.py.
 Verification    : max absolute deviation vs CSV must be < 1e-9.
 
@@ -27,7 +27,7 @@ Ts    = 0.01
 STEPS = 1500
 
 print("=" * 60)
-print("ex02 — Step Response Simulation")
+print("ex02 - Step Response Simulation")
 print("=" * 60)
 
 # --- Simulate ---
@@ -40,7 +40,7 @@ for k in range(STEPS):
 
 print(f"\nSimulated {STEPS} steps at Ts={Ts} s")
 print(f"  y[0]   = {y_sim[0]:.9f}   (expected 0.0)")
-print(f"  y[-1]  = {y_sim[-1]:.9f}  (expected ≈ 1.0)")
+print(f"  y[-1]  = {y_sim[-1]:.9f}  (expected approx = 1.0)")
 
 # --- Cross-validate against CSV (if present) ---
 csv_path = os.path.join(os.path.dirname(__file__),
@@ -83,6 +83,6 @@ print(f"    tau   = {tau:.4f} s")
 print(f"    theta = {theta:.4f} s")
 
 # For this 2nd-order plant, a rough sanity: tau should be O(1)
-results["tau_sanity"] = assert_close(tau, 1.0, tol=0.5, label="tau ≈ 1.0 s")
+results["tau_sanity"] = assert_close(tau, 1.0, tol=0.5, label="tau approx = 1.0 s")
 
 print_summary(results)

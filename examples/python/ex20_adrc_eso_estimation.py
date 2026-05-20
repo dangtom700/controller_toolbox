@@ -1,5 +1,5 @@
 """
-ex20 — ADRC Extended State Observer Estimation
+ex20 - ADRC Extended State Observer Estimation
 ================================================
 Goal     : Demonstrate the ADRC ESO tracking the plant output and the
            lumped disturbance z3 (generalised disturbance). Apply an external
@@ -31,12 +31,12 @@ DIST_MAG = 0.5
 
 omega_o = 20.0
 omega_c = 4.0
-b0      = 1.0e-4   # rough input gain: b0 ≈ b1/Ts for 2nd order plant
+b0      = 1.0e-4   # rough input gain: b0 approx = b1/Ts for 2nd order plant
 
 print("=" * 60)
-print("ex20 — ADRC / ESO Disturbance Estimation")
+print("ex20 - ADRC / ESO Disturbance Estimation")
 print("=" * 60)
-print(f"\n  ω_o={omega_o}, ω_c={omega_c}, b0={b0}")
+print(f"\n  omega_o={omega_o}, omega_c={omega_c}, b0={b0}")
 
 adrc  = DiscreteADRC(omega_o=omega_o, omega_c=omega_c, b0=b0,
                      Ts=Ts, u_min=-10.0, u_max=10.0)
@@ -68,7 +68,7 @@ z3_pre  = float(np.mean(np.abs(z3[burn:DIST_K])))
 z3_post = float(np.mean(np.abs(z3[DIST_K:DIST_K+200])))
 results["eso_detects_dist"] = z3_post > 2.0 * z3_pre
 print(f"  z3 mean |pre|={z3_pre:.4f}, |post|={z3_post:.4f}  "
-      f"{'[PASS]' if results['eso_detects_dist'] else '[FAIL]'} post > 2× pre")
+      f"{'[PASS]' if results['eso_detects_dist'] else '[FAIL]'} post > 2* pre")
 
 ss_err = abs(float(np.mean(y[-200:])) - 1.0)
 results["ss_tracks"] = ss_err < 0.02

@@ -1,5 +1,5 @@
 """
-ex26 — TunerSuite Soft-Warning Dispatch (Python Mirror)
+ex26 - TunerSuite Soft-Warning Dispatch (Python Mirror)
 =========================================================
 Goal     : Replicate the TunerSuite tier-dispatch logic in Python and verify
            that IDEAL pairings emit no warning, SOFT pairings emit one warning
@@ -8,9 +8,9 @@ Goal     : Replicate the TunerSuite tier-dispatch logic in Python and verify
 
 Data generation : Synthetic FOPDT parameters; no plant simulation needed.
 Verification    :
-  - PID + RelayZN → IDEAL (no warning).
-  - SMC + RelayZN → FALLBACK (warning emitted).
-  - LeadLag + RelayZN → SOFT (warning emitted).
+  - PID + RelayZN -> IDEAL (no warning).
+  - SMC + RelayZN -> FALLBACK (warning emitted).
+  - LeadLag + RelayZN -> SOFT (warning emitted).
   - Result objects always have success=True for well-formed inputs.
 
 Run:
@@ -82,19 +82,19 @@ def dispatch(tuner_name: str, kind: CtrlKind,
 
 # ---------- Test cases ----------
 print("=" * 60)
-print("ex26 — TunerSuite Soft-Warning Dispatch")
+print("ex26 - TunerSuite Soft-Warning Dispatch")
 print("=" * 60)
 
 cases = [
-    ("RelayZN", CtrlKind.PID,     "IDEAL — no warning"),
-    ("RelayZN", CtrlKind.Smith,   "SOFT  — 1 warning"),
-    ("RelayZN", CtrlKind.LeadLag, "SOFT  — 1 warning"),
-    ("RelayZN", CtrlKind.SMC,     "FALLBACK — 1 warning"),
-    ("IMC",     CtrlKind.PID,     "IDEAL — no warning"),
-    ("IMC",     CtrlKind.LQR,     "FALLBACK — 1 warning"),
-    ("Bryson",  CtrlKind.LQR,     "IDEAL — no warning"),
-    ("Bryson",  CtrlKind.MPC,     "SOFT  — 1 warning"),
-    ("Bryson",  CtrlKind.PID,     "FALLBACK — 1 warning"),
+    ("RelayZN", CtrlKind.PID,     "IDEAL - no warning"),
+    ("RelayZN", CtrlKind.Smith,   "SOFT  - 1 warning"),
+    ("RelayZN", CtrlKind.LeadLag, "SOFT  - 1 warning"),
+    ("RelayZN", CtrlKind.SMC,     "FALLBACK - 1 warning"),
+    ("IMC",     CtrlKind.PID,     "IDEAL - no warning"),
+    ("IMC",     CtrlKind.LQR,     "FALLBACK - 1 warning"),
+    ("Bryson",  CtrlKind.LQR,     "IDEAL - no warning"),
+    ("Bryson",  CtrlKind.MPC,     "SOFT  - 1 warning"),
+    ("Bryson",  CtrlKind.PID,     "FALLBACK - 1 warning"),
 ]
 
 results = {}

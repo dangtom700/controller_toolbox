@@ -1,5 +1,5 @@
 """
-ex14 — Kalman Filter State Estimation
+ex14 - Kalman Filter State Estimation
 ========================================
 Goal     : Run the KalmanFilter on the example plant with noisy output
            measurements and verify the estimated states converge to the true
@@ -8,8 +8,8 @@ Goal     : Run the KalmanFilter on the example plant with noisy output
 Data generation : 1 500 PRBS samples; output noise at 20 dB SNR.
 Verification    :
   - RMSE(x_hat, x_true) < RMSE(x_naive, x_true) where x_naive uses y as x1.
-  - P stays symmetric (|P - P'|_∞ < 1e-12) at every step.
-  - P is PSD (min eigenvalue ≥ -1e-10) at every step.
+  - P stays symmetric (|P - P'|_inf < 1e-12) at every step.
+  - P is PSD (min eigenvalue >= -1e-10) at every step.
 
 Run:
     conda activate soft_robotics
@@ -29,7 +29,7 @@ Ts    = 0.01
 STEPS = 1500
 
 print("=" * 60)
-print("ex14 — Kalman Filter")
+print("ex14 - Kalman Filter")
 print("=" * 60)
 
 ss_true = tf2ss(EXAMPLE_NUM, EXAMPLE_DEN)
@@ -68,7 +68,7 @@ for k in range(STEPS):
     if min_eig < -1e-10:
         P_psd_violations += 1
 
-print(f"\n  Noise sigma_meas ≈ {sigma_meas:.6f}")
+print(f"\n  Noise sigma_meas approx = {sigma_meas:.6f}")
 print(f"  Q_kf = {sigma_proc**2:.2e} * I,  R_kf = {sigma_meas**2:.4e} * I")
 
 rmse_kf = rmse(x_true[:, 0], x_hat[:, 0])

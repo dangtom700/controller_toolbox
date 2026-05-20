@@ -1,5 +1,5 @@
 """
-ex28 — ITAE vs ISE Cost Function Comparison
+ex28 - ITAE vs ISE Cost Function Comparison
 =============================================
 Goal     : Optimise PID gains separately using ISE and ITAE cost functions and
            compare the resulting closed-loop transient behaviour.
@@ -79,7 +79,7 @@ def nelder_mead(f, x0, bounds, max_evals=250, tol=1e-5):
     return simp[0], costs[0]
 
 print("=" * 60)
-print("ex28 — ITAE vs ISE Optimisation")
+print("ex28 - ITAE vs ISE Optimisation")
 print("=" * 60)
 
 x0     = [2.0, 1.0, 0.3]

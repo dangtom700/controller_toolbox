@@ -125,7 +125,7 @@ class DiscreteLQG:
 # ---------------------------------------------------------------------------
 # DiscreteMPC  (lib/DiscreteMPC.h)
 # Condensed incremental QP, unconstrained closed-form solution
-# u* = -(Hess)^{-1} F x  →  first element applied
+# u* = -(Hess)^{-1} F x  ->  first element applied
 # ---------------------------------------------------------------------------
 class DiscreteMPC:
     def __init__(self, A: np.ndarray, B: np.ndarray, C: np.ndarray,
@@ -163,7 +163,7 @@ class DiscreteMPC:
     def compute(self, x: np.ndarray, r: float) -> float:
         # Deviation from setpoint expanded over horizon
         r_vec = r * np.ones((self._Phi.shape[0], 1))
-        # u_seq = -F x + (Hess^-1 Theta' Q_bar) r  — simplified: use precomputed F
+        # u_seq = -F x + (Hess^-1 Theta' Q_bar) r  - simplified: use precomputed F
         u_seq = -self._F @ x
         # add reference feedforward (same structure, precomputed from Phi)
         # For a constant reference: u = -F x + G r, but we keep it simple here
@@ -223,7 +223,7 @@ class DiscreteSMC:
 
 # ---------------------------------------------------------------------------
 # DiscreteADRC  (lib/DiscreteADRC.h)
-# 3rd-order ESO, β params per Gao 2003: β1=3ωo, β2=3ωo², β3=ωo³
+# 3rd-order ESO, beta params per Gao 2003: beta1=3omegao, beta2=3omegao^2, beta3=omegao^3
 # ---------------------------------------------------------------------------
 class DiscreteADRC:
     def __init__(self, omega_o: float, omega_c: float, b0: float,
@@ -258,7 +258,7 @@ class DiscreteADRC:
 
 # ---------------------------------------------------------------------------
 # ExtremumSeeker  (lib/ExtremumSeeker.h)
-# Dither → HPF → demodulate → LPF → integrate
+# Dither -> HPF -> demodulate -> LPF -> integrate
 # ---------------------------------------------------------------------------
 class ExtremumSeeker:
     def __init__(self, dither_amp: float, dither_freq: float,

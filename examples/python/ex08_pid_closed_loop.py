@@ -1,5 +1,5 @@
 """
-ex08 — PID Closed-Loop Simulation
+ex08 - PID Closed-Loop Simulation
 ===================================
 Goal     : Close the loop around the example plant with a DiscretePID and
            verify performance metrics (rise time, settling time, overshoot,
@@ -9,7 +9,7 @@ Data generation : 1 500 step samples, unit step reference, gains from IMC rule.
 Verification    :
   - Steady-state error < 0.5 %.
   - Overshoot < 10 %.
-  - Rise time (10→90%) recorded and sane (0.1–5 s).
+  - Rise time (10->90%) recorded and sane (0.1-5 s).
 
 Run:
     conda activate soft_robotics
@@ -27,11 +27,11 @@ from utils.verify import dc_gain_check, print_summary, assert_close
 Ts    = 0.01
 STEPS = 1500
 
-# IMC-tuned gains for G(s)=1/(s²+1.5s+1), lambda=0.5
+# IMC-tuned gains for G(s)=1/(s^2+1.5s+1), lambda=0.5
 Kp, Ki, Kd = 3.0, 1.5, 0.75
 
 print("=" * 60)
-print("ex08 — PID Closed-Loop Simulation")
+print("ex08 - PID Closed-Loop Simulation")
 print("=" * 60)
 print(f"\n  Gains: Kp={Kp}, Ki={Ki}, Kd={Kd}, Ts={Ts}")
 
@@ -62,11 +62,11 @@ print(f"\n  Overshoot: {overshoot_pct:.2f} %")
 results["overshoot"] = overshoot_pct < 10.0
 print(f"  {'[PASS]' if results['overshoot'] else '[FAIL]'} overshoot < 10%")
 
-# Rise time (10→90%)
+# Rise time (10->90%)
 y10 = np.argmax(y >= 0.10)
 y90 = np.argmax(y >= 0.90)
 rise_time = (y90 - y10) * Ts
-print(f"  Rise time (10→90%): {rise_time:.3f} s")
+print(f"  Rise time (10->90%): {rise_time:.3f} s")
 results["rise_time"] = 0.05 < rise_time < 5.0
 print(f"  {'[PASS]' if results['rise_time'] else '[FAIL]'} rise time in (0.05, 5.0) s")
 

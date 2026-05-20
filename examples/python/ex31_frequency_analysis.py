@@ -1,16 +1,16 @@
 """
-ex31 — Frequency-Domain Closed-Loop Analysis
+ex31 - Frequency-Domain Closed-Loop Analysis
 ==============================================
-Goal     : Compute sensitivity S(jω) = 1/(1+L(jω)) and complementary
-           sensitivity T(jω) = L(jω)/(1+L(jω)) for the PID-controlled plant.
+Goal     : Compute sensitivity S(jomega) = 1/(1+L(jomega)) and complementary
+           sensitivity T(jomega) = L(jomega)/(1+L(jomega)) for the PID-controlled plant.
            Verify Bode's integral (waterbed), peak sensitivity Ms, and
            crossover frequency match the time-domain step response.
 
 Data generation : Analytic frequency response from PID + plant transfer functions.
 Verification    :
-  - Ms = max|S(jω)| > 1.0 (physical lower bound).
-  - |S(jω)| + |T(jω)| ≈ |S + T| = 1 at all frequencies (within 1e-6).
-  - −3 dB closed-loop bandwidth (|T| = 0.707) > 1 rad/s.
+  - Ms = max|S(jomega)| > 1.0 (physical lower bound).
+  - |S(jomega)| + |T(jomega)| approx = |S + T| = 1 at all frequencies (within 1e-6).
+  - -3 dB closed-loop bandwidth (|T| = 0.707) > 1 rad/s.
 
 Run:
     conda activate soft_robotics
@@ -27,12 +27,12 @@ Ts = 0.01
 Kp, Ki, Kd, N = 3.0, 1.5, 0.75, 10.0
 
 print("=" * 60)
-print("ex31 — Frequency-Domain Closed-Loop Analysis")
+print("ex31 - Frequency-Domain Closed-Loop Analysis")
 print("=" * 60)
 
 omega = np.logspace(-2, 3, 5000)
 
-# Continuous-time plant G(s) = 1/(s²+1.5s+1)
+# Continuous-time plant G(s) = 1/(s^2+1.5s+1)
 def G(s): return 1.0 / (s**2 + 1.5*s + 1.0)
 
 # PID in frequency domain (filtered derivative)
@@ -70,7 +70,7 @@ print(f"  Closed-loop bandwidth: {bw_rad:.2f} rad/s")
 results["bandwidth_gt_1"] = bw_rad > 1.0 if not np.isnan(bw_rad) else False
 print(f"  {'[PASS]' if results['bandwidth_gt_1'] else '[FAIL]'} bandwidth > 1 rad/s")
 
-# Gain margin (|L|=1 → |S| check at phase crossover)
+# Gain margin (|L|=1 -> |S| check at phase crossover)
 L_mag   = np.abs(L_arr)
 L_phase = np.degrees(np.angle(L_arr))
 cross_idx = np.argmin(np.abs(L_mag - 1.0))

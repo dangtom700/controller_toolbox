@@ -1,12 +1,12 @@
 """
-ex03 — PRBS Excitation and ARX Model Identification
+ex03 - PRBS Excitation and ARX Model Identification
 ====================================================
 Audience : Experienced developers familiar with the C++ controller_toolbox.
 Goal     : Generate a PRBS input, drive the example plant in open loop, then
            fit a 2nd-order ARX model using least squares and compare the
            identified coefficients against the known plant coefficients.
 
-Data generation : 2 000 samples of PRBS(±0.5) through ss_step().
+Data generation : 2 000 samples of PRBS(+/-0.5) through ss_step().
 Verification    :
   - PRBS has near-flat power spectrum (ratio max/min spectral power < 10 dB).
   - ARX identified coefficients match plant coefficients to < 1 %.
@@ -28,7 +28,7 @@ Ts    = 0.01
 STEPS = 2000
 
 print("=" * 60)
-print("ex03 — PRBS Excitation & ARX Identification")
+print("ex03 - PRBS Excitation & ARX Identification")
 print("=" * 60)
 
 # --- Generate PRBS and collect I/O data ---
@@ -38,7 +38,7 @@ y = np.zeros(STEPS)
 for k in range(STEPS):
     y[k] = ss_step(plant, u[k])
 
-print(f"\nGenerated {STEPS} PRBS samples, amplitude=±0.5")
+print(f"\nGenerated {STEPS} PRBS samples, amplitude=+/-0.5")
 
 # --- Verify PRBS spectral flatness ---
 Y = np.abs(np.fft.rfft(u))**2
@@ -51,7 +51,7 @@ print(f"  {'[PASS]' if results['prbs_flat'] else '[FAIL]'} spectral spread < 40 
 
 # --- ARX identification: 2nd order, na=2, nb=2 ---
 # y[k] = -a1 y[k-1] - a2 y[k-2] + b1 u[k-1] + b2 u[k-2]
-# Build regression matrix [−y[k-1], −y[k-2], u[k-1], u[k-2]]
+# Build regression matrix [-y[k-1], -y[k-2], u[k-1], u[k-2]]
 BURN = 50   # discard transient
 N  = STEPS - BURN - 2
 Phi = np.column_stack([
