@@ -1,2 +1,0 @@
-add_executable(boiler_turbine_case_study boiler_turbine_case_study.cpp)
-target_link_libraries(boiler_turbine_case_study PRIVATE controller_toolbox)

@@ -1,213 +1,109 @@
-// ============================================================
-//  ex21_boiler_turbine_case_study.cpp
-//  Boiler-Turbine Case Study: Successive Online Model Linearisation
-//
-//  Recreates the study from:
-//  "Nonlinear predictive control of a boiler-turbine unit: A state-space 
-//  approach with successive on-line model linearization and quadratic optimization"
-//  by Maciej Lawrynczuk (ISA Transactions, 2017).
-//
-//  This example demonstrates that using a fixed linear MPC model causes
-//  degradation at off-design operating points, while updating the MPC model 
-//  via successive online linearisation restores high performance.
-// ============================================================
-#include "ControllerToolbox.h"
-#include <iostream>
-#include <vector>
+#include <ControllerToolbox.h>
 #include <cmath>
+#include <iostream>
+#include <algorithm>
 
-static constexpr double Ts = 1.0; // 1s sampling as in the paper
-
-// ---------------------------------------------------------------------------
-// Boiler-Turbine Nonlinear Model (Bell-Astrom model structure)
-// x1: Drum pressure
-// x2: Electric power
-// x3: Fluid density
-// u1: Fuel valve
-// u2: Steam valve
-// u3: Feed-water valve
-// ---------------------------------------------------------------------------
-struct BTState {
-    double P, E, rho;
-    Eigen::VectorXd toVector() const {
-        Eigen::VectorXd x(3); x << P, E, rho; return x;
-    }
-};
-
-struct BTInputs {
-    double u1, u2, u3;
-    Eigen::VectorXd toVector() const {
-        Eigen::VectorXd u(3); u << u1, u2, u3; return u;
-    }
-};
-
-class BoilerTurbine {
+class BoilerTurbine
+{
 public:
-    BTState x;
-    
-    BoilerTurbine(BTState x0) : x(x0) {}
+    const float Ts = 1.0f; // Sampling time in seconds
 
-    // dx/dt calculation
-    BTState dynamics(const BTState& st, const BTInputs& u) const {
-        BTState dxdt;
-        double P98 = std::pow(st.P, 9.0/8.0); // P^(9/8)
-        
-        // Bell-Astrom nonlinear ODEs
-        dxdt.P = -0.0018 * u.u2 * P98 + 0.9 * u.u1 - 0.15 * u.u3;
-        dxdt.E = (0.073 * u.u2 - 0.016) * P98 - 0.1 * st.E;
-        dxdt.rho = (141.0 * u.u3 - (1.1 * u.u2 - 0.19) * st.P) / 85.0;
-        
-        return dxdt;
+    // Commanded valve positions (set externally each step)
+    float u1 = 0.5f, u2 = 0.5f, u3 = 0.5f;
+
+    // Plant states and outputs
+    float x1, x2, x3;
+    float y1, y2, y3;
+
+    // Rate-of-change of valve positions (read-back after constrain_valve_rate)
+    float du1 = 0.0f, du2 = 0.0f, du3 = 0.0f;
+
+    inline void constrain_valve()
+    {
+        u1 = std::clamp(u1, 0.0f, 1.0f);
+        u2 = std::clamp(u2, 0.0f, 1.0f);
+        u3 = std::clamp(u3, 0.0f, 1.0f);
     }
 
-    // Step plant using RK4 integration
-    void step(const BTInputs& u) {
-        BTState k1 = dynamics(x, u);
-        BTState x2 = {x.P + 0.5*Ts*k1.P, x.E + 0.5*Ts*k1.E, x.rho + 0.5*Ts*k1.rho};
-        BTState k2 = dynamics(x2, u);
-        BTState x3 = {x.P + 0.5*Ts*k2.P, x.E + 0.5*Ts*k2.E, x.rho + 0.5*Ts*k2.rho};
-        BTState k3 = dynamics(x3, u);
-        BTState x4 = {x.P + Ts*k3.P, x.E + Ts*k3.E, x.rho + Ts*k3.rho};
-        BTState k4 = dynamics(x4, u);
+    // Computes du = u - u_prev, clamps the rate, then applies the
+    // rate-limited increment so u reflects the actual achievable position.
+    // du1/du2/du3 are updated as diagnostic outputs.
+    inline void constrain_valve_rate()
+    {
+        du1 = std::clamp(u1 - u1_prev_, -0.007f, 0.007f);
+        du2 = std::clamp(u2 - u2_prev_, -2.0f,   0.02f);
+        du3 = std::clamp(u3 - u3_prev_, -0.05f,   0.05f);
+        u1 = u1_prev_ + du1;
+        u2 = u2_prev_ + du2;
+        u3 = u3_prev_ + du3;
+        u1_prev_ = u1;
+        u2_prev_ = u2;
+        u3_prev_ = u3;
+    }
 
-        x.P += (Ts/6.0) * (k1.P + 2*k2.P + 2*k3.P + k4.P);
-        x.E += (Ts/6.0) * (k1.E + 2*k2.E + 2*k3.E + k4.E);
-        x.rho += (Ts/6.0) * (k1.rho + 2*k2.rho + 2*k3.rho + k4.rho);
+    void update()
+    {
+        float x1_98 = std::pow(x1, 9.0f / 8.0f);
+
+        float dx1 = -0.0018f * u2 * x1_98 + 0.9f * u1 - 0.15f * u3;
+        float dx2 = (0.073f * u2 - 0.016f) * x1_98 - 0.1f * x2;
+        float dx3 = (141.0f * u3 - (1.1f * u2 - 0.19f) * x1) / 85.0f;
+
+        // Outputs from current state (all at time k, before the Euler step)
+        y1 = x1;
+        y2 = x2;
+        float acs = ((1.0f - 0.001538f * x3) * 0.8f * x1 - 25.6f) / (x3 * (1.0394f - 0.0012304f * x1));
+        float qe = (0.854f * u2 - 0.147f) * x1 + 45.59f * u1 - 2.514f * u3 - 2.096f;
+        y3 = 0.05f * (0.13073f * x3 + 100.0f * acs + qe / 9.0f - 67.975f);
+
+        // Forward-Euler state update: x[k+1] = x[k] + Ts * dx
+        x1 += Ts * dx1;
+        x2 += Ts * dx2;
+        x3 += Ts * dx3;
     }
-    
-    // Outputs (y1=Pressure, y2=Power, y3=Water level deviation approximation)
-    Eigen::VectorXd output() const {
-        Eigen::VectorXd y(3);
-        y(0) = x.P;
-        y(1) = x.E;
-        // Simplified water level deviation for demonstration
-        y(2) = 0.05 * (0.13073 * x.rho - 67.975); 
-        return y;
-    }
-    
-    // Online Linearization (Jacobian via finite differences)
-    ctrl::StateSpace linearize(const BTInputs& u) const {
-        const int n = 3, m = 3, p = 3;
-        Eigen::MatrixXd Ac(n, n), Bc(n, m);
-        const double eps = 1e-5;
-        
-        BTState f0 = dynamics(x, u);
-        
-        // A matrix: d(f) / dx
-        BTState x_pert = x; x_pert.P += eps;
-        BTState fx = dynamics(x_pert, u);
-        Ac(0,0) = (fx.P - f0.P)/eps; Ac(1,0) = (fx.E - f0.E)/eps; Ac(2,0) = (fx.rho - f0.rho)/eps;
-        
-        x_pert = x; x_pert.E += eps;
-        fx = dynamics(x_pert, u);
-        Ac(0,1) = (fx.P - f0.P)/eps; Ac(1,1) = (fx.E - f0.E)/eps; Ac(2,1) = (fx.rho - f0.rho)/eps;
-        
-        x_pert = x; x_pert.rho += eps;
-        fx = dynamics(x_pert, u);
-        Ac(0,2) = (fx.P - f0.P)/eps; Ac(1,2) = (fx.E - f0.E)/eps; Ac(2,2) = (fx.rho - f0.rho)/eps;
-        
-        // B matrix: d(f) / du
-        BTInputs u_pert = u; u_pert.u1 += eps;
-        BTState fu = dynamics(x, u_pert);
-        Bc(0,0) = (fu.P - f0.P)/eps; Bc(1,0) = (fu.E - f0.E)/eps; Bc(2,0) = (fu.rho - f0.rho)/eps;
-        
-        u_pert = u; u_pert.u2 += eps;
-        fu = dynamics(x, u_pert);
-        Bc(0,1) = (fu.P - f0.P)/eps; Bc(1,1) = (fu.E - f0.E)/eps; Bc(2,1) = (fu.rho - f0.rho)/eps;
-        
-        u_pert = u; u_pert.u3 += eps;
-        fu = dynamics(x, u_pert);
-        Bc(0,2) = (fu.P - f0.P)/eps; Bc(1,2) = (fu.E - f0.E)/eps; Bc(2,2) = (fu.rho - f0.rho)/eps;
-        
-        // C matrix (dy/dx)
-        Eigen::MatrixXd Cc = Eigen::MatrixXd::Zero(p, n);
-        Cc(0,0) = 1.0; 
-        Cc(1,1) = 1.0; 
-        Cc(2,2) = 0.05 * 0.13073;
-        
-        Eigen::MatrixXd Dc = Eigen::MatrixXd::Zero(p, m);
-        
-        // Convert Continuous to Discrete (Euler approximation for simplicity here)
-        // Ad = I + Ac*Ts, Bd = Bc*Ts
-        Eigen::MatrixXd Ad = Eigen::MatrixXd::Identity(n, n) + Ac * Ts;
-        Eigen::MatrixXd Bd = Bc * Ts;
-        
-        return ctrl::StateSpace(Ad, Bd, Cc, Dc, Ts);
-    }
+
+private:
+    float u1_prev_ = 0.5f, u2_prev_ = 0.5f, u3_prev_ = 0.5f;
 };
 
-void run_case_study() {
-    // OP B: Mid-load operating point
-    BTState op_B = {97.2, 50.5, 500.0}; // rho roughly 500 for OP B
-    BTInputs u_B = {0.3, 0.5, 0.4};     // Approximation of inputs at OP B
-    
-    BoilerTurbine plant(op_B);
-    
-    // Create base linear model at OP B
-    ctrl::StateSpace linear_opB = plant.linearize(u_B);
-    
-    ctrl::MPCParams params;
-    params.Np = 20; 
-    params.Nc = 5;
-    params.rho_y = 1.0;
-    params.rho_u = 0.1;
-    params.uMin = 0.0; params.uMax = 1.0;
-    params.duMin = -0.1; params.duMax = 0.1;
+void random_valve(float &u1, float &u2, float &u3)
+{
+    // Random between change rate
+    float du1 = ((float)rand() / RAND_MAX) * 0.014f - 0.007f; // [-0.007, 0.007]
+    float du2 = ((float)rand() / RAND_MAX) * 2.02f - 2.0f;    // [-2.0, 0.02]
+    float du3 = ((float)rand() / RAND_MAX) * 0.1f - 0.05f;    // [-0.05, 0.05]
 
-    // 1. Fixed MPC (Standard)
-    ctrl::DiscreteMPC fixed_mpc(linear_opB, params);
-    
-    // 2. Successive Linearized MPC
-    ctrl::DiscreteMPC adaptive_mpc(linear_opB, params);
-    
-    std::cout << "--- Simulating TC1: Abrupt Setpoint Change (OP B -> OP C) ---\n";
-    
-    // OP C Reference
-    Eigen::VectorXd ref(3); ref << 140.0, 128.0, 12.0; // P, E, L
-    
-    // Simulate Fixed MPC
-    BoilerTurbine plant_fixed(op_B);
-    BTInputs u_fixed = u_B;
-    fixed_mpc.setState(plant_fixed.x.toVector());
-    
-    double ise_fixed = 0.0;
-    for (int k = 0; k < 50; ++k) {
-        Eigen::VectorXd y = plant_fixed.output();
-        ise_fixed += (y - ref).squaredNorm();
-        
-        Eigen::VectorXd u_vec = fixed_mpc.computeRef(plant_fixed.x.toVector(), ref);
-        u_fixed.u1 = u_vec(0); u_fixed.u2 = u_vec(1); u_fixed.u3 = u_vec(2);
-        plant_fixed.step(u_fixed);
-    }
-    
-    // Simulate Adaptive MPC
-    BoilerTurbine plant_adaptive(op_B);
-    BTInputs u_adaptive = u_B;
-    adaptive_mpc.setState(plant_adaptive.x.toVector());
-    
-    double ise_adaptive = 0.0;
-    for (int k = 0; k < 50; ++k) {
-        Eigen::VectorXd y = plant_adaptive.output();
-        ise_adaptive += (y - ref).squaredNorm();
-        
-        // Successive online linearisation
-        ctrl::StateSpace current_linear_model = plant_adaptive.linearize(u_adaptive);
-        adaptive_mpc.setPlant(current_linear_model); // Update MPC internal model
-        
-        Eigen::VectorXd u_vec = adaptive_mpc.computeRef(plant_adaptive.x.toVector(), ref);
-        u_adaptive.u1 = u_vec(0); u_adaptive.u2 = u_vec(1); u_adaptive.u3 = u_vec(2);
-        plant_adaptive.step(u_adaptive);
-    }
-    
-    std::cout << "Fixed MPC ISE:    " << ise_fixed << "\n";
-    std::cout << "Adaptive MPC ISE: " << ise_adaptive << "\n";
-    
-    if (ise_adaptive < ise_fixed) {
-        std::cout << "-> Adaptive MPC achieves tighter tracking by anticipating nonlinear gain changes.\n";
-    }
+    u1 += du1;
+    u2 += du2;
+    u3 += du3;
 }
 
-int main() {
-    run_case_study();
+int main()
+{
+    BoilerTurbine bt;
+
+    // Initial conditions
+    bt.x1 = 100.0f; // Drum pressure
+    bt.x2 = 50.0f;  // Electric power
+    bt.x3 = 20.0f;  // Water level
+
+    // Control inputs
+    bt.u1 = 0.5f; // Fuel flow valve position
+    bt.u2 = 0.5f; // Steam control valve position
+    bt.u3 = 0.5f; // Feedwater flow valve position
+
+    for (int i = 0; i < 100; ++i)
+    {
+        random_valve(bt.u1, bt.u2, bt.u3);
+        bt.constrain_valve();
+        bt.constrain_valve_rate();
+        bt.update();
+        std::cout << "Time: " << i * bt.Ts << "s, "
+                  << "Drum Pressure: " << bt.y1 << ", "
+                  << "Electric Power: " << bt.y2 << ", "
+                  << "Water Level Deviation: " << bt.y3 << ", "
+                  << "Valve Positions: u1=" << bt.u1 << ", u2=" << bt.u2 << ", u3=" << bt.u3 << std::endl;
+    }
+
     return 0;
 }

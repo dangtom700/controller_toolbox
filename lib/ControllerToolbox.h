@@ -66,7 +66,7 @@
                               //   + LoopShapingTuner, KalmanWeightTuner
 #include "ControllerStack.h"  // Supervisory / Additive / Weighted controller stacks
 #include "TunerSuite.h"       // All tuning methods (runtime soft-warning dispatch, Nelder-Mead)
-#include "MetricsAnalyzer.h"     // Time-domain metric extraction
-#include "SystemAnalysis.h"      // Frequency-domain & stability analysis
-#include "hal/HAL.h"             // ISensor, IActuator, SimPlant, SimSensor, SimActuator
-#include "AtomicParamBuffer.h"   // Lock-free double-buffer for RT parameter updates
+#include "MetricsAnalyzer.h"  // Time-domain metric extraction
+#include "SystemAnalysis.h"   // Frequency-domain & stability analysis
+// #include "hal/HAL.h"           // ISensor, IActuator, SimPlant, SimSensor, SimActuator
+// #include "AtomicParamBuffer.h" // Lock-free double-buffer for RT parameter updates
