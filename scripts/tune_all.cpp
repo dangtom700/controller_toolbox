@@ -6,15 +6,15 @@
 //          stdout and written to tuned_params.txt for downstream use.
 //
 //  Tuning strategy per controller:
-//    DiscretePID     → open-loop step response → StepResponseTuner (IMC)
-//    DiscreteLQR     → LQRWeightTuner::brysonMethod
-//    DiscreteLQG     → brysonMethod  +  KalmanWeightTuner::isotropic
-//    DiscreteMPC     → MPCHorizonTuner::recommend
-//    DiscreteLeadLag → LoopShapingTuner
-//    DiscreteSMC     → physics-based bandwidth parameterisation
-//    DiscreteADRC    → bandwidth parameterisation (Gao 2003)
-//    ExtremumSeeker  → plant-bandwidth-based dither design
-//    SmithPredictor  → inner PID via StepResponseTuner
+//    DiscretePID     -> open-loop step response -> StepResponseTuner (IMC)
+//    DiscreteLQR     -> LQRWeightTuner::brysonMethod
+//    DiscreteLQG     -> brysonMethod  +  KalmanWeightTuner::isotropic
+//    DiscreteMPC     -> MPCHorizonTuner::recommend
+//    DiscreteLeadLag -> LoopShapingTuner
+//    DiscreteSMC     -> physics-based bandwidth parameterisation
+//    DiscreteADRC    -> bandwidth parameterisation (Gao 2003)
+//    ExtremumSeeker  -> plant-bandwidth-based dither design
+//    SmithPredictor  -> inner PID via StepResponseTuner
 //
 //  Build: cmake target  tune_all
 // ============================================================
@@ -253,10 +253,10 @@ int main()
     // =========================================================
     section("6. DiscreteSMC  (bandwidth-parameterised)");
     {
-        // c_e:  surface slope ≈ closed-loop BW  (~3 rad/s → c_e=1)
-        // c_de: error rate weight (≈ 0.1 × c_e)
-        // K:    switching gain ≥ max disturbance + some margin
-        // phi:  boundary layer ≈ acceptable steady-state error × c_e
+        // c_e:  surface slope approx = closed-loop BW  (~3 rad/s -> c_e=1)
+        // c_de: error rate weight (approx = 0.1 * c_e)
+        // K:    switching gain >= max disturbance + some margin
+        // phi:  boundary layer approx = acceptable steady-state error * c_e
         ctrl::SMCParams sp;
         sp.c_e = 1.0;
         sp.c_de = 0.1;
@@ -282,10 +282,10 @@ int main()
     // =========================================================
     section("7. DiscreteADRC  (bandwidth parameterisation, Gao 2003)");
     {
-        // From FOPDT: approximate b0 ≈ K/tau
+        // From FOPDT: approximate b0 approx = K/tau
         const double b0 = fopdt.K / fopdt.tau;
         const double omega_c = 3.0;           // desired closed-loop BW [rad/s]
-        const double omega_o = 5.0 * omega_c; // ESO BW: 5× controller BW (rule of thumb)
+        const double omega_o = 5.0 * omega_c; // ESO BW: 5* controller BW (rule of thumb)
 
         ctrl::ADRCParams ap;
         ap.omega_o = omega_o;
@@ -296,7 +296,7 @@ int main()
 
         std::cout << "  b0      = " << ap.b0 << "  (approx input gain K/tau)\n";
         std::cout << "  omega_c = " << ap.omega_c << " rad/s\n";
-        std::cout << "  omega_o = " << ap.omega_o << " rad/s  (5× omega_c)\n";
+        std::cout << "  omega_o = " << ap.omega_o << " rad/s  (5* omega_c)\n";
         std::cout << "  uMin    = " << ap.uMin << "  uMax = " << ap.uMax << "\n";
 
         fout << "[ADRC_Gao2003]\n"
@@ -311,11 +311,11 @@ int main()
     section("8. ExtremumSeeker  (plant-bandwidth-based dither)");
     {
         // Rule: f_p >> plant BW, f_lpf < f_p, f_hpf < f_lpf
-        // Plant BW ~ 1/(2*pi*tau) ≈ 0.08 Hz  → f_p = 5 Hz
+        // Plant BW ~ 1/(2*pi*tau) approx = 0.08 Hz  -> f_p = 5 Hz
         const double plant_bw_hz = 1.0 / (2.0 * M_PI * fopdt.tau);
 
         ctrl::ExtremumSeekerParams ep;
-        ep.perturbFreq = std::max(5.0 * plant_bw_hz, 1.0); // at least 5× plant BW
+        ep.perturbFreq = std::max(5.0 * plant_bw_hz, 1.0); // at least 5* plant BW
         ep.perturbAmp = 0.05;                              // small relative to output range
         ep.lpfCutoff = ep.perturbFreq / 10.0;              // decade below dither
         ep.hpfCutoff = ep.lpfCutoff / 5.0;                 // below LPF

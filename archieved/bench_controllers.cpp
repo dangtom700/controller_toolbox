@@ -109,7 +109,7 @@ int main()
     const double Ts = 0.01;
 
     std::cout << "====================================================================\n"
-              << "  Controller Toolbox — Per-Step Latency Benchmark\n"
+              << "  Controller Toolbox - Per-Step Latency Benchmark\n"
               << "  Steps: " << STEPS << "  (10 % warm-up discarded)\n"
               << "  Platform: " << sizeof(void *) * 8 << "-bit\n"
               << "====================================================================\n\n";
@@ -121,7 +121,7 @@ int main()
 
         ctrl::StateSpace sys = makePlant(n, Ts);
 
-        // DiscretePID (independent of n — always SISO)
+        // DiscretePID (independent of n - always SISO)
         if (n == 2)
         {
             ctrl::PIDParams pp;
@@ -222,7 +222,7 @@ int main()
         std::cout << "\n";
     }
 
-    // SmithPredictor — delay model is always 2-state
+    // SmithPredictor - delay model is always 2-state
     {
         ctrl::StateSpace sys2 = makePlant(2, Ts);
         ctrl::PIDParams pp;

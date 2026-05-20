@@ -1,5 +1,5 @@
 // ============================================================
-//  test_controllers.cpp  —  Comprehensive controller test suite
+//  test_controllers.cpp  -  Comprehensive controller test suite
 //
 //  Validates all controllers in lib/ against the example plant:
 //    G(s) = 1 / (s^2 + 1.5s + 1),  ZOH at Ts = 0.01 s
@@ -80,7 +80,7 @@ void test_plant_model()
     test::check(plant.inputSize() == 1, "Plant has 1 input");
     test::check(plant.outputSize() == 1, "Plant has 1 output");
 
-    // DC gain ≈ 1 for G(s)=1/(s^2+1.5s+1)
+    // DC gain approx = 1 for G(s)=1/(s^2+1.5s+1)
     auto Acl = Eigen::MatrixXd::Identity(2, 2) - plant.A;
     double dc = (plant.C * Acl.inverse() * plant.B + plant.D)(0, 0);
     test::check(std::abs(dc - 1.0) < 0.01, "DC gain approx 1.0");
@@ -140,7 +140,7 @@ void test_pid()
         test::check(std::abs(y_final - 1.0) < 0.02, "PID closed-loop tracks unit step");
     }
 
-    // NaN guard: NaN input must NOT corrupt state — controller holds last output
+    // NaN guard: NaN input must NOT corrupt state - controller holds last output
     {
         ctrl::DiscretePID pid2(p, Ts);
         pid2.compute(1.0); // prime with a valid step so u_prev_ != 0
@@ -151,7 +151,7 @@ void test_pid()
         test::check(std::isfinite(u_after), "NaN input: state not corrupted after recovery");
     }
 
-    // Inf guard: Inf input must NOT corrupt state — controller holds last output
+    // Inf guard: Inf input must NOT corrupt state - controller holds last output
     {
         ctrl::DiscretePID pid3(p, Ts);
         double u_inf = pid3.compute(std::numeric_limits<double>::infinity());
@@ -229,7 +229,7 @@ void test_lqr()
     u = lqr.compute(x0, Eigen::VectorXd(), u_ff);
     test::check(std::abs(u(0) - 2.0) < 1e-12, "LQR: feedforward offset applied");
 
-    // Non-stabilizable plant: DARE cannot converge — constructor warns and reports non-convergence
+    // Non-stabilizable plant: DARE cannot converge - constructor warns and reports non-convergence
     {
         Eigen::MatrixXd A(2, 2), B(2, 1), C(1, 2), D(1, 1);
         A << 2.0, 0.0, 0.0, 0.5; // unstable mode at 2.0
@@ -240,10 +240,10 @@ void test_lqr()
         ctrl::LQRParams lp;
         lp.Q = Eigen::MatrixXd::Identity(2, 2);
         lp.R = Eigen::MatrixXd::Identity(1, 1);
-        // Constructor no longer throws — it warns and returns best available iterate
+        // Constructor no longer throws - it warns and returns best available iterate
         ctrl::DiscreteLQR bad(unstable, lp);
-        test::check(!bad.dareConverged(), "LQR: unstabilizable plant — dareConverged() is false");
-        test::check(bad.gainMatrix().allFinite(), "LQR: unstabilizable — gain matrix still finite");
+        test::check(!bad.dareConverged(), "LQR: unstabilizable plant - dareConverged() is false");
+        test::check(bad.gainMatrix().allFinite(), "LQR: unstabilizable - gain matrix still finite");
     }
 
     // LQRAdapter wraps LQR as IController
@@ -315,7 +315,7 @@ void test_mpc()
     {
         auto rec = ctrl::MPCHorizonTuner::recommend(plant, Ts);
         test::check(rec.Np >= 5, "MPCHorizonTuner: Np >= 5");
-        test::check(rec.Nc >= 1 && rec.Nc <= rec.Np, "MPCHorizonTuner: 1 ≤ Nc ≤ Np");
+        test::check(rec.Nc >= 1 && rec.Nc <= rec.Np, "MPCHorizonTuner: 1 <= Nc <= Np");
     }
 }
 
@@ -930,7 +930,7 @@ void test_tuners()
 int main()
 {
     std::cout << "============================================================\n";
-    std::cout << "  Controller Toolbox — Comprehensive Test Suite\n";
+    std::cout << "  Controller Toolbox - Comprehensive Test Suite\n";
     std::cout << "  Plant: G(s) = 1/(s^2 + 1.5s + 1),  Ts = " << Ts << " s\n";
     std::cout << "============================================================\n";
 

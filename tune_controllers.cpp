@@ -6,15 +6,15 @@
 //  Output: Printed tuned parameters for each controller in the list.
 //
 //  Supported controller types and their auto-tuning strategy:
-//    DiscretePID      → RelayAutoTuner (relay feedback test on plant)
-//    DiscreteLQR      → LQRWeightTuner::brysonMethod
-//    DiscreteLQG      → LQRWeightTuner::brysonMethod + KalmanWeightTuner::isotropic
-//    DiscreteMPC      → MPCHorizonTuner::recommend
-//    DiscreteLeadLag  → LoopShapingTuner (requires omega_c, phase_add_deg)
-//    DiscreteSMC      → Relay-based heuristic (Ku, Tu → c_e, K, phi)
-//    DiscreteADRC     → Bandwidth parameterisation (omega_c, omega_o, b0)
-//    SmithPredictor   → PID inner controller tuned via relay
-//    ExtremumSeeker   → Manual (no closed-form tuner; parameters printed as-is)
+//    DiscretePID      -> RelayAutoTuner (relay feedback test on plant)
+//    DiscreteLQR      -> LQRWeightTuner::brysonMethod
+//    DiscreteLQG      -> LQRWeightTuner::brysonMethod + KalmanWeightTuner::isotropic
+//    DiscreteMPC      -> MPCHorizonTuner::recommend
+//    DiscreteLeadLag  -> LoopShapingTuner (requires omega_c, phase_add_deg)
+//    DiscreteSMC      -> Relay-based heuristic (Ku, Tu -> c_e, K, phi)
+//    DiscreteADRC     -> Bandwidth parameterisation (omega_c, omega_o, b0)
+//    SmithPredictor   -> PID inner controller tuned via relay
+//    ExtremumSeeker   -> Manual (no closed-form tuner; parameters printed as-is)
 //
 //  Build:
 //    cd build && cmake .. && cmake --build . --target tune_controllers
@@ -31,7 +31,7 @@
 
 namespace {
 
-// ── Plant model (second-order example: G(s)=1/(s²+1.5s+1), ZOH Ts=0.01s) ──
+// ── Plant model (second-order example: G(s)=1/(s^2+1.5s+1), ZOH Ts=0.01s) ──
 constexpr double Ts = 0.01;
 
 ctrl::StateSpace buildExamplePlant()
@@ -93,7 +93,7 @@ struct MPCDesign {
 struct LeadLagDesign {
     double omega_c       = 5.0;   // desired crossover [rad/s]
     double phase_add_deg = 45.0;  // phase lead to add [deg]
-    double gain_at_wc    = 1.0;   // |G(jωc)| before compensator
+    double gain_at_wc    = 1.0;   // |G(jomegac)| before compensator
 };
 
 struct SMCDesign {
@@ -106,7 +106,7 @@ struct SMCDesign {
 
 struct ADRCDesign {
     double omega_c = 5.0;
-    double omega_o = 20.0;  // typically 3-10× omega_c
+    double omega_o = 20.0;  // typically 3-10* omega_c
     double b0      = 1.0;
     double uMin    = -20.0, uMax = 20.0;
 };
@@ -153,7 +153,7 @@ void tuneAndPrint(const ControllerDesign& design, const ctrl::StateSpace& plant)
 
         // ── PID ──────────────────────────────────────────────────────────────
         if constexpr (std::is_same_v<T, PIDDesign>) {
-            std::cout << "=== DiscretePID — Relay Auto-Tuner ===\n";
+            std::cout << "=== DiscretePID - Relay Auto-Tuner ===\n";
             auto tuner = runRelayTest(plant);
             std::cout << "  Relay test: Ku=" << tuner.ultimateGain()
                       << "  Tu=" << tuner.ultimatePeriod() << " s\n";
@@ -173,7 +173,7 @@ void tuneAndPrint(const ControllerDesign& design, const ctrl::StateSpace& plant)
 
         // ── LQR ──────────────────────────────────────────────────────────────
         else if constexpr (std::is_same_v<T, LQRDesign>) {
-            std::cout << "=== DiscreteLQR — Bryson's Method ===\n";
+            std::cout << "=== DiscreteLQR - Bryson's Method ===\n";
             ctrl::LQRParams lp = ctrl::LQRWeightTuner::brysonMethodFor<ctrl::DiscreteLQR>(
                 d.xmax, d.umax);
             std::cout << "  Q =\n" << lp.Q << "\n";
@@ -184,7 +184,7 @@ void tuneAndPrint(const ControllerDesign& design, const ctrl::StateSpace& plant)
 
         // ── LQG ──────────────────────────────────────────────────────────────
         else if constexpr (std::is_same_v<T, LQGDesign>) {
-            std::cout << "=== DiscreteLQG — Bryson + Kalman Noise Tuner ===\n";
+            std::cout << "=== DiscreteLQG - Bryson + Kalman Noise Tuner ===\n";
             ctrl::LQRParams lp = ctrl::LQRWeightTuner::brysonMethodFor<ctrl::DiscreteLQG>(
                 d.xmax, d.umax);
             ctrl::KalmanNoiseParams kp = ctrl::KalmanWeightTuner::isotropicFor<ctrl::DiscreteLQG>(
@@ -199,7 +199,7 @@ void tuneAndPrint(const ControllerDesign& design, const ctrl::StateSpace& plant)
 
         // ── MPC ──────────────────────────────────────────────────────────────
         else if constexpr (std::is_same_v<T, MPCDesign>) {
-            std::cout << "=== DiscreteMPC — MPCHorizonTuner ===\n";
+            std::cout << "=== DiscreteMPC - MPCHorizonTuner ===\n";
             auto rec = ctrl::MPCHorizonTuner::recommendFor<ctrl::DiscreteMPC>(
                 plant, plant.Ts, d.rho_y, d.rho_u);
             std::cout << "  Estimated settling time: " << rec.estimatedSettlingTime << " s\n";
@@ -210,7 +210,7 @@ void tuneAndPrint(const ControllerDesign& design, const ctrl::StateSpace& plant)
 
         // ── Lead-Lag ──────────────────────────────────────────────────────────
         else if constexpr (std::is_same_v<T, LeadLagDesign>) {
-            std::cout << "=== DiscreteLeadLag — LoopShapingTuner ===\n";
+            std::cout << "=== DiscreteLeadLag - LoopShapingTuner ===\n";
             ctrl::LoopShapingTuner::Input in;
             in.omega_c       = d.omega_c;
             in.phase_add_deg = d.phase_add_deg;
@@ -227,7 +227,7 @@ void tuneAndPrint(const ControllerDesign& design, const ctrl::StateSpace& plant)
 
         // ── SMC ──────────────────────────────────────────────────────────────
         else if constexpr (std::is_same_v<T, SMCDesign>) {
-            std::cout << "=== DiscreteSMC — Relay-Heuristic ===\n";
+            std::cout << "=== DiscreteSMC - Relay-Heuristic ===\n";
             auto tuner = runRelayTest(plant);
             const double Ku = tuner.ultimateGain();
             // Heuristic: K ~ 0.5*Ku, phi from boundary-layer spec
@@ -246,7 +246,7 @@ void tuneAndPrint(const ControllerDesign& design, const ctrl::StateSpace& plant)
 
         // ── ADRC ─────────────────────────────────────────────────────────────
         else if constexpr (std::is_same_v<T, ADRCDesign>) {
-            std::cout << "=== DiscreteADRC — Bandwidth Parameterisation ===\n";
+            std::cout << "=== DiscreteADRC - Bandwidth Parameterisation ===\n";
             ctrl::ADRCParams ap;
             ap.omega_c = d.omega_c;
             ap.omega_o = d.omega_o;
@@ -265,7 +265,7 @@ void tuneAndPrint(const ControllerDesign& design, const ctrl::StateSpace& plant)
 
         // ── Smith Predictor ──────────────────────────────────────────────────
         else if constexpr (std::is_same_v<T, SmithPredictorDesign>) {
-            std::cout << "=== SmithPredictor — Inner PID via Relay ===\n";
+            std::cout << "=== SmithPredictor - Inner PID via Relay ===\n";
             auto tuner = runRelayTest(plant);
             ctrl::PIDParams pp = tuner.computePIDParams(ctrl::PIDTuningRule::TyreusLuyben);
             pp.uMin = d.uMin; pp.uMax = d.uMax;
@@ -279,7 +279,7 @@ void tuneAndPrint(const ControllerDesign& design, const ctrl::StateSpace& plant)
 
         // ── ESC ──────────────────────────────────────────────────────────────
         else if constexpr (std::is_same_v<T, ESCDesign>) {
-            std::cout << "=== ExtremumSeeker — Manual Bandwidth Parameterisation ===\n";
+            std::cout << "=== ExtremumSeeker - Manual Bandwidth Parameterisation ===\n";
             std::cout << "  perturbAmp="  << d.perturbAmp
                       << "  perturbFreq=" << d.perturbFreq << " Hz\n";
             std::cout << "  lpfCutoff="   << d.lpfCutoff
@@ -295,7 +295,7 @@ void tuneAndPrint(const ControllerDesign& design, const ctrl::StateSpace& plant)
 } // anonymous namespace
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  main — edit this list to select which controllers to tune
+//  main - edit this list to select which controllers to tune
 // ─────────────────────────────────────────────────────────────────────────────
 int main()
 {

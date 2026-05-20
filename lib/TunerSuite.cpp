@@ -16,9 +16,9 @@ namespace ctrl
     //  Compatibility lookup tables
     //
     //  Each tuning method has three tiers for each CtrlKind:
-    //    IDEAL    — no warning, full support
-    //    SOFT     — warning + proceed (success=true, warned=true)
-    //    FALLBACK — warning + default params (success=false, warned=true)
+    //    IDEAL    - no warning, full support
+    //    SOFT     - warning + proceed (success=true, warned=true)
+    //    FALLBACK - warning + default params (success=false, warned=true)
     //
     //  These tiers match the cheatsheet's "Applications" sections.
     // ============================================================
@@ -60,7 +60,7 @@ namespace ctrl
             case CtrlKind::Smith:
                 return Tier::SOFT;
             case CtrlKind::LeadLag:
-                return Tier::SOFT; // Kp → gain K hint
+                return Tier::SOFT; // Kp -> gain K hint
             default:
                 return Tier::FALLBACK;
             }
@@ -90,7 +90,7 @@ namespace ctrl
             case CtrlKind::MPC:
                 return Tier::SOFT; // rho_y/rho_u analogy
             case CtrlKind::SMC:
-                return Tier::SOFT; // Q ratio → c_e/c_de hint
+                return Tier::SOFT; // Q ratio -> c_e/c_de hint
             default:
                 return Tier::FALLBACK;
             }
@@ -129,7 +129,7 @@ namespace ctrl
             case CtrlKind::LeadLag:
                 return Tier::IDEAL;
             case CtrlKind::PID:
-                return Tier::SOFT; // omega_c → bandwidth / N hint
+                return Tier::SOFT; // omega_c -> bandwidth / N hint
             default:
                 return Tier::FALLBACK;
             }
@@ -174,7 +174,7 @@ namespace ctrl
     }
 
     // ============================================================
-    //  softWarn  — emit to std::clog and store in base
+    //  softWarn  - emit to std::clog and store in base
     // ============================================================
     void TunerSuite::softWarn(TuningResultBase &base, const std::string &msg)
     {
@@ -338,10 +338,10 @@ namespace ctrl
         if (fopdt.theta < 1e-6)
         {
             std::string msg =
-                "Cohen-Coon: dead time theta ≈ 0. Results may be inaccurate. "
+                "Cohen-Coon: dead time theta approx = 0. Results may be inaccurate. "
                 "Use IMC-PID (TunerSuite::imcPID) for near-zero dead time.";
             softWarn(res, msg);
-            // Fall through — CohenCoonTuner will throw; we catch and return IMC instead.
+            // Fall through - CohenCoonTuner will throw; we catch and return IMC instead.
             try
             {
                 res.params = CohenCoonTuner::tuneImpl(fopdt, Ts);
@@ -378,7 +378,7 @@ namespace ctrl
         {
             std::string extra;
             if (target == CtrlKind::MPC)
-                extra = "For MPC: set rho_y = 1/xmax², rho_u = 1/umax² as weight scalars. "
+                extra = "For MPC: set rho_y = 1/xmax^2, rho_u = 1/umax^2 as weight scalars. "
                         "Use MPCHorizonTuner for Np and Nc.";
             else if (target == CtrlKind::SMC)
                 extra = "For SMC: use sqrt(Q[0,0]/Q[1,1]) as a c_e/c_de ratio hint. "
@@ -514,7 +514,7 @@ namespace ctrl
     //   Lagarias et al. "Convergence Properties of the Nelder-Mead Simplex
     //   Method in Low Dimensions" (SIAM J. Optim. 1998).
     //
-    // Parameters: α=1 (reflect), γ=2 (expand), ρ=0.5 (contract), σ=0.5 (shrink).
+    // Parameters: alpha=1 (reflect), γ=2 (expand), ρ=0.5 (contract), sigma=0.5 (shrink).
     // Bounds are enforced by clamping candidates before each evaluation.
     // -------------------------------------------------------------------------
     std::vector<double> TunerSuite::nelderMead(
@@ -671,14 +671,14 @@ namespace ctrl
 
         if (paramBounds.empty())
         {
-            softWarn(res, "TunerSuite::optimise: paramBounds is empty — nothing to optimise.");
+            softWarn(res, "TunerSuite::optimise: paramBounds is empty - nothing to optimise.");
             res.success = false;
             return res;
         }
 
         if (!costFn)
         {
-            softWarn(res, "TunerSuite::optimise: costFn is null — provide a simulation cost function.");
+            softWarn(res, "TunerSuite::optimise: costFn is null - provide a simulation cost function.");
             res.success = false;
             return res;
         }
@@ -694,7 +694,7 @@ namespace ctrl
         }
         else if (static_cast<int>(x0.size()) != n)
         {
-            softWarn(res, "TunerSuite::optimise: x0 size mismatch with paramBounds — using midpoints.");
+            softWarn(res, "TunerSuite::optimise: x0 size mismatch with paramBounds - using midpoints.");
             x0.resize(n);
             for (int i = 0; i < n; ++i)
                 x0[i] = 0.5 * (paramBounds[i].first + paramBounds[i].second);
@@ -708,7 +708,7 @@ namespace ctrl
         res.evalCount = evals + 1;
         res.success = true;
 
-        // All controller types are valid for optimisation — no warning needed.
+        // All controller types are valid for optimisation - no warning needed.
         // Just record which target was requested (informational).
         (void)target;
 
@@ -734,7 +734,7 @@ namespace ctrl
             }
             catch (...)
             {
-                return 1e30; // construction failed — reject this candidate
+                return 1e30; // construction failed - reject this candidate
             }
             if (!ctrl)
                 return 1e30;

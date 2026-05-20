@@ -5,15 +5,15 @@
 
 ## Introduction
 
-Selecting the right tuning method is as consequential as selecting the right controller structure. A well-tuned LQR on a poorly characterised plant can outperform a poorly tuned H∞ controller on a well-characterised one. This document surveys the principal tuning strategies used in discrete-time control practice, organised by the information they require and the cost function they minimise. Engineers familiar with PID controllers and state-space models will find each method described at the level of working implementation rather than derivation.
+Selecting the right tuning method is as consequential as selecting the right controller structure. A well-tuned LQR on a poorly characterised plant can outperform a poorly tuned Hinf controller on a well-characterised one. This document surveys the principal tuning strategies used in discrete-time control practice, organised by the information they require and the cost function they minimise. Engineers familiar with PID controllers and state-space models will find each method described at the level of working implementation rather than derivation.
 
 The tuning strategies are divided into three families: **heuristic/frequency-domain methods** (require little model information), **optimisation-based methods** (require a model or simulation), and **adaptive/online methods** (operate during closed-loop execution).
 
 ---
 
-## 1. Ziegler–Nichols Relay Tuning
+## 1. Ziegler-Nichols Relay Tuning
 
-**Mechanism.** Apply a relay of amplitude ±*d* in a closed loop. The plant self-oscillates at its ultimate frequency. Measure the peak-to-peak output amplitude *a* and oscillation period *T_u*.
+**Mechanism.** Apply a relay of amplitude +/-*d* in a closed loop. The plant self-oscillates at its ultimate frequency. Measure the peak-to-peak output amplitude *a* and oscillation period *T_u*.
 
 **Key equations.**
 
@@ -22,30 +22,30 @@ $$K_u = \frac{4d}{\pi a}, \quad T_u = \text{average period}$$
 | Rule | $K_p$ | $T_i$ | $T_d$ |
 |---|---|---|---|
 | Classic ZN | $0.6\,K_u$ | $0.5\,T_u$ | $0.125\,T_u$ |
-| Tyreus–Luyben | $K_u/2.2$ | $2.2\,T_u$ | $T_u/6.3$ |
+| Tyreus-Luyben | $K_u/2.2$ | $2.2\,T_u$ | $T_u/6.3$ |
 | AMIGO | $0.4\,K_u$ | $T_u/0.8$ | $0.1\,K_p T_u$ |
 
 **Applications.** Process control (temperature, flow, pressure loops), embedded systems where only a relay test is practical.
 
 **Pros.** No explicit plant model required; fast; runs online.
 
-**Cons.** Aggressive ZN settings produce ~25 % overshoot; Tyreus–Luyben is more conservative but slower; AMIGO offers the best balance. Dead-time-dominant plants require the Smith Predictor extension.
+**Cons.** Aggressive ZN settings produce ~25 % overshoot; Tyreus-Luyben is more conservative but slower; AMIGO offers the best balance. Dead-time-dominant plants require the Smith Predictor extension.
 
 ---
 
 ## 2. IMC-PID (Internal Model Control)
 
-**Mechanism.** Invert the invertible part of the plant model, then add a low-pass filter of bandwidth λ to ensure robustness and properness. The result is algebraically reduced to PID form.
+**Mechanism.** Invert the invertible part of the plant model, then add a low-pass filter of bandwidth lambda to ensure robustness and properness. The result is algebraically reduced to PID form.
 
 **Key equations.** For a FOPDT model $G(s) = Ke^{-\theta s}/(\tau s+1)$:
 
 $$K_p = \frac{2\tau + \theta}{2K(\lambda + \theta)}, \quad T_i = \tau + \frac{\theta}{2}, \quad T_d = \frac{\tau\theta}{2\tau+\theta}$$
 
-where λ is the closed-loop time constant (tuning knob). Increasing λ sacrifices speed for robustness.
+where lambda is the closed-loop time constant (tuning knob). Increasing lambda sacrifices speed for robustness.
 
 **Applications.** Chemical process loops; anywhere a FOPDT step-response identification is available (use `StepResponseTuner::identify` + `computePIDParams(IMC)`).
 
-**Pros.** Single tuning parameter (λ); predictable closed-loop bandwidth; guaranteed stability for stable, minimum-phase plants.
+**Pros.** Single tuning parameter (lambda); predictable closed-loop bandwidth; guaranteed stability for stable, minimum-phase plants.
 
 **Cons.** Requires an explicit FOPDT model; performance degrades when the true plant deviates significantly from the model.
 
@@ -83,7 +83,7 @@ where $P_e$ is the steady-state error covariance. Controller: $u_k = -K\hat{x}_k
 
 **Pros.** Optimal for linear Gaussian systems; noise covariances have physical interpretations (process noise variance, sensor noise variance).
 
-**Cons.** Sensitive to model mismatch; LQG controllers can be non-robust (Doyle 1978 counterexample). Supplement with robustness checks (LQG/LTR or H∞).
+**Cons.** Sensitive to model mismatch; LQG controllers can be non-robust (Doyle 1978 counterexample). Supplement with robustness checks (LQG/LTR or Hinf).
 
 ---
 

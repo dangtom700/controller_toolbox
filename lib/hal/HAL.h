@@ -1,11 +1,11 @@
 #pragma once
 
-// HAL.h — Hardware Abstraction Layer convenience include.
+// HAL.h - Hardware Abstraction Layer convenience include.
 //
 // Pulls in ISensor, IActuator, SimPlant, SimSensor, and SimActuator.
 // Include this header (or "ControllerToolbox.h") to access the full HAL.
 //
-// Example — closed-loop simulation with the HAL:
+// Example - closed-loop simulation with the HAL:
 //
 //   #include "ControllerToolbox.h"  // or "hal/HAL.h" directly
 //

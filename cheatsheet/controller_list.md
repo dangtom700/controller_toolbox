@@ -15,10 +15,10 @@
 ---
 
 ### 2. State‑Space and Optimal Control
-- **Linear Quadratic Regulator (LQR)** – infinite & finite horizon
-- **Linear Quadratic Gaussian (LQG)** – LQR + Kalman filter
+- **Linear Quadratic Regulator (LQR)** - infinite & finite horizon
+- **Linear Quadratic Gaussian (LQG)** - LQR + Kalman filter
 - **LQG with Loop Transfer Recovery (LQG/LTR)**
-- **Linear Quadratic Integral (LQI)** – LQR with integral action
+- **Linear Quadratic Integral (LQI)** - LQR with integral action
 - **Linear Quadratic Tracking (LQT)**
 - **Minimum‑Time Control** (Bang‑Bang optimal)
 - **Minimum‑Energy Control**
@@ -43,21 +43,21 @@
 ---
 
 ### 4. Robust Control
-- **H∞ (H‑infinity) Control** (mixed sensitivity, loop‑shaping)
+- **Hinf (H‑infinity) Control** (mixed sensitivity, loop‑shaping)
 - **H₂ Control**
-- **μ‑Synthesis** (structured singular value)
+- **mu‑Synthesis** (structured singular value)
 - **Quantitative Feedback Theory (QFT)**
-- **Sliding Mode Control (SMC)** – classical first‑order
+- **Sliding Mode Control (SMC)** - classical first‑order
 - **Integral Sliding Mode Control**
 - **Higher‑Order Sliding Mode** (Super‑Twisting, Twisting, Prescribed‑time)
 - **Kharitonov‑Based Robust Design**
-- **Lyapunov’s Direct Method Redesign**
-- **LMI‑Based Robust Control** (H∞, H₂, pole clustering)
+- **Lyapunov's Direct Method Redesign**
+- **LMI‑Based Robust Control** (Hinf, H₂, pole clustering)
 
 ---
 
 ### 5. Adaptive Control
-- **Model Reference Adaptive Control (MRAC)** – direct & indirect
+- **Model Reference Adaptive Control (MRAC)** - direct & indirect
 - **Self‑Tuning Regulator (STR)**
 - **Gain Scheduling** (classical, parameter‑dependent)
 - **Adaptive PID**
@@ -115,7 +115,7 @@
 - **Decentralized PID with Detuning**
 - **Multivariable IMC**
 - **Multivariable LQR / LQG**
-- **H∞ Loop‑Shaping for MIMO**
+- **Hinf Loop‑Shaping for MIMO**
 - **Input‑Output Linearization** (MIMO)
 
 ---
@@ -135,7 +135,7 @@
 - **IMC‑PID** (PID synthesized from IMC)
 - **Smith Predictor + PID**
 - **Fractional‑Order PID (FOPID)**
-- **Active Disturbance Rejection Control (ADRC)** – Extended State Observer + PD/PID
+- **Active Disturbance Rejection Control (ADRC)** - Extended State Observer + PD/PID
 - **Two‑Degree‑of‑Freedom (2‑DOF) PID** (separate servo/regulator tuning)
 - **Composite Nonlinear Feedback (CNF) Control**
 - **Disturbance Observer Based Control (DOBC) + PID/LQR**
@@ -144,7 +144,7 @@
 
 ### 11. Digital / Discrete‑Time Specific
 - **Deadbeat Control**
-- **Dahlin’s Algorithm**
+- **Dahlin's Algorithm**
 - **Discrete‑Time LQR / LQG**
 - **Discrete Sliding Mode Control**
 - **Delta‑Operator Control**

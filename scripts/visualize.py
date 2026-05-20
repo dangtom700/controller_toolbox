@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-visualize.py  —  Visualize simulation results from simulate_all
+visualize.py  -  Visualize simulation results from simulate_all
 
 Input:  sim_<name>.csv files produced by the simulate_all binary
         (columns: t, y, error, u)
@@ -52,7 +52,7 @@ DISPLAY_NAME = {
     "adrc":    "ADRC",
     "esc":     "ESC",
     "smith":   "Smith Predictor",
-    "stack":   "Stack (SMC→PID)",
+    "stack":   "Stack (SMC->PID)",
 }
 
 # Color cycle for comparison plot
@@ -147,9 +147,9 @@ def plot_single(name, data, out_dir, disturbance_t=7.5):
     ax1.axhline(1.0, color="gray", lw=0.8, ls="--", label="Reference")
     ax1.axvline(disturbance_t, color="red", lw=0.7, ls=":", alpha=0.6,
                 label=f"Disturbance +0.2 @ t={disturbance_t}s")
-    ax1.axhspan(0.98, 1.02, alpha=0.08, color="green", label="±2% band")
+    ax1.axhspan(0.98, 1.02, alpha=0.08, color="green", label="+/-2% band")
     ax1.set_ylabel("Output  y(t)")
-    ax1.set_title(f"Closed-loop response — {dn}")
+    ax1.set_title(f"Closed-loop response - {dn}")
     ax1.legend(fontsize=7, loc="lower right")
     ax1.grid(True, ls="--", alpha=0.4)
 
@@ -209,7 +209,7 @@ def plot_comparison(datasets, out_dir, disturbance_t=7.5):
     ax_y.axhline(1.0, color="gray", lw=0.6, ls="--")
     ax_y.axhspan(0.98, 1.02, alpha=0.06, color="green")
     ax_y.set_xlabel("Time  t (s)"); ax_y.set_ylabel("Output  y(t)")
-    ax_y.set_title("Step response comparison — all controllers")
+    ax_y.set_title("Step response comparison - all controllers")
 
     ax_e.axhline(0, color="gray", lw=0.5)
     ax_e.set_xlabel("Time  t (s)"); ax_e.set_ylabel("Error  e(t)")
@@ -275,13 +275,13 @@ def plot_esc_convergence(data, out_dir):
     axes[0].plot(t, theta, lw=1.2, color="#9467bd", label="θ (estimate)")
     axes[0].axhline(1.0, ls="--", color="gray", lw=0.8, label="Optimum (θ*=1)")
     axes[0].set_xlabel("Time (s)"); axes[0].set_ylabel("θ")
-    axes[0].set_title("ESC — operating point convergence")
+    axes[0].set_title("ESC - operating point convergence")
     axes[0].legend(fontsize=8); axes[0].grid(True, ls="--", alpha=0.3)
 
     cost = [e**2 for e in err]
-    axes[1].plot(t, cost, lw=1.0, color="#ff7f0e", label="J = (θ−1)²")
+    axes[1].plot(t, cost, lw=1.0, color="#ff7f0e", label="J = (θ-1)^2")
     axes[1].set_xlabel("Time (s)"); axes[1].set_ylabel("Cost J")
-    axes[1].set_title("ESC — cost convergence")
+    axes[1].set_title("ESC - cost convergence")
     axes[1].legend(fontsize=8); axes[1].grid(True, ls="--", alpha=0.3)
     axes[1].set_yscale("log")
 

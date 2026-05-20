@@ -15,23 +15,23 @@
 #include <iosfwd>
 
 // ============================================================
-//  TunerSuite.h  —  Unified tuner library with soft-warning dispatch
+//  TunerSuite.h  -  Unified tuner library with soft-warning dispatch
 //
 //  Covers all seven tuning families from the tuning_methods cheatsheet:
-//    1. Relay / Ziegler-Nichols   → dedicated: PID
-//    2. IMC-PID                   → dedicated: PID
-//    3. Cohen-Coon                → dedicated: PID  (high dead-time)
-//    4. LQR Bryson's Rule         → dedicated: LQR, LQG
-//    5. LQG Kalman noise          → dedicated: LQG
-//    6. MPC horizon/weight        → dedicated: MPC
-//    7. Frequency-domain shaping  → dedicated: LeadLag
-//    8. Optimisation-based (Nelder-Mead ISE) → any controller (generic)
+//    1. Relay / Ziegler-Nichols   -> dedicated: PID
+//    2. IMC-PID                   -> dedicated: PID
+//    3. Cohen-Coon                -> dedicated: PID  (high dead-time)
+//    4. LQR Bryson's Rule         -> dedicated: LQR, LQG
+//    5. LQG Kalman noise          -> dedicated: LQG
+//    6. MPC horizon/weight        -> dedicated: MPC
+//    7. Frequency-domain shaping  -> dedicated: LeadLag
+//    8. Optimisation-based (Nelder-Mead ISE) -> any controller (generic)
 //
 //  Compatibility tiers (applied at RUNTIME, not compile time):
-//    IDEAL    — tuner was designed for this controller; no warning emitted.
-//    SOFT     — tuner can produce useful output but the match is imperfect;
+//    IDEAL    - tuner was designed for this controller; no warning emitted.
+//    SOFT     - tuner can produce useful output but the match is imperfect;
 //               a diagnostic is written to std::clog and result.warned == true.
-//    FALLBACK — tuner is not meaningful for this controller; default/zero
+//    FALLBACK - tuner is not meaningful for this controller; default/zero
 //               parameters are returned, result.success == false, strong
 //               warning emitted.  The caller still gets a valid (empty) object.
 //
@@ -69,14 +69,14 @@ namespace ctrl
     // ============================================================
     //  Typed result structs
     //  Every TunerSuite method returns one of these, carrying:
-    //    success — whether a meaningful parameter set was produced
-    //    warned  — whether a soft warning was emitted
-    //    warning — the warning text (empty when warned == false)
+    //    success - whether a meaningful parameter set was produced
+    //    warned  - whether a soft warning was emitted
+    //    warning - the warning text (empty when warned == false)
     // ============================================================
     struct TuningResultBase
     {
-        bool success = false; // false → parameters are default/invalid
-        bool warned = false;  // true  → soft warning was emitted
+        bool success = false; // false -> parameters are default/invalid
+        bool warned = false;  // true  -> soft warning was emitted
         std::string warning;  // diagnostic text (also sent to std::clog)
     };
 
@@ -128,13 +128,13 @@ namespace ctrl
         // ----------------------------------------------------------
         //  DEDICATED: PID
         //  SOFT WARN: Smith (tune the inner PID separately)
-        //  FALLBACK:  LQR, LQG, MPC, LeadLag, SMC, ADRC, ESC — warns,
+        //  FALLBACK:  LQR, LQG, MPC, LeadLag, SMC, ADRC, ESC - warns,
         //             returns default PIDParams so the caller can inspect the
         //             raw Ku/Tu data if they wish.
         //
-        //  relay  — a completed RelayAutoTuner (isDone() == true)
-        //  rule   — ZN | TyreusLuyben | AMIGO | IMC
-        //  lambda — IMC closed-loop time constant (-1 → auto)
+        //  relay  - a completed RelayAutoTuner (isDone() == true)
+        //  rule   - ZN | TyreusLuyben | AMIGO | IMC
+        //  lambda - IMC closed-loop time constant (-1 -> auto)
         static PIDTuneResult relayZN(CtrlKind target,
                                      const RelayAutoTuner &relay,
                                      PIDTuningRule rule = PIDTuningRule::TyreusLuyben,
@@ -147,8 +147,8 @@ namespace ctrl
         //  SOFT WARN: Smith (inner), LeadLag (use Kp as gain hint only)
         //  FALLBACK:  LQR, LQG, MPC, SMC, ADRC, ESC
         //
-        //  fopdt — identified via StepResponseTuner::identify()
-        //  lambda — closed-loop BW (-1 → 0.5 · tau)
+        //  fopdt - identified via StepResponseTuner::identify()
+        //  lambda - closed-loop BW (-1 -> 0.5 . tau)
         static PIDTuneResult imcPID(CtrlKind target,
                                     const StepResponseTuner::FOPDTModel &fopdt,
                                     double Ts,
@@ -170,24 +170,24 @@ namespace ctrl
         //  4.  LQR Bryson's Rule  (cheatsheet §3)
         // ----------------------------------------------------------
         //  DEDICATED: LQR, LQG
-        //  SOFT WARN: MPC (different Q/R convention — Np*p × Np*p vs n×n),
+        //  SOFT WARN: MPC (different Q/R convention - Np*p * Np*p vs n*n),
         //             SMC (c_e ~ sqrt(Q_ratio) as a design hint)
         //  FALLBACK:  PID, LeadLag, ESC, Smith
         //
-        //  xmax — maximum acceptable state deviation per channel  (n×1)
-        //  umax — maximum acceptable control effort per channel   (m×1)
+        //  xmax - maximum acceptable state deviation per channel  (n*1)
+        //  umax - maximum acceptable control effort per channel   (m*1)
         static LQRTuneResult bryson(CtrlKind target,
                                     const Eigen::VectorXd &xmax,
                                     const Eigen::VectorXd &umax);
 
         // ----------------------------------------------------------
-        //  5.  Kalman noise weights  (cheatsheet §4 — LQG observer part)
+        //  5.  Kalman noise weights  (cheatsheet §4 - LQG observer part)
         // ----------------------------------------------------------
         //  DEDICATED: LQG
         //  SOFT WARN: Generic (standalone KalmanFilter)
         //  FALLBACK:  LQR (no observer), PID, MPC, LeadLag, SMC, ADRC, ESC
         //
-        //  isotropic model: Qf = σp²·I,  Rf = σm²·I,  P0 = Qf
+        //  isotropic model: Qf = sigmap^2.I,  Rf = sigmam^2.I,  P0 = Qf
         static KalmanTuneResult kalmanNoise(CtrlKind target,
                                             int nStates,
                                             int nOutputs,
@@ -222,21 +222,21 @@ namespace ctrl
                                              const LoopShapingTuner::Input &in);
 
         // ----------------------------------------------------------
-        //  8.  Optimisation-based tuner — Nelder-Mead ISE  (cheatsheet §7)
+        //  8.  Optimisation-based tuner - Nelder-Mead ISE  (cheatsheet §7)
         // ----------------------------------------------------------
-        //  Applies to: ALL controller types  (Generic, PID, LQR, …)
-        //  No warnings emitted regardless of target — this method is truly
+        //  Applies to: ALL controller types  (Generic, PID, LQR, ...)
+        //  No warnings emitted regardless of target - this method is truly
         //  universal because it treats the controller as a black box.
         //
         //  costFn(params) must:
         //    1. Construct a controller from params.
         //    2. Simulate it against the plant (or real hardware).
-        //    3. Return a scalar cost (ISE, IAE, ITAE, …).
+        //    3. Return a scalar cost (ISE, IAE, ITAE, ...).
         //
-        //  paramBounds — [{lo, hi}, …] for each scalar parameter
-        //  x0          — initial guess; empty → midpoint of each bound
-        //  maxEvals    — cost-function evaluation budget
-        //  tol         — convergence tolerance on simplex size
+        //  paramBounds - [{lo, hi}, ...] for each scalar parameter
+        //  x0          - initial guess; empty -> midpoint of each bound
+        //  maxEvals    - cost-function evaluation budget
+        //  tol         - convergence tolerance on simplex size
         //
         //  A lightweight Nelder-Mead simplex is used. For multi-modal surfaces
         //  use multiple restarts (call optimise() several times with different x0).
@@ -266,7 +266,7 @@ namespace ctrl
                     int N,
                     std::function<std::unique_ptr<IController>(const std::vector<double> &)> factory);
 
-        // Same but uses ITAE weighting (t · |error|) — penalises late errors more.
+        // Same but uses ITAE weighting (t . |error|) - penalises late errors more.
         static std::function<double(const std::vector<double> &)>
         makeITAECost(const StateSpace &plant,
                      double ref,

@@ -152,7 +152,7 @@ void test_other_tuners_extended() {
 
 int main() {
     std::cout << "============================================================\n";
-    std::cout << "  Controller Toolbox — Extended Tuner Tests\n";
+    std::cout << "  Controller Toolbox - Extended Tuner Tests\n";
     std::cout << "============================================================\n";
 
     test_relay_extended();

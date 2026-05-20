@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-deploy.py  —  Deployment script for all tuned controllers
+deploy.py  -  Deployment script for all tuned controllers
 
 Input:  tuned_params.txt  (from tune_all binary)
         optional: --config  JSON override file
@@ -11,7 +11,7 @@ Output: deployment logs (stdout + deploy_YYYYMMDD_HHMMSS.log)
 Workflow:
   1. Validate that tuned_params.txt exists and is well-formed.
   2. Parse each controller's parameters.
-  3. For each controller: validate params → stage → verify → deploy.
+  3. For each controller: validate params -> stage -> verify -> deploy.
   4. Write a deployment manifest with success/failure per controller.
   5. Exit code 0 if all controllers deployed; nonzero if any failed.
 
@@ -332,7 +332,7 @@ def stage_deploy(section, params, staged_path, env, deploy_dir, log, dry_run) ->
     target_path = os.path.join(target_dir, "params.json")
 
     if dry_run:
-        log.info(f"  [DRY-RUN] Would deploy {staged_path} → {target_path}")
+        log.info(f"  [DRY-RUN] Would deploy {staged_path} -> {target_path}")
         return True
 
     os.makedirs(target_dir, exist_ok=True)
@@ -398,7 +398,7 @@ def deploy_all(params_all: dict, env: str, deploy_dir: str,
 
             record["stages"][stage_name] = "OK" if ok else "FAILED"
             if not ok:
-                log.error(f"  [{section}] Stage '{stage_name}' FAILED — aborting this controller.")
+                log.error(f"  [{section}] Stage '{stage_name}' FAILED - aborting this controller.")
                 all_ok = False
                 break
 

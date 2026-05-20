@@ -1,8 +1,8 @@
-# Controller Toolbox — Code Review Report
+# Controller Toolbox - Code Review Report
 
 **Date:** 2026-05-19  
 **Reviewer:** Engineering Team  
-**Scope:** Full codebase audit — `lib/`, `examples/`, `tests/`, `scripts/`
+**Scope:** Full codebase audit - `lib/`, `examples/`, `tests/`, `scripts/`
 
 ---
 
@@ -20,13 +20,13 @@ The following items from the original report are now implemented. Where the impl
 
 | # | Original Item | Implementing Component | Status |
 |---|---|---|---|
-| 1 | Stability Margin Calculators (GM, PM) | `SystemAnalysis::calculateMargins()` | Implemented — see bugs 2.1, 2.2 |
-| 2 | Automated Time-Domain Metric Extraction | `MetricsAnalyzer` class | Implemented — see bug 2.9 |
+| 1 | Stability Margin Calculators (GM, PM) | `SystemAnalysis::calculateMargins()` | Implemented - see bugs 2.1, 2.2 |
+| 2 | Automated Time-Domain Metric Extraction | `MetricsAnalyzer` class | Implemented - see bug 2.9 |
 | 3 | Pole/Zero Extraction and Stability Check | `SystemAnalysis::getPoles()`, `isDiscreteStable()` | Implemented |
-| 4 | Robust Sensitivity Analysis (H∞ norm) | `SystemAnalysis::calculateHInfinityNorm()` | Implemented (grid approximation) |
+| 4 | Robust Sensitivity Analysis (Hinf norm) | `SystemAnalysis::calculateHInfinityNorm()` | Implemented (grid approximation) |
 | 5 | Discrete Lyapunov Equation Solver | `SystemAnalysis::solveDiscreteLyapunov()` | Implemented |
 
-> **Note on H∞ approximation:** `calculateHInfinityNorm()` evaluates the peak singular value over a fixed 10 000-point frequency grid. This is an approximation, not a rigorous upper bound. For formal robustness certification, the result should be treated as a lower bound only.
+> **Note on Hinf approximation:** `calculateHInfinityNorm()` evaluates the peak singular value over a fixed 10 000-point frequency grid. This is an approximation, not a rigorous upper bound. For formal robustness certification, the result should be treated as a lower bound only.
 
 ---
 
@@ -36,10 +36,10 @@ The following defects were identified in the current implementation. Each entry 
 
 ---
 
-### 2.1 `SystemAnalysis::calculateMargins()` — `log(0)` produces `-inf`
+### 2.1 `SystemAnalysis::calculateMargins()` - `log(0)` produces `-inf`
 
 **File:** `lib/SystemAnalysis.cpp`, approximately line 135  
-**Severity:** High — corrupts gain margin computation silently  
+**Severity:** High - corrupts gain margin computation silently  
 **Description:** The expression `std::log10(mag)` is evaluated unconditionally. When `mag` approaches zero (e.g., at a system resonance or numeric underflow), the result is `-inf`, which propagates into the margin calculation and returns a falsely infinite gain margin.  
 **Recommended Fix:** Add a finite-check guard before the logarithm:
 ```cpp
@@ -49,46 +49,46 @@ double gain_dB = 20.0 * std::log10(mag);
 
 ---
 
-### 2.2 `SystemAnalysis::calculateMargins()` — Brittle Single-Crossover Heuristic
+### 2.2 `SystemAnalysis::calculateMargins()` - Brittle Single-Crossover Heuristic
 
 **File:** `lib/SystemAnalysis.cpp`  
-**Severity:** Medium — returns incorrect margins on resonant or non-minimum-phase plants  
-**Description:** The current implementation finds the first frequency where the gain crosses 0 dB (for phase margin) or the phase crosses −180° (for gain margin), using a single threshold comparison. Systems with multiple gain crossovers — common in lightly damped plants, non-minimum-phase systems, or higher-order loops — will report the first crossover instead of the worst-case (smallest) margin, giving an overly optimistic stability assessment.  
+**Severity:** Medium - returns incorrect margins on resonant or non-minimum-phase plants  
+**Description:** The current implementation finds the first frequency where the gain crosses 0 dB (for phase margin) or the phase crosses -180° (for gain margin), using a single threshold comparison. Systems with multiple gain crossovers - common in lightly damped plants, non-minimum-phase systems, or higher-order loops - will report the first crossover instead of the worst-case (smallest) margin, giving an overly optimistic stability assessment.  
 **Recommended Fix:** Collect all sign-change pairs across the frequency grid and report the minimum margin found across all crossovers. Flag systems with more than one crossover in the output struct.
 
 ---
 
-### 2.3 `DiscreteLQR::solveDARE()` — Unrecoverable Exception on Non-Convergence
+### 2.3 `DiscreteLQR::solveDARE()` - Unrecoverable Exception on Non-Convergence
 
 **File:** `lib/DiscreteLQR.cpp`  
-**Severity:** High — terminates the process in production  
+**Severity:** High - terminates the process in production  
 **Description:** After 10 000 value-iteration steps, `solveDARE()` throws `std::runtime_error` with no recovery path. In an embedded control system, an unhandled exception at runtime is unacceptable. Additionally, the last iterate at the point of timeout may be a usable warm-start approximation, but it is discarded.  
 **Recommended Fix:** Expose convergence state to the caller. Return a `struct DareResult { MatrixXd P; bool converged; int iterations; }` and let the caller decide whether to accept the approximate solution, fall back to a manual pole-placement gain, or log a warning.
 
 ---
 
-### 2.4 `DiscreteLQR` — No Stabilizability Pre-Check
+### 2.4 `DiscreteLQR` - No Stabilizability Pre-Check
 
 **File:** `lib/DiscreteLQR.cpp`  
-**Severity:** Medium — wastes 10 000 iterations before failing on an unsolvable problem  
+**Severity:** Medium - wastes 10 000 iterations before failing on an unsolvable problem  
 **Description:** If the pair `(A, B)` is not stabilizable, the DARE has no solution and the value-iteration cannot converge. There is no pre-flight check, so the solver exhausts its iteration budget before throwing. This makes debugging difficult because the error message does not distinguish "slow convergence" from "mathematically impossible."  
-**Recommended Fix:** Implement a PBH (Popov-Belevitch-Hautus) test utility and assert stabilizability at the entry point of `solveDARE()`. This takes O(n³) and eliminates the misleading timeout.
+**Recommended Fix:** Implement a PBH (Popov-Belevitch-Hautus) test utility and assert stabilizability at the entry point of `solveDARE()`. This takes O(n^3) and eliminates the misleading timeout.
 
 ---
 
-### 2.5 `DiscreteMPC::buildCondensedMatrices()` — Dynamic Allocation in Compute Path
+### 2.5 `DiscreteMPC::buildCondensedMatrices()` - Dynamic Allocation in Compute Path
 
 **File:** `lib/DiscreteMPC.cpp`  
-**Severity:** High — violates real-time determinism  
+**Severity:** High - violates real-time determinism  
 **Description:** `F_.resize()` and `Phi_.resize()` are called inside `buildCondensedMatrices()`, which is invoked during the control update. Eigen's `resize()` on `MatrixXd` calls `malloc` if the matrix needs to grow. In a hard real-time control loop, heap allocation introduces unbounded latency and is incompatible with MISRA-C++, AUTOSAR, and most RTOS deployment requirements.  
 **Recommended Fix:** Pre-allocate `F_`, `Phi_`, and `H_` at maximum horizon size during the `DiscreteMPC` constructor. Inside the compute path, use `block()` views rather than resizing.
 
 ---
 
-### 2.6 `DiscreteMPC` — Silent LDLT Solver Failure
+### 2.6 `DiscreteMPC` - Silent LDLT Solver Failure
 
 **File:** `lib/DiscreteMPC.cpp`  
-**Severity:** High — outputs corrupted control action without any diagnostic  
+**Severity:** High - outputs corrupted control action without any diagnostic  
 **Description:** `H_.ldlt().solve(rhs)` produces numerically garbage results if `H` is rank-deficient (e.g., when the prediction horizon is 1 with zero terminal cost weighting). Eigen's LDLT does not throw; it silently returns an invalid solution. The corrupted control signal is then passed to the plant actuator.  
 **Recommended Fix:** Capture the decomposition object and verify `ldlt.info() == Eigen::Success` before using the result. On failure, revert to the previous control action and log an error.
 ```cpp
@@ -99,19 +99,19 @@ u_opt = ldlt.solve(rhs);
 
 ---
 
-### 2.7 `KalmanFilter::update()` — Unguarded Innovation Covariance Inversion
+### 2.7 `KalmanFilter::update()` - Unguarded Innovation Covariance Inversion
 
 **File:** `lib/KalmanFilter.cpp`  
-**Severity:** High — silent state estimate corruption  
+**Severity:** High - silent state estimate corruption  
 **Description:** The innovation covariance `S = H*P*H' + R` is inverted via `S.ldlt().solve()` without checking for conditioning. When the measurement noise `R` is set very small (aggressive tuning), `S` becomes nearly singular and the Kalman gain `K` diverges, immediately corrupting all state estimates and covariance propagation.  
 **Recommended Fix:** Apply the same LDLT health check as in §2.6. Additionally, enforce a minimum diagonal floor on `R` (`R.diagonal().array() = R.diagonal().array().max(1e-12)`) to prevent near-singular innovation matrices.
 
 ---
 
-### 2.8 `DiscretePID::compute()` — NaN/Inf Propagation
+### 2.8 `DiscretePID::compute()` - NaN/Inf Propagation
 
 **File:** `lib/DiscretePID.cpp`  
-**Severity:** Medium — corrupts integral and derivative state permanently  
+**Severity:** Medium - corrupts integral and derivative state permanently  
 **Description:** `compute(error)` performs no input validation. A single `NaN` measurement (sensor dropout, ADC fault) corrupts the integral accumulator and derivative state, and the controller output becomes `NaN` for all subsequent steps even after the sensor recovers. The anti-windup back-calculation also produces `NaN`, preventing recovery.  
 **Recommended Fix:** Add a finite-check at the top of `compute()`:
 ```cpp
@@ -121,20 +121,20 @@ This applies equally to all other controllers that accept a scalar error input (
 
 ---
 
-### 2.9 `MetricsAnalyzer` — Incorrect Settling Time When Signal Never Settles
+### 2.9 `MetricsAnalyzer` - Incorrect Settling Time When Signal Never Settles
 
 **File:** `lib/MetricsAnalyzer.cpp`, approximately line 44  
-**Severity:** Low — misleading metric in unstable or underdamped closed-loop simulations  
+**Severity:** Low - misleading metric in unstable or underdamped closed-loop simulations  
 **Description:** The settling time search loop records the last sample index at which the signal is within the 2% band. If the signal never enters that band (e.g., a test with an unstable controller), the function returns the final sample time as the settling time rather than indicating that settling was not achieved. Downstream analysis (tuner optimizers, test assertions) may interpret this as a valid but very slow response.  
 **Recommended Fix:** Initialise `settle_idx = -1` before the loop. After the loop, if `settle_idx == -1`, return `std::numeric_limits<double>::quiet_NaN()` to signal non-convergence.
 
 ---
 
-### 2.10 `DiscreteADRC` — Forward-Euler ESO Has No Stability Guard
+### 2.10 `DiscreteADRC` - Forward-Euler ESO Has No Stability Guard
 
 **File:** `lib/DiscreteADRC.cpp`  
-**Severity:** Medium — ESO can diverge at construction time parameters without warning  
-**Description:** The Extended State Observer (ESO) is discretized using Forward Euler. The stability of Forward-Euler integration requires that the observer bandwidth satisfy `ω_o < 2/Ts`. No assertion or warning is issued if the user passes a bandwidth that violates this condition, causing the ESO poles to leave the unit circle and the observer states to diverge.  
+**Severity:** Medium - ESO can diverge at construction time parameters without warning  
+**Description:** The Extended State Observer (ESO) is discretized using Forward Euler. The stability of Forward-Euler integration requires that the observer bandwidth satisfy `omega_o < 2/Ts`. No assertion or warning is issued if the user passes a bandwidth that violates this condition, causing the ESO poles to leave the unit circle and the observer states to diverge.  
 **Recommended Fix:** Add a construction-time assertion:
 ```cpp
 assert(omega_o * sample_time_ < 2.0 &&
@@ -144,10 +144,10 @@ assert(omega_o * sample_time_ < 2.0 &&
 
 ---
 
-### 2.11 `SmithPredictor` — Dynamic `std::deque` Allocation in Real-Time Path
+### 2.11 `SmithPredictor` - Dynamic `std::deque` Allocation in Real-Time Path
 
 **File:** `lib/SmithPredictor.cpp`  
-**Severity:** High — heap allocation on every control step  
+**Severity:** High - heap allocation on every control step  
 **Description:** The dead-time compensation delay buffer is implemented as `std::deque<double>`. Each `push_back` / `pop_front` pair may invoke the allocator if the deque's internal chunked storage grows. In a real-time loop executing at 1 kHz or higher, this is a determinism violation.  
 **Recommended Fix:** Replace the deque with a fixed-size circular buffer pre-allocated in the constructor to `delay_steps + 1` elements:
 ```cpp
@@ -169,23 +169,23 @@ The following areas have measurable performance deficiencies that should be addr
 
 ---
 
-### 3.1 `SystemAnalysis::calculateMargins()` — O(10 000 × n³) Frequency Sweep
+### 3.1 `SystemAnalysis::calculateMargins()` - O(10 000 * n^3) Frequency Sweep
 
 **File:** `lib/SystemAnalysis.cpp`  
-**Impact:** Approximately 10 000 eigenvalue evaluations per `calculateMargins()` call. For a 4-state system, each evaluation is O(64) FLOPs; for an 8-state system, O(512). Total: several million FLOPs per call — acceptable offline, but prohibitive in an adaptive gain-scheduling loop that calls it at each parameter update.  
-**Recommendation:** Replace the uniform grid search with a bisection algorithm. Starting from coarse bracket points that bound the crossover frequencies, bisection converges in O(log₂(10 000) ≈ 13) evaluations, reducing the cost by ~700×. The result should also be cached and invalidated only when the plant model changes.
+**Impact:** Approximately 10 000 eigenvalue evaluations per `calculateMargins()` call. For a 4-state system, each evaluation is O(64) FLOPs; for an 8-state system, O(512). Total: several million FLOPs per call - acceptable offline, but prohibitive in an adaptive gain-scheduling loop that calls it at each parameter update.  
+**Recommendation:** Replace the uniform grid search with a bisection algorithm. Starting from coarse bracket points that bound the crossover frequencies, bisection converges in O(log₂(10 000) approx = 13) evaluations, reducing the cost by ~700*. The result should also be cached and invalidated only when the plant model changes.
 
 ---
 
-### 3.2 `KalmanFilter::update()` — Per-Step O(n³) Matrix Inversion
+### 3.2 `KalmanFilter::update()` - Per-Step O(n^3) Matrix Inversion
 
 **File:** `lib/KalmanFilter.cpp`  
-**Impact:** Full covariance update `P⁺ = (I − KH)P` involves an n×n matrix multiply each step. For n ≥ 8, this becomes the dominant cost in the control loop.  
-**Recommendation:** For the common case of small state vectors (n ≤ 4), switch `MatrixXd` to `Matrix<double, n, n>` fixed-size types. Eigen automatically applies fully unrolled, inlined inversions for small fixed sizes, eliminating function-call overhead and enabling SIMD auto-vectorization.
+**Impact:** Full covariance update `P⁺ = (I - KH)P` involves an n*n matrix multiply each step. For n >= 8, this becomes the dominant cost in the control loop.  
+**Recommendation:** For the common case of small state vectors (n <= 4), switch `MatrixXd` to `Matrix<double, n, n>` fixed-size types. Eigen automatically applies fully unrolled, inlined inversions for small fixed sizes, eliminating function-call overhead and enabling SIMD auto-vectorization.
 
 ---
 
-### 3.3 `DiscreteMPC` — Full Condensed Matrix Rebuild on Any Parameter Change
+### 3.3 `DiscreteMPC` - Full Condensed Matrix Rebuild on Any Parameter Change
 
 **File:** `lib/DiscreteMPC.cpp`  
 **Impact:** `buildCondensedMatrices()` recomputes the prediction matrices `F` and `Φ` (which depend on the plant model) and the Hessian `H` (which depends on Q and R weights) in a single monolithic rebuild. Adaptive MPC that updates only Q/R weights at runtime triggers a full rebuild unnecessarily.  
@@ -193,7 +193,7 @@ The following areas have measurable performance deficiencies that should be addr
 
 ---
 
-### 3.4 Example Programs — Blocking CSV I/O Inside Control Loop
+### 3.4 Example Programs - Blocking CSV I/O Inside Control Loop
 
 **Files:** All `examples/ex*.cpp`  
 **Impact:** Every example writes step-response data via `std::ofstream` inside the simulation step. File system calls can block for milliseconds (kernel page cache misses, disk scheduling). On real hardware this destroys real-time performance; even in simulation it introduces non-determinism that obscures timing analysis.  
@@ -201,7 +201,7 @@ The following areas have measurable performance deficiencies that should be addr
 
 ---
 
-### 3.5 `ControllerTuner` Relay Experiment — Blocking Simulation Loop
+### 3.5 `ControllerTuner` Relay Experiment - Blocking Simulation Loop
 
 **File:** `lib/ControllerTuner.cpp`  
 **Impact:** The relay auto-tuner runs a closed-loop simulation to extract the ultimate gain and period. The entire experiment runs synchronously in a tight loop with no yield points. On real hardware, this means the relay experiment cannot coexist with a live control task and prevents RTOS integration.  
@@ -215,40 +215,40 @@ Features are ranked by production impact. **P0** items block deployment on physi
 
 ---
 
-### P0 — Safety & Real-Time Readiness
+### P0 - Safety & Real-Time Readiness
 
 **`InputGuard` Decorator**  
 A lightweight decorator class that wraps any `IController` and enforces NaN/Inf checking, output saturation, and a configurable fallback strategy (hold last output, switch to manual, or zero output). This provides a single enforcement point rather than requiring each controller to duplicate input validation code.
 
-**`AtomicParamBuffer<Params>` — Lock-Free Parameter Updates**  
+**`AtomicParamBuffer<Params>` - Lock-Free Parameter Updates**  
 Updating controller parameters from a background thread (telemetry, auto-tuner, gain scheduler) while the real-time thread is inside `compute()` causes data races on every controller. Implement a double-buffered parameter container using `std::atomic` pointer swap: the background thread writes to the inactive buffer and atomically promotes it; the real-time thread reads from whichever buffer is current without acquiring a mutex.
 
 **`ISensor` / `IActuator` Hardware Abstraction Layer (HAL)**  
 The toolbox currently has no interface between controllers and physical I/O. Define two pure-virtual interfaces in `lib/hal/`:
-- `ISensor { virtual double read() = 0; }` — abstracts ADC, encoder, CAN signal  
-- `IActuator { virtual void write(double u) = 0; }` — abstracts DAC, PWM, EtherCAT drive  
+- `ISensor { virtual double read() = 0; }` - abstracts ADC, encoder, CAN signal  
+- `IActuator { virtual void write(double u) = 0; }` - abstracts DAC, PWM, EtherCAT drive  
 
 Provide a `SimSensor` / `SimActuator` pair backed by `PlantModel` for testing, and document the contract for writing hardware adapters.
 
 ---
 
-### P1 — Algorithm Completeness
+### P1 - Algorithm Completeness
 
 **Fractional Delay in `SmithPredictor`**  
-The current implementation supports only integer dead-times (`delay_steps` = integer multiple of `Ts`). Many real processes have non-integer delays. Add a Padé approximation option: for a fractional delay `L = k·Ts + δ`, the fractional part `δ` is approximated by a first- or second-order Padé filter, and `k` integer steps are handled by the circular buffer.
+The current implementation supports only integer dead-times (`delay_steps` = integer multiple of `Ts`). Many real processes have non-integer delays. Add a Padé approximation option: for a fractional delay `L = k.Ts + delta`, the fractional part `delta` is approximated by a first- or second-order Padé filter, and `k` integer steps are handled by the circular buffer.
 
 **DARE Warm-Start and Convergence Fallback in `DiscreteLQR`**  
-After fixing bug 2.3, expose the last iterate `P` as a warm-start hint for subsequent `solveDARE()` calls (e.g., during adaptive weight updates). When the plant changes slowly, the previous solution is near the new one, and warm-starting can reduce iteration count by 10–100×.
+After fixing bug 2.3, expose the last iterate `P` as a warm-start hint for subsequent `solveDARE()` calls (e.g., during adaptive weight updates). When the plant changes slowly, the previous solution is near the new one, and warm-starting can reduce iteration count by 10-100*.
 
 **Multiple-Crossover Margin Reporting in `SystemAnalysis`**  
 After fixing bug 2.2, extend `MarginResult` to include vectors of all crossover frequencies and per-crossover margins. This is essential for correctly assessing stability of higher-order or non-minimum-phase closed loops.
 
 **`ExtremumSeeker` Convergence Detector**  
-The extremum seeker has no convergence criterion. Add a stagnation detector: if the gradient estimate magnitude stays below a threshold `ε` for `N_stag` consecutive windows, set a `converged()` flag and optionally stop dithering to reduce steady-state perturbation of the plant.
+The extremum seeker has no convergence criterion. Add a stagnation detector: if the gradient estimate magnitude stays below a threshold `epsilon` for `N_stag` consecutive windows, set a `converged()` flag and optionally stop dithering to reduce steady-state perturbation of the plant.
 
 ---
 
-### P2 — Developer Experience
+### P2 - Developer Experience
 
 **Catch2 / GoogleTest Migration**  
 The current test suite uses custom `test::` macros defined locally. Migrating to Catch2 or GoogleTest provides BDD-style test naming, better assertion messages, death-test support (needed to verify that `solveDARE()` throws correctly), and CI integration. The migration is straightforward since the existing test structure is already logically organized.
@@ -260,7 +260,7 @@ Add a `benchmarks/` directory with one benchmark per controller measuring per-st
 All public headers contain well-written doc comments, but no HTML reference is generated. Add a `Doxyfile` and a CI step that builds the API docs on every merge to `main` and publishes them to GitHub Pages. This eliminates the need to read header files to discover method signatures.
 
 **Deployment Checklist**  
-Add a `DEPLOYMENT.md` at the project root documenting: (1) parameter bound constraints for each controller (e.g., ADRC `ω_o < 2/Ts`, MPC horizon feasibility conditions); (2) RTOS integration guidance (zero-allocation checklist, stack size estimates); and (3) a troubleshooting section covering the most common failure modes (DARE non-convergence, MPC infeasibility, Kalman divergence).
+Add a `DEPLOYMENT.md` at the project root documenting: (1) parameter bound constraints for each controller (e.g., ADRC `omega_o < 2/Ts`, MPC horizon feasibility conditions); (2) RTOS integration guidance (zero-allocation checklist, stack size estimates); and (3) a troubleshooting section covering the most common failure modes (DARE non-convergence, MPC infeasibility, Kalman divergence).
 
 ---
 

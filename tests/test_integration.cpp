@@ -76,13 +76,13 @@ void test_regressions() {
         // Constructor now warns and continues rather than throwing
         ctrl::DiscreteLQR lqr(bad_plant, lp);
         test::check(!lqr.dareConverged(),
-                    "TC-REG-05 (Issue I-5): unstabilisable plant — dareConverged() is false");
+                    "TC-REG-05 (Issue I-5): unstabilisable plant - dareConverged() is false");
     }
 }
 
 int main() {
     std::cout << "============================================================\n";
-    std::cout << "  Controller Toolbox — Integration & Regression Tests\n";
+    std::cout << "  Controller Toolbox - Integration & Regression Tests\n";
     std::cout << "============================================================\n";
 
     test_stack_extended();

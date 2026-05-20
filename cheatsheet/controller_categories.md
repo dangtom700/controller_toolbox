@@ -5,7 +5,7 @@ Re-organises the master controller list along four practical axes:
 
 ---
 
-## Axis 1 — By Implementation Approach
+## Axis 1 - By Implementation Approach
 
 ### A. Closed-Form / Recurrence-Relation (real-time, no solver)
 These controllers compute u[k] with O(n) arithmetic per step.
@@ -15,7 +15,7 @@ These controllers compute u[k] with O(n) arithmetic per step.
 | On/Off (Bang-Bang) | 1-bit comparator |
 | P, PI, PD, PID (all variants) | ISA parallel/series/ideal |
 | Adaptive PID | online gain update only |
-| Fractional-Order PID (FOPID) | IIR approximation of s^α |
+| Fractional-Order PID (FOPID) | IIR approximation of s^alpha |
 | 2-DOF PID | two separate transfer functions |
 | Lead, Lag, Lead-Lag Compensators | biquad filter |
 | Phase-Lead / Phase-Lag Networks | same as lead-lag |
@@ -51,7 +51,7 @@ These controllers solve a finite-horizon optimisation problem at each sample.
 | Dynamic Matrix Control (DMC) | unconstrained LS |
 | Model Algorithmic Control (MAC) | unconstrained LS |
 | Generalized Predictive Control (GPC) | unconstrained / constrained QP |
-| Explicit MPC | offline multi-parametric QP → PWA lookup |
+| Explicit MPC | offline multi-parametric QP -> PWA lookup |
 | Nonlinear MPC (NMPC) | nonlinear NLP (e.g., IPOPT, CasADi) |
 | Economic MPC | non-quadratic NLP |
 | Robust MPC (min-max / tube) | robust QP / SOCP |
@@ -61,8 +61,8 @@ These controllers solve a finite-horizon optimisation problem at each sample.
 | Adaptive MPC | QP + online parameter update |
 | LQG / LQG-LTR | offline Riccati (DARE/CARE) + online KF |
 | H₂ Control | offline LMI / Riccati solve |
-| H∞ Control (loop-shaping, mixed sensitivity) | offline γ-iteration / LMI |
-| μ-Synthesis | offline D-K iteration |
+| Hinf Control (loop-shaping, mixed sensitivity) | offline γ-iteration / LMI |
+| mu-Synthesis | offline D-K iteration |
 | QFT | offline frequency-domain loop shaping |
 | LMI-Based Robust Control | offline SDP (e.g., CVXPY, MOSEK) |
 | Minimum-Time / Bang-Bang Optimal | offline Pontryagin |
@@ -125,38 +125,38 @@ Controller structure is fixed, but parameters evolve online.
 
 ---
 
-## Axis 2 — By Plant Knowledge Requirement
+## Axis 2 - By Plant Knowledge Requirement
 
 | Knowledge Level | Controllers |
 |---|---|
-| **Full model (A,B,C,D)** | LQR, LQG, MPC, H∞, H₂, μ-Synthesis, Pole Placement, DARE-based |
+| **Full model (A,B,C,D)** | LQR, LQG, MPC, Hinf, H₂, mu-Synthesis, Pole Placement, DARE-based |
 | **FOPDT / reduced model** | IMC-PID, Smith Predictor, Z-N, Tyreus-Luyben, Cohen-Coon |
-| **Frequency-response data** | QFT, H∞ loop-shaping, Lead-Lag design |
+| **Frequency-response data** | QFT, Hinf loop-shaping, Lead-Lag design |
 | **Step / impulse response data** | DMC, MAC, GPC (with FIR model) |
 | **No model (model-free)** | ESC, MFAC, IFT, VRFT, RL, relay auto-tune, Bang-Bang |
 | **Partial / online identified** | STR, MRAC, Adaptive MPC, MMAC |
 
 ---
 
-## Axis 3 — SISO vs. MIMO Capability
+## Axis 3 - SISO vs. MIMO Capability
 
 | Scope | Controllers |
 |---|---|
 | **SISO only** | On/Off, P/PI/PD/PID (scalar), Lead-Lag, Smith Predictor, IMC-PID, Dahlin, Deadbeat, ESC |
-| **SISO or MIMO (natural extension)** | LQR, LQG, MPC, H∞, H₂, SMC, MRAC, Pole Placement, Observer-based |
-| **MIMO by design** | μ-Synthesis, LQG/LTR, Dynamic Decoupling, Multivariable PID, Distributed MPC, Consensus |
+| **SISO or MIMO (natural extension)** | LQR, LQG, MPC, Hinf, H₂, SMC, MRAC, Pole Placement, Observer-based |
+| **MIMO by design** | mu-Synthesis, LQG/LTR, Dynamic Decoupling, Multivariable PID, Distributed MPC, Consensus |
 
 ---
 
-## Axis 4 — Discrete C++ Toolbox Implementation Tier
+## Axis 4 - Discrete C++ Toolbox Implementation Tier
 
 | Tier | Description | Controllers |
 |---|---|---|
-| **Tier 1 — Core** | Closed-form, real-time, no external libraries | PID (all variants), LQR, LQI, Pole Placement, Observer, Deadbeat, Lead-Lag, Smith Predictor, Cascade, Feedforward, SMC (basic), ADRC, DOBC, ESC |
-| **Tier 2 — Optimisation** | Requires embedded QP solver (e.g., OSQP, qpOASES) | Linear MPC, GPC, DMC, Robust MPC, Explicit MPC (offline), LQG |
-| **Tier 3 — Advanced Adaptive** | Requires RLS / EKF / gradient update | MRAC, STR, Adaptive MPC, ILC, L1 Adaptive, MFAC |
-| **Tier 4 — Intelligent** | Requires inference engine (ONNX, TensorFlow Lite, fuzzylite) | Fuzzy PID, NN Control, ANFIS, RL Policy |
-| **Tier 5 — Offline / External Tool** | Controller synthesised offline (MATLAB, CVXPY); only the gain matrix runs online | H∞, H₂, μ-Synthesis, LMI-Based, NMPC, Economic MPC |
+| **Tier 1 - Core** | Closed-form, real-time, no external libraries | PID (all variants), LQR, LQI, Pole Placement, Observer, Deadbeat, Lead-Lag, Smith Predictor, Cascade, Feedforward, SMC (basic), ADRC, DOBC, ESC |
+| **Tier 2 - Optimisation** | Requires embedded QP solver (e.g., OSQP, qpOASES) | Linear MPC, GPC, DMC, Robust MPC, Explicit MPC (offline), LQG |
+| **Tier 3 - Advanced Adaptive** | Requires RLS / EKF / gradient update | MRAC, STR, Adaptive MPC, ILC, L1 Adaptive, MFAC |
+| **Tier 4 - Intelligent** | Requires inference engine (ONNX, TensorFlow Lite, fuzzylite) | Fuzzy PID, NN Control, ANFIS, RL Policy |
+| **Tier 5 - Offline / External Tool** | Controller synthesised offline (MATLAB, CVXPY); only the gain matrix runs online | Hinf, H₂, mu-Synthesis, LMI-Based, NMPC, Economic MPC |
 
 ---
 

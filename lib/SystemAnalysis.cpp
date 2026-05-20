@@ -132,7 +132,7 @@ namespace ctrl
         const Eigen::MatrixXcd Cc = sys.C.cast<std::complex<double>>();
         const Eigen::MatrixXcd Dc = sys.D.cast<std::complex<double>>();
 
-        // Evaluate G(e^{jwTs}) at a single frequency — shared by coarse scan and bisection
+        // Evaluate G(e^{jwTs}) at a single frequency - shared by coarse scan and bisection
         auto evalAt = [&](double w) -> std::complex<double>
         {
             std::complex<double> z = std::polar(1.0, w * sys.Ts);
@@ -161,7 +161,7 @@ namespace ctrl
             pha[i] = wrapPhase(std::arg(g) * 180.0 / M_PI);
         }
 
-        // Step 2: Bisection refinement over each bracket — converges in ~50 evals per crossing
+        // Step 2: Bisection refinement over each bracket - converges in ~50 evals per crossing
         const int bisect_iters = 50;
 
         StabilityMargins margins;

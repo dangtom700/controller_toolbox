@@ -2,7 +2,7 @@
 #include "ISensor.h"
 #include "SimPlant.h"
 
-// SimSensor — ISensor adapter backed by a SimPlant.
+// SimSensor - ISensor adapter backed by a SimPlant.
 //
 // read() returns the plant's cached output from the last step().
 // isValid() is always true for a simulation (no hardware faults).
@@ -14,7 +14,7 @@
 //
 //   double y = sensor.read();        // y[k] = plant output
 //   double u = pid.compute(r - y);
-//   actuator.write(u);               // advances plant → x[k+1]
+//   actuator.write(u);               // advances plant -> x[k+1]
 namespace ctrl {
 
 class SimSensor : public ISensor {

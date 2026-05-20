@@ -69,7 +69,7 @@ static ctrl::StepResponseTuner::FOPDTModel get_fopdt(const ctrl::StateSpace &pla
 struct RTStats
 {
     double max_jitter_us = 0.0;  // worst-case timing jitter [micro-s]
-    int missed = 0;              // steps that ran > 1.5×Ts late
+    int missed = 0;              // steps that ran > 1.5*Ts late
     double avg_compute_us = 0.0; // average compute() wall time [micro-s]
 };
 
@@ -452,7 +452,7 @@ int main()
     //  8. ControllerStack
     // =========================================================
     {
-        std::cout << "\n[8] ControllerStack (Supervisory: SMC→PID)  - real-time\n";
+        std::cout << "\n[8] ControllerStack (Supervisory: SMC->PID)  - real-time\n";
         ctrl::PIDParams pp;
         pp.Kp = 3.0;
         pp.Ki = 2.0;

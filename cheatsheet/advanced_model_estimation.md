@@ -13,7 +13,7 @@ The target reader is assumed to be comfortable with state-space models, PEM, and
 
 ---
 
-## Part I — Regularised and Bias-Corrected Linear Methods
+## Part I - Regularised and Bias-Corrected Linear Methods
 
 ---
 
@@ -61,11 +61,11 @@ $$\hat{\theta}_{\text{IV}} = (Z^T \Phi)^{-1} Z^T Y$$
 
 ---
 
-## Part II — Kernel-Based and Probabilistic Methods
+## Part II - Kernel-Based and Probabilistic Methods
 
 ---
 
-## 3. Support Vector Regression (SVR / ε-SVR)
+## 3. Support Vector Regression (SVR / epsilon-SVR)
 
 **Mechanism.** SVR fits a function $f(x) = \langle w, \phi(x) \rangle + b$ such that all training residuals lie within an $\varepsilon$-insensitive tube, minimising model complexity (the 2-norm of $w$) subject to the constraint:
 
@@ -111,7 +111,7 @@ $$\log p(Y|X,\theta) = -\tfrac{1}{2}Y^T(K+\sigma_n^2 I)^{-1}Y - \tfrac{1}{2}\log
 
 This balances data fit against model complexity without held-out data.
 
-**Applications in system ID.** Direct dynamics models $x_{k+1} = f(x_k, u_k) + \varepsilon$; Gaussian process state-space models (GP-SSM, Frigola 2015); MPC with uncertainty propagation (GP-MPC, Hewing 2020); active learning — query the operating point where $\sigma_*^2$ is largest.
+**Applications in system ID.** Direct dynamics models $x_{k+1} = f(x_k, u_k) + \varepsilon$; Gaussian process state-space models (GP-SSM, Frigola 2015); MPC with uncertainty propagation (GP-MPC, Hewing 2020); active learning - query the operating point where $\sigma_*^2$ is largest.
 
 **Pros.** Calibrated uncertainty (posterior variance usable in robust/stochastic MPC); automatic relevance determination (ARD kernel identifies irrelevant inputs); non-parametric (no structural commitment).
 
@@ -121,7 +121,7 @@ This balances data fit against model complexity without held-out data.
 
 ## 5. Relevance Vector Machine (RVM)
 
-**Mechanism.** The RVM (Tipping 2001) is a sparse Bayesian linear model in a kernel basis. Rather than the SVR $\varepsilon$-tube, it places independent zero-mean Gaussian priors over each weight $w_i$ with a separate precision hyperparameter $\alpha_i$. Automatic Relevance Determination (ARD) drives irrelevant $\alpha_i \to \infty$, which zeros the corresponding weight — yielding a sparser solution than SVR, typically.
+**Mechanism.** The RVM (Tipping 2001) is a sparse Bayesian linear model in a kernel basis. Rather than the SVR $\varepsilon$-tube, it places independent zero-mean Gaussian priors over each weight $w_i$ with a separate precision hyperparameter $\alpha_i$. Automatic Relevance Determination (ARD) drives irrelevant $\alpha_i \to \infty$, which zeros the corresponding weight - yielding a sparser solution than SVR, typically.
 
 $$p(\theta | \alpha) = \prod_i \mathcal{N}(\theta_i | 0, \alpha_i^{-1}), \quad \hat{\alpha}_{\text{ML-II}} = \underset{\alpha}{\arg\max}\; p(Y | X, \alpha)$$
 
@@ -135,7 +135,7 @@ $$p(\theta | \alpha) = \prod_i \mathcal{N}(\theta_i | 0, \alpha_i^{-1}), \quad \
 
 ---
 
-## Part III — Neural Network Architectures for Dynamics
+## Part III - Neural Network Architectures for Dynamics
 
 ---
 
@@ -189,15 +189,15 @@ Two training modes:
 $$x(k+1) = (1-\alpha)x(k) + \alpha\,\sigma\bigl(W_{\text{res}} x(k) + W_{\text{in}} u(k)\bigr)$$
 $$\hat{y}(k) = W_{\text{out}} x(k)$$
 
-where $\alpha$ is the leaking rate and $\sigma$ is a pointwise nonlinearity (tanh). The reservoir state $x(k)$ is a high-dimensional nonlinear transformation of the input history; the output layer is trained by ridge regression — a single linear least-squares solve.
+where $\alpha$ is the leaking rate and $\sigma$ is a pointwise nonlinearity (tanh). The reservoir state $x(k)$ is a high-dimensional nonlinear transformation of the input history; the output layer is trained by ridge regression - a single linear least-squares solve.
 
-**Echo State Property.** The spectral radius of $W_{\text{res}}$ must be less than 1 (typically 0.7–0.99) to ensure the network fades memory of initial conditions and converges to a unique trajectory driven by the input.
+**Echo State Property.** The spectral radius of $W_{\text{res}}$ must be less than 1 (typically 0.7-0.99) to ensure the network fades memory of initial conditions and converges to a unique trajectory driven by the input.
 
 **Applications.** Chaotic system identification (Lorenz, Mackey-Glass); time-series forecasting when training data is abundant; real-time adaptive filtering; surrogate models for fluid dynamics.
 
-**Pros.** Training is a single ridge regression — convex, fast, no gradient required; captures long-range temporal dependencies; reservoir size easily scaled.
+**Pros.** Training is a single ridge regression - convex, fast, no gradient required; captures long-range temporal dependencies; reservoir size easily scaled.
 
-**Cons.** Reservoir weights are not optimised — large reservoirs may be needed; hyperparameters (spectral radius, leaking rate, input scaling) require tuning; no uncertainty quantification.
+**Cons.** Reservoir weights are not optimised - large reservoirs may be needed; hyperparameters (spectral radius, leaking rate, input scaling) require tuning; no uncertainty quantification.
 
 ---
 
@@ -211,17 +211,17 @@ where $H_{ki} = g(w_i^T x_k + b_i)$ is the hidden-layer activation matrix, $g$ i
 
 **Applications.** Rapid prototype identification when training time is constrained; soft sensors updated online (OS-ELM, sequential update without full retraining); fault diagnosis classifiers.
 
-**Pros.** Training is one matrix inversion — extremely fast; no gradient, no local minima; OS-ELM variant supports streaming data.
+**Pros.** Training is one matrix inversion - extremely fast; no gradient, no local minima; OS-ELM variant supports streaming data.
 
 **Cons.** Universal approximation requires very wide hidden layers; random initialisation introduces variance between runs; accuracy generally inferior to tuned MLP on the same dataset; no uncertainty.
 
 ---
 
-## Part IV — Fuzzy and Hybrid Systems
+## Part IV - Fuzzy and Hybrid Systems
 
 ---
 
-## 10. Takagi–Sugeno (TS) Fuzzy Model Identification
+## 10. Takagi-Sugeno (TS) Fuzzy Model Identification
 
 **Mechanism.** A TS fuzzy model represents a nonlinear system as a blended collection of local linear models, each active in a fuzzy region of the operating space. For $r$ rules:
 
@@ -232,9 +232,9 @@ $$\hat{y}(x) = \frac{\sum_{i=1}^{r} \mu_i(x)\,(a_i^T x + b_i)}{\sum_{i=1}^{r} \m
 where $\mu_i(x)$ is the membership degree to cluster $i$ (typically Gaussian or trapezoidal).
 
 **Identification procedure:**
-1. **Structure identification** — cluster the input-output data space using Fuzzy C-Means (FCM) or Gustafson-Kessel (ellipsoidal clusters) to determine the number of rules $r$ and the antecedent membership functions $\mu_i$.
-2. **Consequence identification** — for each cluster, solve a weighted least-squares problem (weight = $\mu_i$) to obtain $a_i, b_i$.
-3. **Validation and simplification** — merge clusters whose local models are nearly identical; prune rules with low firing strength.
+1. **Structure identification** - cluster the input-output data space using Fuzzy C-Means (FCM) or Gustafson-Kessel (ellipsoidal clusters) to determine the number of rules $r$ and the antecedent membership functions $\mu_i$.
+2. **Consequence identification** - for each cluster, solve a weighted least-squares problem (weight = $\mu_i$) to obtain $a_i, b_i$.
+3. **Validation and simplification** - merge clusters whose local models are nearly identical; prune rules with low firing strength.
 
 **Applications.** Gain-scheduled MPC linearisation; nonlinear valve and actuator models; rule-based control systems where interpretability is a regulatory requirement (pharmaceutical, aerospace).
 
@@ -244,13 +244,13 @@ where $\mu_i(x)$ is the membership degree to cluster $i$ (typically Gaussian or 
 
 ---
 
-## 11. ANFIS — Adaptive Neuro-Fuzzy Inference System
+## 11. ANFIS - Adaptive Neuro-Fuzzy Inference System
 
 **Mechanism.** ANFIS (Jang 1993) implements a Takagi-Sugeno fuzzy system in a five-layer feedforward network, enabling gradient-based learning of both the antecedent membership parameters and the consequent linear coefficients simultaneously. The network layers are:
 
 | Layer | Function |
 |---|---|
-| 1. Fuzzification | Compute $\mu_i(x)$ — sigmoid, Gaussian, or generalised bell |
+| 1. Fuzzification | Compute $\mu_i(x)$ - sigmoid, Gaussian, or generalised bell |
 | 2. Rule firing | $w_i = \prod_j \mu_{ij}(x_j)$ |
 | 3. Normalisation | $\bar{w}_i = w_i / \sum w_i$ |
 | 4. Defuzzification | $\bar{w}_i (a_i^T x + b_i)$ |
@@ -266,7 +266,7 @@ where $\mu_i(x)$ is the membership degree to cluster $i$ (typically Gaussian or 
 
 ---
 
-## Part V — Ensemble and Evolutionary Methods
+## Part V - Ensemble and Evolutionary Methods
 
 ---
 
@@ -278,7 +278,7 @@ $$\hat{y}(x) = \frac{1}{T}\sum_{t=1}^{T} h_t(x)$$
 
 For dynamical identification, $x = \varphi(k) = [y(k-1), \ldots, u(k-nb)]^\top$, yielding a nonlinear NARX-type predictor. Out-of-bag (OOB) samples provide an unbiased estimate of generalisation error without a separate validation set.
 
-**Feature importance.** Mean decrease in impurity (MDI) or permutation importance across trees measures each lag's contribution to predictive accuracy — a data-driven lag selection criterion.
+**Feature importance.** Mean decrease in impurity (MDI) or permutation importance across trees measures each lag's contribution to predictive accuracy - a data-driven lag selection criterion.
 
 **Applications.** Nonlinear process control surrogate models; fault classification from sensor time series; gain-schedule identification where the scheduling variable is unknown.
 
@@ -310,7 +310,7 @@ where $\eta$ is the learning rate (shrinkage) and $L$ is typically squared error
 
 $$J(\theta) = \sum_k \bigl(y(k) - \hat{y}(k|\theta)\bigr)^2 + \lambda\,\Omega(\theta)$$
 
-Beyond parameter estimation for fixed structures, Genetic Programming (GP, not to be confused with Gaussian Process) evolves the *model structure* itself — operators, functions, and lags are all subject to evolution.
+Beyond parameter estimation for fixed structures, Genetic Programming (GP, not to be confused with Gaussian Process) evolves the *model structure* itself - operators, functions, and lags are all subject to evolution.
 
 | Method | Searches | Strengths |
 |---|---|---|
@@ -326,7 +326,7 @@ Beyond parameter estimation for fixed structures, Genetic Programming (GP, not t
 
 ---
 
-## Part VI — Non-Parametric and Local Methods
+## Part VI - Non-Parametric and Local Methods
 
 ---
 
@@ -356,17 +356,17 @@ For on-line use, LWPR (Locally Weighted Projection Regression, Vijayakumar & Sch
 |---|---|---|---|---|---|
 | Ridge / LASSO | Low | No (point est.) | Linear | Via lagged regressors | High |
 | IV | Low | No | Linear | Yes | High |
-| SVR | Low–Med | No | Kernel | Via NARX setup | Low |
-| GPR | Low–Med | **Yes** | Kernel | Via NARX setup | Low |
-| RVM | Low–Med | **Yes** | Sparse kernel | Via NARX setup | Low |
-| MLP | Med–High | No | NN | Via NARX setup | Low |
-| NARX-NN | Med–High | No | NN | **Native** | Low |
+| SVR | Low-Med | No | Kernel | Via NARX setup | Low |
+| GPR | Low-Med | **Yes** | Kernel | Via NARX setup | Low |
+| RVM | Low-Med | **Yes** | Sparse kernel | Via NARX setup | Low |
+| MLP | Med-High | No | NN | Via NARX setup | Low |
+| NARX-NN | Med-High | No | NN | **Native** | Low |
 | ESN | High | No | Random reservoir | **Native** | Low |
 | ELM | Med | No | Random hidden | Via NARX setup | Low |
 | TS Fuzzy | Med | No | Blended linear | Via TS-NARX | **High** |
 | ANFIS | Med | No | TS + gradient | Via NARX setup | **Medium** |
-| Random Forest | Med–High | Partial (QRF) | Ensemble tree | Via NARX setup | Medium |
-| GBT / XGBoost | Med–High | Partial | Ensemble tree | Via NARX setup | Medium |
+| Random Forest | Med-High | Partial (QRF) | Ensemble tree | Via NARX setup | Medium |
+| GBT / XGBoost | Med-High | Partial | Ensemble tree | Via NARX setup | Medium |
 | Evolutionary | Any | No | Any | Any | Variable |
 | LWR / LWPR | High | Partial | Local linear | Via local NARX | **High** |
 
@@ -390,9 +390,9 @@ For on-line use, LWPR (Locally Weighted Projection Regression, Vijayakumar & Sch
 
 The methods in this document extend the classical identification toolbox toward data-driven territory. The key principle remains unchanged from parametric identification: **model complexity must be matched to data informativeness**. A GPR model with 15 data points can outperform a 10-layer NARX network, and a well-specified ARX can outperform a Random Forest when the dynamics are genuinely linear.
 
-Validation protocol does not change: always separate training, validation (for hyperparameter selection), and test data. Simulate the identified model in open loop over the test set and compare the simulated output against measured output — not one-step-ahead predictions, which are optimistic indicators of true model quality for control applications.
+Validation protocol does not change: always separate training, validation (for hyperparameter selection), and test data. Simulate the identified model in open loop over the test set and compare the simulated output against measured output - not one-step-ahead predictions, which are optimistic indicators of true model quality for control applications.
 
-For control-oriented identification specifically, prefer models that generalise well in simulation (OE-like training criterion) over models that minimise one-step-ahead error (ARX-like). Uncertainty-aware models (GPR, RVM) enable robust MPC constraint tightening and active exploration — a capability that purely point-estimate models cannot provide.
+For control-oriented identification specifically, prefer models that generalise well in simulation (OE-like training criterion) over models that minimise one-step-ahead error (ARX-like). Uncertainty-aware models (GPR, RVM) enable robust MPC constraint tightening and active exploration - a capability that purely point-estimate models cannot provide.
 
 ---
 

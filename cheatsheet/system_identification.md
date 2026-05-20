@@ -13,7 +13,7 @@ This document organises the principal identification model structures from the s
 
 ## 1. FIR and Step-Response Models
 
-**Mechanism.** The output is a finite weighted sum of past inputs — no output feedback. The model is non-parametric in the sense that no pole/zero structure is assumed.
+**Mechanism.** The output is a finite weighted sum of past inputs - no output feedback. The model is non-parametric in the sense that no pole/zero structure is assumed.
 
 $$y(k) = \sum_{i=0}^{n} b_i\, u(k-i) + e(k)$$
 
@@ -35,7 +35,7 @@ where $s_i$ are the sampled step-response coefficients.
 
 ## 2. ARX (AutoRegressive with eXogenous Input)
 
-**Mechanism.** Past outputs feed back into the prediction. The noise enters as white noise on the output — equivalent to assuming the noise is filtered by $1/A(q)$.
+**Mechanism.** Past outputs feed back into the prediction. The noise enters as white noise on the output - equivalent to assuming the noise is filtered by $1/A(q)$.
 
 $$A(q)\,y(k) = B(q)\,u(k) + e(k)$$
 
@@ -57,7 +57,7 @@ where $A(q) = 1 + a_1 q^{-1} + \cdots + a_{na} q^{-na}$ and $B(q) = b_1 q^{-nk} 
 
 $$A(q)\,y(k) = B(q)\,u(k) + C(q)\,e(k)$$
 
-**Estimation.** Iterative prediction-error minimisation (PEM); not globally convex — requires good initialisation (ARX solution is standard).
+**Estimation.** Iterative prediction-error minimisation (PEM); not globally convex - requires good initialisation (ARX solution is standard).
 
 **Applications.** Processes with coloured process noise (chemical reactors, power systems).
 
@@ -69,7 +69,7 @@ $$A(q)\,y(k) = B(q)\,u(k) + C(q)\,e(k)$$
 
 ## 4. OE (Output Error)
 
-**Mechanism.** Separates plant dynamics from noise entirely. The predictor is a pure simulation of the plant — no output feedback in the noise path.
+**Mechanism.** Separates plant dynamics from noise entirely. The predictor is a pure simulation of the plant - no output feedback in the noise path.
 
 $$y(k) = \frac{B(q)}{F(q)}\,u(k) + e(k), \quad \hat{y}(k|\theta) = \frac{B(q)}{F(q)}\,u(k)$$
 
@@ -83,7 +83,7 @@ $$y(k) = \frac{B(q)}{F(q)}\,u(k) + e(k), \quad \hat{y}(k|\theta) = \frac{B(q)}{F
 
 ---
 
-## 5. Box–Jenkins (BJ)
+## 5. Box-Jenkins (BJ)
 
 **Mechanism.** The most general single-input single-output polynomial structure. Plant and noise dynamics are fully decoupled.
 
@@ -123,21 +123,21 @@ $$G(s) = \frac{K}{(\tau s + 1)}\,e^{-T_d s} \quad \text{(FOPDT)}$$
 
 Parameters $K$, $\tau$, $T_d$ estimated via the tangent/area method or nonlinear least squares (`procest` in MATLAB).
 
-**Applications.** Process control tuning (IMC-PID, Cohen–Coon, AMIGO); wherever a physical interpretation of gain, time constant, and dead time is needed.
+**Applications.** Process control tuning (IMC-PID, Cohen-Coon, AMIGO); wherever a physical interpretation of gain, time constant, and dead time is needed.
 
-**Pros.** Interpretable parameters; directly feeds IMC and Cohen–Coon PID tuning rules.
+**Pros.** Interpretable parameters; directly feeds IMC and Cohen-Coon PID tuning rules.
 
 **Cons.** Inadequate for oscillatory, integrating, or unstable plants; dead-time estimation is sensitive to noise.
 
 ---
 
-## 8. Nonlinear Structures (NARX, Hammerstein–Wiener, Takagi–Sugeno, GP)
+## 8. Nonlinear Structures (NARX, Hammerstein-Wiener, Takagi-Sugeno, GP)
 
 | Structure | Nonlinearity location | Estimation |
 |---|---|---|
-| **Hammerstein–Wiener** | Static input/output nonlinearity around linear dynamics | Iterative linear/nonlinear separation |
+| **Hammerstein-Wiener** | Static input/output nonlinearity around linear dynamics | Iterative linear/nonlinear separation |
 | **NARX** | Fully nonlinear map of past I/O | Neural network, gradient descent |
-| **Takagi–Sugeno** | Blended local linear models via fuzzy membership | Fuzzy c-means + local linear regression |
+| **Takagi-Sugeno** | Blended local linear models via fuzzy membership | Fuzzy c-means + local linear regression |
 | **Gaussian Process** | Non-parametric; posterior mean + variance over functions | Marginal likelihood maximisation |
 
 **Common applications.** Actuator saturation modelling (Hammerstein); engine/power electronics (NARX); gain-scheduled MPC linearisation (TS); data-efficient identification under uncertainty (GP).
@@ -150,4 +150,4 @@ Parameters $K$, $\tau$, $T_d$ estimated via the tangent/area method or nonlinear
 
 Model structure selection should be guided by three questions: (1) How much prior structural knowledge is available? (2) Is the noise model important for the downstream controller design? (3) Is the system linear, mildly nonlinear, or strongly nonlinear?
 
-For linear plants with unknown noise, start with ARX for speed, refine with OE if simulation accuracy matters, and use BJ when both plant and disturbance models must be accurate. For MIMO systems, N4SID subspace methods are the default. For nonlinear plants, begin with Hammerstein–Wiener if the nonlinearity location is known, and escalate to NARX or GP only when simpler structures cannot fit validation data. In all cases, validate the identified model on a separate dataset not used for estimation — a model that fits training data perfectly but fails on validation data is an overfit model, not a system model.
+For linear plants with unknown noise, start with ARX for speed, refine with OE if simulation accuracy matters, and use BJ when both plant and disturbance models must be accurate. For MIMO systems, N4SID subspace methods are the default. For nonlinear plants, begin with Hammerstein-Wiener if the nonlinearity location is known, and escalate to NARX or GP only when simpler structures cannot fit validation data. In all cases, validate the identified model on a separate dataset not used for estimation - a model that fits training data perfectly but fails on validation data is an overfit model, not a system model.
