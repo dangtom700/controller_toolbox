@@ -15,17 +15,15 @@
 //   isValid() - true while the sensor data is fresh and within hardware limits.
 //               Controllers should freeze or fault when this returns false.
 //   reset()   - restores the sensor to its initial state (e.g. clears filters).
-namespace ctrl
-{
+namespace ctrl {
 
-    class ISensor
-    {
-    public:
-        virtual ~ISensor() = default;
+class ISensor {
+public:
+    virtual ~ISensor() = default;
 
-        virtual double read() = 0;
-        virtual bool isValid() const { return true; }
-        virtual void reset() {}
-    };
+    virtual double read()           = 0;
+    virtual bool   isValid() const  { return true; }
+    virtual void   reset()          {}
+};
 
 } // namespace ctrl

@@ -29,126 +29,138 @@
 #include <variant>
 #include <functional>
 
-namespace {
-
-// -- Plant model (second-order example: G(s)=1/(s^2+1.5s+1), ZOH Ts=0.01s) --
-constexpr double Ts = 0.01;
-
-ctrl::StateSpace buildExamplePlant()
+namespace
 {
-    ctrl::TransferFunction tf(
-        { 0.0, 4.9625e-5, 4.9125e-5 },
-        { 1.0, -1.98511,   0.98522  },
-        Ts);
-    return ctrl::tf2ss(tf);
-}
 
-// -- Relay test helper (simulates relay on the given plant) --
-ctrl::RelayAutoTuner runRelayTest(const ctrl::StateSpace& plant,
-                                  double relayAmp   = 0.5,
-                                  int    cyclesReq  = 4)
-{
-    ctrl::RelayTunerConfig cfg;
-    cfg.relayAmplitude = relayAmp;
-    cfg.cyclesRequired = cyclesReq;
+    // -- Plant model (second-order example: G(s)=1/(s^2+1.5s+1), ZOH Ts=0.01s) --
+    constexpr double Ts = 0.01;
 
-    ctrl::RelayAutoTuner tuner(cfg, plant.Ts);
-    Eigen::VectorXd x = Eigen::VectorXd::Zero(plant.stateSize());
-    double y = 0.0;
-
-    while (!tuner.isDone()) {
-        Eigen::VectorXd uv(1); uv << tuner.step(y);
-        y = ctrl::ssStep(plant, x, uv)(0);
+    ctrl::StateSpace buildExamplePlant()
+    {
+        ctrl::TransferFunction tf(
+            {0.0, 4.9625e-5, 4.9125e-5},
+            {1.0, -1.98511, 0.98522},
+            Ts);
+        return ctrl::tf2ss(tf);
     }
-    return tuner;
-}
 
-// -----------------------------------------------------------------------------
-//  Controller design descriptors
-// -----------------------------------------------------------------------------
+    // -- Relay test helper (simulates relay on the given plant) --
+    ctrl::RelayAutoTuner runRelayTest(const ctrl::StateSpace &plant,
+                                      double relayAmp = 0.5,
+                                      int cyclesReq = 4)
+    {
+        ctrl::RelayTunerConfig cfg;
+        cfg.relayAmplitude = relayAmp;
+        cfg.cyclesRequired = cyclesReq;
 
-struct PIDDesign {
-    ctrl::PIDTuningRule rule = ctrl::PIDTuningRule::TyreusLuyben;
-    double uMin = -10.0, uMax = 10.0;
-};
+        ctrl::RelayAutoTuner tuner(cfg, plant.Ts);
+        Eigen::VectorXd x = Eigen::VectorXd::Zero(plant.stateSize());
+        double y = 0.0;
 
-struct LQRDesign {
-    Eigen::VectorXd xmax;   // maximum state deviations (Bryson)
-    Eigen::VectorXd umax;   // maximum control efforts
-};
+        while (!tuner.isDone())
+        {
+            Eigen::VectorXd uv(1);
+            uv << tuner.step(y);
+            y = ctrl::ssStep(plant, x, uv)(0);
+        }
+        return tuner;
+    }
 
-struct LQGDesign {
-    Eigen::VectorXd xmax;
-    Eigen::VectorXd umax;
-    double sigmaProcess = 0.01;
-    double sigmaMeas    = 0.10;
-};
+    // -----------------------------------------------------------------------------
+    //  Controller design descriptors
+    // -----------------------------------------------------------------------------
 
-struct MPCDesign {
-    double rho_y = 1.0;
-    double rho_u = 0.1;
-    double uMin  = -10.0, uMax = 10.0;
-};
+    struct PIDDesign
+    {
+        ctrl::PIDTuningRule rule = ctrl::PIDTuningRule::TyreusLuyben;
+        double uMin = -10.0, uMax = 10.0;
+    };
 
-struct LeadLagDesign {
-    double omega_c       = 5.0;   // desired crossover [rad/s]
-    double phase_add_deg = 45.0;  // phase lead to add [deg]
-    double gain_at_wc    = 1.0;   // |G(jomegac)| before compensator
-};
+    struct LQRDesign
+    {
+        Eigen::VectorXd xmax; // maximum state deviations (Bryson)
+        Eigen::VectorXd umax; // maximum control efforts
+    };
 
-struct SMCDesign {
-    // Derived from relay test: c_e, K, phi set heuristically
-    double c_e   = 1.0;
-    double c_de  = 0.5;
-    double phi   = 0.3;
-    double uMin  = -10.0, uMax = 10.0;
-};
+    struct LQGDesign
+    {
+        Eigen::VectorXd xmax;
+        Eigen::VectorXd umax;
+        double sigmaProcess = 0.01;
+        double sigmaMeas = 0.10;
+    };
 
-struct ADRCDesign {
-    double omega_c = 5.0;
-    double omega_o = 20.0;  // typically 3-10* omega_c
-    double b0      = 1.0;
-    double uMin    = -20.0, uMax = 20.0;
-};
+    struct MPCDesign
+    {
+        double rho_y = 1.0;
+        double rho_u = 0.1;
+        double uMin = -10.0, uMax = 10.0;
+    };
 
-struct SmithPredictorDesign {
-    int    delaySteps = 5;
-    double uMin = -10.0, uMax = 10.0;
-};
+    struct LeadLagDesign
+    {
+        double omega_c = 5.0;        // desired crossover [rad/s]
+        double phase_add_deg = 45.0; // phase lead to add [deg]
+        double gain_at_wc = 1.0;     // |G(jomegac)| before compensator
+    };
 
-struct ESCDesign {
-    double perturbAmp  = 0.1;
-    double perturbFreq = 1.0;
-    double lpfCutoff   = 0.1;
-    double hpfCutoff   = 0.05;
-    double integGain   = 1.0;
-    bool   seekMinimum = true;
-};
+    struct SMCDesign
+    {
+        // Derived from relay test: c_e, K, phi set heuristically
+        double c_e = 1.0;
+        double c_de = 0.5;
+        double phi = 0.3;
+        double uMin = -10.0, uMax = 10.0;
+    };
 
-using ControllerDesign = std::variant<
-    PIDDesign,
-    LQRDesign,
-    LQGDesign,
-    MPCDesign,
-    LeadLagDesign,
-    SMCDesign,
-    ADRCDesign,
-    SmithPredictorDesign,
-    ESCDesign
->;
+    struct ADRCDesign
+    {
+        double omega_c = 5.0;
+        double omega_o = 20.0; // typically 3-10* omega_c
+        double b0 = 1.0;
+        double uMin = -20.0, uMax = 20.0;
+    };
 
-// -----------------------------------------------------------------------------
-//  Tuning dispatcher
-// -----------------------------------------------------------------------------
+    struct SmithPredictorDesign
+    {
+        int delaySteps = 5;
+        double uMin = -10.0, uMax = 10.0;
+    };
 
-void tuneAndPrint(const ControllerDesign& design, const ctrl::StateSpace& plant)
-{
-    std::cout << std::fixed << std::setprecision(6);
-    const int n = plant.stateSize();
-    const int m = plant.inputSize();
-    const int p = plant.outputSize();
+    struct ESCDesign
+    {
+        double perturbAmp = 0.1;
+        double perturbFreq = 1.0;
+        double lpfCutoff = 0.1;
+        double hpfCutoff = 0.05;
+        double integGain = 1.0;
+        bool seekMinimum = true;
+    };
 
-    std::visit([&](auto&& d) {
+    using ControllerDesign = std::variant<
+        PIDDesign,
+        LQRDesign,
+        LQGDesign,
+        MPCDesign,
+        LeadLagDesign,
+        SMCDesign,
+        ADRCDesign,
+        SmithPredictorDesign,
+        ESCDesign>;
+
+    // -----------------------------------------------------------------------------
+    //  Tuning dispatcher
+    // -----------------------------------------------------------------------------
+
+    void tuneAndPrint(const ControllerDesign &design, const ctrl::StateSpace &plant)
+    {
+        std::cout << std::fixed << std::setprecision(6);
+        const int n = plant.stateSize();
+        const int m = plant.inputSize();
+        const int p = plant.outputSize();
+
+        std::visit([&](auto &&d)
+                   {
         using T = std::decay_t<decltype(d)>;
 
         // -- PID --------------------------------------------------------------
@@ -288,9 +300,8 @@ void tuneAndPrint(const ControllerDesign& design, const ctrl::StateSpace& plant)
                       << "  seekMinimum=" << (d.seekMinimum ? "true" : "false") << "\n";
             std::cout << "  NOTE: No closed-form auto-tuner exists for ESC.\n"
                       << "        Verify: plant_BW << f_p << 1/(Ts*N_filter)\n\n";
-        }
-    }, design);
-}
+        } }, design);
+    }
 
 } // anonymous namespace
 
@@ -313,46 +324,50 @@ int main()
     std::vector<ControllerDesign> designList;
 
     // PID via Tyreus-Luyben
-    designList.push_back(PIDDesign{ ctrl::PIDTuningRule::TyreusLuyben, -10.0, 10.0 });
+    designList.push_back(PIDDesign{ctrl::PIDTuningRule::TyreusLuyben, -10.0, 10.0});
 
     // LQR via Bryson (xmax=[1,1], umax=[10])
     {
         LQRDesign d;
-        d.xmax.resize(n); d.xmax.setOnes();
-        d.umax.resize(m); d.umax << 10.0;
+        d.xmax.resize(n);
+        d.xmax.setOnes();
+        d.umax.resize(m);
+        d.umax << 10.0;
         designList.push_back(d);
     }
 
     // LQG via Bryson + isotropic noise
     {
         LQGDesign d;
-        d.xmax.resize(n); d.xmax.setOnes();
-        d.umax.resize(m); d.umax << 10.0;
+        d.xmax.resize(n);
+        d.xmax.setOnes();
+        d.umax.resize(m);
+        d.umax << 10.0;
         d.sigmaProcess = 0.01;
-        d.sigmaMeas    = 0.10;
+        d.sigmaMeas = 0.10;
         designList.push_back(d);
     }
 
     // MPC
-    designList.push_back(MPCDesign{ 1.0, 0.1, -10.0, 10.0 });
+    designList.push_back(MPCDesign{1.0, 0.1, -10.0, 10.0});
 
     // Lead compensator at omega_c=5 rad/s, +45 deg
-    designList.push_back(LeadLagDesign{ 5.0, 45.0, 1.0 });
+    designList.push_back(LeadLagDesign{5.0, 45.0, 1.0});
 
     // SMC
-    designList.push_back(SMCDesign{ 1.0, 0.5, 0.3, -10.0, 10.0 });
+    designList.push_back(SMCDesign{1.0, 0.5, 0.3, -10.0, 10.0});
 
     // ADRC
-    designList.push_back(ADRCDesign{ 5.0, 20.0, 1.0, -20.0, 20.0 });
+    designList.push_back(ADRCDesign{5.0, 20.0, 1.0, -20.0, 20.0});
 
     // Smith Predictor (5-step delay inner PID)
-    designList.push_back(SmithPredictorDesign{ 5, -10.0, 10.0 });
+    designList.push_back(SmithPredictorDesign{5, -10.0, 10.0});
 
     // ESC
-    designList.push_back(ESCDesign{ 0.1, 1.0, 0.1, 0.05, 1.0, true });
+    designList.push_back(ESCDesign{0.1, 1.0, 0.1, 0.05, 1.0, true});
 
     // -- Tune and print -------------------------------------------------------
-    for (const auto& d : designList)
+    for (const auto &d : designList)
         tuneAndPrint(d, plant);
 
     return 0;

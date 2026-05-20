@@ -57,17 +57,17 @@ REPLACEMENTS = {
     '⁻': '^-',       # ⁻ superscript minus
     '∧': '&&',      # ∧ logical and
     '∨': '||',      # ∨ logical or
-    '°': '^\circ', # ° degree symbol
+    '°': '^\\circ', # ° degree symbol
     '§': 'Section ', # § section symbol
     '\u0302': '^',   # ̂ combining circumflex accent
-    '∈': '\in',     # ∈ element of
+    '∈': '\\in',     # ∈ element of
     '↓': 'v',     # ↓ down arrow
-    '∫': '\int',   # ∫ integral symbol
-    '√': '\sqrt',   # √ square root
+    '∫': '\\int',   # ∫ integral symbol
+    '√': '\\sqrt',   # √ square root
     '‖': '||',      # ‖ double vertical line
     '★': '*',       # ★ black star
     '✓': '(check)',   # ✓ check mark
-    '↔': '\leftrightarrow',     # ↔ left-right arrow
+    '↔': '\\leftrightarrow',     # ↔ left-right arrow
     '↺': '(anticlockwise)',   # ↺ anticlockwise open circle arrow
     '⁺': '^+',       # ⁺ superscript plus
 }

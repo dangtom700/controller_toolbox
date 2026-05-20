@@ -14,17 +14,15 @@
 //   lastOutput()  - returns the most recent value successfully written.
 //                   Useful for warm-start and bumpless transfer.
 //   reset()       - drives output to zero and clears internal state.
-namespace ctrl
-{
+namespace ctrl {
 
-    class IActuator
-    {
-    public:
-        virtual ~IActuator() = default;
+class IActuator {
+public:
+    virtual ~IActuator() = default;
 
-        virtual void write(double u) = 0;
-        virtual double lastOutput() const = 0;
-        virtual void reset() {}
-    };
+    virtual void   write(double u)       = 0;
+    virtual double lastOutput()  const   = 0;
+    virtual void   reset()               {}
+};
 
 } // namespace ctrl
