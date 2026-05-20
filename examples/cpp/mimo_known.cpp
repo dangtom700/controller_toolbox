@@ -45,6 +45,7 @@
 #include <numeric>
 
 using namespace mimo;
+using namespace ctrl;
 
 // =========================================================================
 // Simulation helpers
@@ -189,13 +190,18 @@ static MIMOMetrics run_decentralized_pid_imc() {
     auto [Kp1, Ki1, Kd1]   = imc_pid(K1, tau1, theta1, 1.0);
     auto [Kp2, Ki2, Kd2]   = imc_pid(K2, tau2, theta2, 1.0);
 
-    DiscretePID pid1(Kp1, Ki1, Kd1, Ts, 10.0, 1.0, -20.0, 20.0);
-    DiscretePID pid2(Kp2, Ki2, Kd2, Ts, 10.0, 1.0, -20.0, 20.0);
+    auto make_pid20 = [](double Kp, double Ki, double Kd) {
+        PIDParams pp; pp.Kp=Kp; pp.Ki=Ki; pp.Kd=Kd;
+        pp.N=10.0; pp.uMin=-20.0; pp.uMax=20.0;
+        return DiscretePID(pp, Ts);
+    };
+    auto pid1 = make_pid20(Kp1, Ki1, Kd1);
+    auto pid2 = make_pid20(Kp2, Ki2, Kd2);
 
     auto ctrl = [&](const Eigen::VectorXd& y, const Eigen::VectorXd&) {
         Eigen::VectorXd u(Nu);
-        u[0] = pid1.compute(REF1, y[0]);
-        u[1] = pid2.compute(REF2, y[1]);
+        u[0] = pid1.compute(REF1 - y[0]);
+        u[1] = pid2.compute(REF2 - y[1]);
         return u;
     };
 
@@ -213,8 +219,13 @@ static MIMOMetrics run_decentralized_pid_opt() {
     auto cost = [](const std::vector<double>& p) -> double {
         double Kp1=p[0], Ki1=p[1], Kd1=p[2], Kp2=p[3], Ki2=p[4], Kd2=p[5];
         if (Kp1 <= 0 || Ki1 < 0 || Kp2 <= 0 || Ki2 < 0) return 1e6;
-        DiscretePID pid1(Kp1, Ki1, Kd1, Ts, 10.0, 1.0, -20.0, 20.0);
-        DiscretePID pid2(Kp2, Ki2, Kd2, Ts, 10.0, 1.0, -20.0, 20.0);
+        auto make_pid_opt = [](double Kp, double Ki, double Kd) {
+            PIDParams pp; pp.Kp=Kp; pp.Ki=Ki; pp.Kd=Kd;
+            pp.N=10.0; pp.uMin=-20.0; pp.uMax=20.0;
+            return DiscretePID(pp, Ts);
+        };
+        DiscretePID pid1 = make_pid_opt(Kp1, Ki1, Kd1);
+        DiscretePID pid2 = make_pid_opt(Kp2, Ki2, Kd2);
         MIMOStateSpace plant = make_plant();
         Eigen::VectorXd u = Eigen::VectorXd::Zero(Nu);
         double J = 0.0;
@@ -224,8 +235,8 @@ static MIMOMetrics run_decentralized_pid_opt() {
             double e1 = REF1 - y[0], e2 = REF2 - y[1];
             J += (e1*e1 + e2*e2) * Ts + 0.1 * t * (std::abs(e1)+std::abs(e2)) * Ts
                + 0.01 * (u[0]*u[0] + u[1]*u[1]) * Ts;
-            u[0] = std::clamp(pid1.compute(REF1, y[0]), -20.0, 20.0);
-            u[1] = std::clamp(pid2.compute(REF2, y[1]), -20.0, 20.0);
+            u[0] = std::clamp(pid1.compute(e1), -20.0, 20.0);
+            u[1] = std::clamp(pid2.compute(e2), -20.0, 20.0);
         }
         return J;
     };
@@ -235,12 +246,17 @@ static MIMOMetrics run_decentralized_pid_opt() {
         {0.01,30},{0,20},{0,5},{0.01,30},{0,20},{0,5}};
     auto xopt = nelder_mead(cost, x0, bounds, 600);
 
-    DiscretePID p1(xopt[0],xopt[1],xopt[2],Ts,10.0,1.0,-20.0,20.0);
-    DiscretePID p2(xopt[3],xopt[4],xopt[5],Ts,10.0,1.0,-20.0,20.0);
+    auto make_pid_final = [](double Kp, double Ki, double Kd) {
+        PIDParams pp; pp.Kp=Kp; pp.Ki=Ki; pp.Kd=Kd;
+        pp.N=10.0; pp.uMin=-20.0; pp.uMax=20.0;
+        return DiscretePID(pp, Ts);
+    };
+    auto p1 = make_pid_final(xopt[0],xopt[1],xopt[2]);
+    auto p2 = make_pid_final(xopt[3],xopt[4],xopt[5]);
     auto ctrl = [&](const Eigen::VectorXd& y, const Eigen::VectorXd&) {
         Eigen::VectorXd u(Nu);
-        u[0] = p1.compute(REF1, y[0]);
-        u[1] = p2.compute(REF2, y[1]);
+        u[0] = p1.compute(REF1 - y[0]);
+        u[1] = p2.compute(REF2 - y[1]);
         return u;
     };
     auto [Y, U] = run_sim(ctrl);

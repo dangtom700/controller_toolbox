@@ -323,16 +323,21 @@ int main() {
     // Step 7: Closed-loop simulation on TRUE plant
     // =====================================================================
     std::cout << "[7] Closed-loop simulation on true plant (" << SIM_STEPS << " steps)...\n";
-    DiscretePID pid1(Kp1, Ki1, Kd1, Ts, 10.0, 1.0, -UMAX, UMAX);
-    DiscretePID pid2(Kp2, Ki2, Kd2, Ts, 10.0, 1.0, -UMAX, UMAX);
+    auto make_pid = [UMAX](double Kp, double Ki, double Kd) {
+        ctrl::PIDParams pp; pp.Kp=Kp; pp.Ki=Ki; pp.Kd=Kd;
+        pp.N=10.0; pp.uMin=-UMAX; pp.uMax=UMAX;
+        return ctrl::DiscretePID(pp, Ts);
+    };
+    auto pid1 = make_pid(Kp1, Ki1, Kd1);
+    auto pid2 = make_pid(Kp2, Ki2, Kd2);
     MIMOStateSpace plant_cl = make_plant();
     Eigen::MatrixXd Y_cl(SIM_STEPS, 2), U_cl(SIM_STEPS, 2);
     Eigen::VectorXd u = Eigen::VectorXd::Zero(Nu);
     for (int k = 0; k < SIM_STEPS; ++k) {
         Eigen::VectorXd y = plant_cl.step(u);
         Y_cl.row(k) = y.transpose(); U_cl.row(k) = u.transpose();
-        u[0] = std::clamp(pid1.compute(REF1, y[0]), -UMAX, UMAX);
-        u[1] = std::clamp(pid2.compute(REF2, y[1]), -UMAX, UMAX);
+        u[0] = std::clamp(pid1.compute(REF1 - y[0]), -UMAX, UMAX);
+        u[1] = std::clamp(pid2.compute(REF2 - y[1]), -UMAX, UMAX);
     }
     MIMOMetrics cl_metrics = compute_metrics(Y_cl, U_cl, REF1, REF2);
     std::cout << "\n";
