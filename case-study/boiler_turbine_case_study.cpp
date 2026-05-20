@@ -1,8 +1,10 @@
 #include <ControllerToolbox.h>
 #include <cmath>
 #include <iostream>
+#include <string>
 #include <algorithm>
 #include <fstream>
+#include <iomanip>
 
 class BoilerTurbine
 {
@@ -67,6 +69,21 @@ private:
     float u1_prev_ = 0.5f, u2_prev_ = 0.5f, u3_prev_ = 0.5f;
 };
 
+struct operating_point
+{
+    float x1, x2, x3; // State
+    float u1, u2, u3; // Control input
+    float y1, y2, y3; // Output
+
+    // Set y1 = x1, y2=x2
+    operating_point(float x1_, float x2_, float x3_, float u1_, float u2_, float u3_, float y3_)
+        : x1(x1_), x2(x2_), x3(x3_), u1(u1_), u2(u2_), u3(u3_), y1(x1_), y2(x2_), y3(y3_) {}
+};
+
+operating_point op_A = {75.6, 15.3, 508.97, 0.11926, 0.38063, 0.12262, 0.098414};
+operating_point op_B = {97.2, 50.5, 469.51, 0.27049, 0.62082, 0.33979, 0.097038};
+operating_point op_C = {140, 128, 323.68, 0.59589, 0.89447, 0.78829, 0.09797};
+
 void random_valve(float &u1, float &u2, float &u3)
 {
     // Random between change rate
@@ -104,11 +121,208 @@ void plant_model_data()
         bt.update();
         data_file << i * bt.Ts << "," << bt.y1 << "," << bt.y2 << "," << bt.y3 << "," << bt.u1 << "," << bt.u2 << "," << bt.u3 << "\n";
     }
+
+    std::cout << "Boiler-turbine data generated in boiler_turbine_data.csv\n";
+}
+
+// Linearized discrete-time state-space model: δx[k+1] = Ad*δx[k] + Bd*δu[k],  δy[k] = Cd*δx[k] + Dd*δu[k]
+struct LinearStateSpace
+{
+    Eigen::Matrix3f Ad, Bd, Cd, Dd;
+
+    void print(const std::string &label) const
+    {
+        std::cout << "\n=== " << label << " ===\n";
+        std::cout << "Ad:\n"
+                  << Ad << "\n\n";
+        std::cout << "Bd:\n"
+                  << Bd << "\n\n";
+        std::cout << "Cd:\n"
+                  << Cd << "\n\n";
+        std::cout << "Dd:\n"
+                  << Dd << "\n";
+    }
+};
+
+// Linearize the nonlinear boiler-turbine dynamics around (op.x, op.u) using forward-Euler discretisation.
+LinearStateSpace linearize(const operating_point &op, float Ts = 1.0f)
+{
+    const float x1 = op.x1, x3 = op.x3;
+    const float u2 = op.u2;
+
+    const float x1_18 = std::pow(x1, 1.0f / 8.0f); // x1^(1/8)
+    const float x1_98 = std::pow(x1, 9.0f / 8.0f); // x1^(9/8)
+
+    // ── Continuous-time state Jacobian  ∂f/∂x ──────────────────────────────
+    // f1 = -0.0018*u2*x1^(9/8) + 0.9*u1 - 0.15*u3
+    // f2 = (0.073*u2 - 0.016)*x1^(9/8) - 0.1*x2
+    // f3 = (141*u3 - (1.1*u2 - 0.19)*x1) / 85
+    Eigen::Matrix3f Ac = Eigen::Matrix3f::Zero();
+    Ac(0, 0) = -0.0018f * u2 * (9.0f / 8.0f) * x1_18;
+    Ac(1, 0) = (0.073f * u2 - 0.016f) * (9.0f / 8.0f) * x1_18;
+    Ac(1, 1) = -0.1f;
+    Ac(2, 0) = -(1.1f * u2 - 0.19f) / 85.0f;
+
+    // ── Continuous-time input Jacobian  ∂f/∂u ──────────────────────────────
+    Eigen::Matrix3f Bc = Eigen::Matrix3f::Zero();
+    Bc(0, 0) = 0.9f;
+    Bc(0, 1) = -0.0018f * x1_98;
+    Bc(0, 2) = -0.15f;
+    Bc(1, 1) = 0.073f * x1_98;
+    Bc(2, 1) = -1.1f * x1 / 85.0f;
+    Bc(2, 2) = 141.0f / 85.0f;
+
+    // ── Output Jacobian  ∂y/∂x ─────────────────────────────────────────────
+    // acs = numer / denom
+    //   numer = (1 - 0.001538*x3)*0.8*x1 - 25.6
+    //   denom = x3*(1.0394 - 0.0012304*x1)
+    const float numer = (1.0f - 0.001538f * x3) * 0.8f * x1 - 25.6f;
+    const float denom = x3 * (1.0394f - 0.0012304f * x1);
+    const float denom2 = denom * denom;
+
+    const float dn_dx1 = 0.8f - 0.0012304f * x3;    // ∂numer/∂x1
+    const float dn_dx3 = -0.0012304f * x1;          // ∂numer/∂x3
+    const float dd_dx1 = -0.0012304f * x3;          // ∂denom/∂x1
+    const float dd_dx3 = 1.0394f - 0.0012304f * x1; // ∂denom/∂x3
+
+    const float dacs_dx1 = (dn_dx1 * denom - numer * dd_dx1) / denom2;
+    const float dacs_dx3 = (dn_dx3 * denom - numer * dd_dx3) / denom2;
+
+    // y3 = 0.05*(0.13073*x3 + 100*acs + qe/9 - 67.975)
+    // qe = (0.854*u2 - 0.147)*x1 + 45.59*u1 - 2.514*u3 - 2.096
+    Eigen::Matrix3f Cc = Eigen::Matrix3f::Zero();
+    Cc(0, 0) = 1.0f;
+    Cc(1, 1) = 1.0f;
+    Cc(2, 0) = 0.05f * (100.0f * dacs_dx1 + (0.854f * u2 - 0.147f) / 9.0f);
+    Cc(2, 2) = 0.05f * (0.13073f + 100.0f * dacs_dx3);
+
+    // ── Output feedthrough  ∂y/∂u ──────────────────────────────────────────
+    Eigen::Matrix3f Dc = Eigen::Matrix3f::Zero();
+    Dc(2, 0) = 0.05f * 45.59f / 9.0f;
+    Dc(2, 1) = 0.05f * 0.854f * x1 / 9.0f;
+    Dc(2, 2) = -0.05f * 2.514f / 9.0f;
+
+    // ── Forward-Euler discretisation: Ad = I + Ts*Ac,  Bd = Ts*Bc ──────────
+    LinearStateSpace ss;
+    ss.Ad = Eigen::Matrix3f::Identity() + Ts * Ac;
+    ss.Bd = Ts * Bc;
+    ss.Cd = Cc;
+    ss.Dd = Dc;
+    return ss;
+}
+
+void state_space_at_operating_points()
+{
+    constexpr float Ts = 1.0f;
+    linearize(op_A, Ts).print("A - Low Load    (x1=75.6,   x2=15.3,   x3=508.97)");
+    linearize(op_B, Ts).print("B - Medium Load (x1=97.2,   x2=50.5,   x3=469.51)");
+    linearize(op_C, Ts).print("C - High Load   (x1=140.0,  x2=128.0,  x3=323.68)");
+}
+
+// LQR regulator linearised around op: drives δx → 0 from an initial perturbation.
+// Outputs a console table and writes lqr_op_<label>.csv.
+void ss_lqr(const LinearStateSpace &ss, const operating_point &op,
+            const std::string &label, float Ts = 0.5f)
+{
+    // Cast float matrices to double for the toolbox API
+    ctrl::StateSpace plant(
+        ss.Ad.cast<double>(), ss.Bd.cast<double>(),
+        ss.Cd.cast<double>(), ss.Dd.cast<double>(), static_cast<double>(Ts));
+
+    std::cout << "\n=== LQR @ Operating Point " << label << " ===\n";
+    std::cout << "Ad:\n"
+              << plant.A << "\nBd:\n"
+              << plant.B << "\n\n";
+
+    // ── Bryson weights ───────────────────────────────────────────────────────
+    // xmax: max acceptable deviation from equilibrium
+    //   x1 (drum pressure)  ±20,  x2 (electric power) ±30,  x3 (water level) ±50
+    // umax: max valve deviation from operating point (all valves ∈ [0,1])
+    Eigen::VectorXd xmax(3), umax(3);
+    xmax << 20.0, 30.0, 1.0;
+    umax << 0.3, 0.3, 0.1;
+    ctrl::LQRParams lqr_p = ctrl::LQRWeightTuner::brysonMethod(xmax, umax);
+
+    std::cout << "Q =\n"
+              << lqr_p.Q << "\nR =\n"
+              << lqr_p.R << "\n\n";
+
+    ctrl::DiscreteLQR lqr(plant, lqr_p);
+    std::cout << "K =\n"
+              << lqr.gainMatrix() << "\n\n";
+
+    // ── Initial perturbation and reference ───────────────────────────────────
+    // Regulate δx → 0 (return to operating point)
+    const Eigen::VectorXd x_ref = Eigen::VectorXd::Zero(3);
+    Eigen::VectorXd dx(3);
+    dx << 5.0, 3.0, -10.0; // small kick: +5 pressure, +3 power, -10 level
+
+    // ── CSV and console output ───────────────────────────────────────────────
+    const std::string fname = "lqr_op_" + label + ".csv";
+    std::ofstream f(fname);
+    f << "Time,dx1,dx2,dx3,u1,u2,u3\n";
+
+    int spacing[] = {5, 10, 8, 10, 10, 10, 10, 10, 8};
+    int sum_spacing = 0;
+    for (size_t i = 0; i < sizeof(spacing) / sizeof(spacing[0]); ++i)
+        sum_spacing += spacing[i];
+
+    std::cout << std::setw(spacing[0]) << "k"
+              << std::setw(spacing[1]) << "t[s]"
+              << std::setw(spacing[2]) << "dx1"
+              << std::setw(spacing[3]) << "dx2"
+              << std::setw(spacing[4]) << "dx3"
+              << std::setw(spacing[5]) << "u1"
+              << std::setw(spacing[6]) << "u2"
+              << std::setw(spacing[7]) << "u3" << "\n";
+    std::cout << std::string(sum_spacing, '-') << "\n";
+
+    const Eigen::Vector3d u0(op.u1, op.u2, op.u3);
+
+    for (int k = 0; k <= 500; ++k)
+    {
+        Eigen::VectorXd du = lqr.compute(dx, x_ref);
+
+        // Clamp each absolute valve position to [0, 1]
+        for (int i = 0; i < 3; ++i)
+        {
+            double u_abs = std::max(0.0, std::min(1.0, u0(i) + du(i)));
+            du(i) = u_abs - u0(i);
+        }
+
+        f << k * Ts << ","
+          << dx(0) << "," << dx(1) << "," << dx(2) << ","
+          << u0(0) + du(0) << "," << u0(1) + du(1) << "," << u0(2) + du(2) << "\n";
+
+        if (k % 10 == 0)
+            std::cout << std::setw(spacing[0]) << k
+                      << std::fixed << std::setprecision(4)
+                      << std::setw(spacing[1]) << k * Ts
+                      << std::setw(spacing[2]) << dx(0)
+                      << std::setw(spacing[3]) << dx(1)
+                      << std::setw(spacing[4]) << dx(2)
+                      << std::setw(spacing[5]) << u0(0) + du(0)
+                      << std::setw(spacing[6]) << u0(1) + du(1)
+                      << std::setw(spacing[7]) << u0(2) + du(2) << "\n";
+
+        ctrl::ssStep(plant, dx, du);
+    }
+
+    std::cout << "LQR data written to " << fname << "\n";
+}
+
+void run_case_study(const operating_point &op, const std::string &label, const float Ts)
+{
+    LinearStateSpace ss_op = linearize(op, Ts);
+    ss_op.print(label);
+    ss_lqr(ss_op, op, label, Ts);
 }
 
 int main()
 {
     plant_model_data();
-    std::cout << "Boiler-turbine data generated in boiler_turbine_data.csv\n";
+    run_case_study(op_A, "A - Low Load", 1.0f);
+    run_case_study(op_B, "B - Medium Load", 1.0f);
+    run_case_study(op_C, "C - High Load", 1.0f);
     return 0;
 }
