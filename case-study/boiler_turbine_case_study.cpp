@@ -2,6 +2,7 @@
 #include <cmath>
 #include <iostream>
 #include <algorithm>
+#include <fstream>
 
 class BoilerTurbine
 {
@@ -31,8 +32,8 @@ public:
     inline void constrain_valve_rate()
     {
         du1 = std::clamp(u1 - u1_prev_, -0.007f, 0.007f);
-        du2 = std::clamp(u2 - u2_prev_, -2.0f,   0.02f);
-        du3 = std::clamp(u3 - u3_prev_, -0.05f,   0.05f);
+        du2 = std::clamp(u2 - u2_prev_, -2.0f, 0.02f);
+        du3 = std::clamp(u3 - u3_prev_, -0.05f, 0.05f);
         u1 = u1_prev_ + du1;
         u2 = u2_prev_ + du2;
         u3 = u3_prev_ + du3;
@@ -70,7 +71,7 @@ void random_valve(float &u1, float &u2, float &u3)
 {
     // Random between change rate
     float du1 = ((float)rand() / RAND_MAX) * 0.014f - 0.007f; // [-0.007, 0.007]
-    float du2 = ((float)rand() / RAND_MAX) * 2.02f - 2.0f;    // [-2.0, 0.02]
+    float du2 = ((float)rand() / RAND_MAX) * 0.04f - 0.02f;   // [-0.02, 0.02]
     float du3 = ((float)rand() / RAND_MAX) * 0.1f - 0.05f;    // [-0.05, 0.05]
 
     u1 += du1;
@@ -78,7 +79,7 @@ void random_valve(float &u1, float &u2, float &u3)
     u3 += du3;
 }
 
-int main()
+void plant_model_data()
 {
     BoilerTurbine bt;
 
@@ -92,18 +93,22 @@ int main()
     bt.u2 = 0.5f; // Steam control valve position
     bt.u3 = 0.5f; // Feedwater flow valve position
 
+    std::ofstream data_file("boiler_turbine_data.csv");
+    data_file << "Time,Drum Pressure,Electric Power,Water Level Deviation,u1,u2,u3\n";
+
     for (int i = 0; i < 100; ++i)
     {
         random_valve(bt.u1, bt.u2, bt.u3);
-        bt.constrain_valve();
         bt.constrain_valve_rate();
+        bt.constrain_valve();
         bt.update();
-        std::cout << "Time: " << i * bt.Ts << "s, "
-                  << "Drum Pressure: " << bt.y1 << ", "
-                  << "Electric Power: " << bt.y2 << ", "
-                  << "Water Level Deviation: " << bt.y3 << ", "
-                  << "Valve Positions: u1=" << bt.u1 << ", u2=" << bt.u2 << ", u3=" << bt.u3 << std::endl;
+        data_file << i * bt.Ts << "," << bt.y1 << "," << bt.y2 << "," << bt.y3 << "," << bt.u1 << "," << bt.u2 << "," << bt.u3 << "\n";
     }
+}
 
+int main()
+{
+    plant_model_data();
+    std::cout << "Boiler-turbine data generated in boiler_turbine_data.csv\n";
     return 0;
 }
