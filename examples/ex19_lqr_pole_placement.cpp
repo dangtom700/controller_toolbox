@@ -19,7 +19,7 @@ int main()
     Eigen::Vector2d Bd = Ts * Bc;
     ctrl::StateSpace plant(Ad, Bd, Eigen::RowVector2d(1,0), Eigen::MatrixXd::Zero(1,1), Ts);
 
-    // Desired continuous poles: -2 ± 2j
+    // Desired continuous poles: -2 +/- 2j
     // Discrete poles: z = exp(s * Ts)
     std::complex<double> s1(-2.0, 2.0);
     std::complex<double> s2(-2.0, -2.0);

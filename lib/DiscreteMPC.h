@@ -5,16 +5,16 @@
 
 // Discrete-time Model Predictive Controller (condensed incremental QP formulation).
 //
-// Cost: J = Σ_{i=1}^{Np} ρ_y·‖y[k+i|k] − r‖² + Σ_{j=0}^{Nc-1} ρ_u·‖Δu[k+j]‖²
+// Cost: J = Σ_{i=1}^{Np} ρ_y.‖y[k+i|k] - r‖^2 + Σ_{j=0}^{Nc-1} ρ_u.‖Δu[k+j]‖^2
 //
 // Prediction (condensed form):
-//   Y_pred = F·x[k] + Φ·ΔU
-//   F(i,:)   = C·A^(i+1)           i = 0,…,Np−1
-//   Φ(i,j,:) = C·A^(i−j)·B         j ≤ i, else 0
+//   Y_pred = F.x[k] + Φ.ΔU
+//   F(i,:)   = C.A^(i+1)           i = 0,...,Np-1
+//   Φ(i,j,:) = C.A^(i-j).B         j <= i, else 0
 //
 // Unconstrained optimal solution (receding horizon, apply first move only):
-//   ΔU* = −(Φ'·Q_y·Φ + R_u)⁻¹·Φ'·Q_y·(F·x[k] − R_stacked)
-//   u[k] = u[k−1] + ΔU*[0:m]
+//   ΔU* = -(Φ'.Q_y.Φ + R_u)⁻¹.Φ'.Q_y.(F.x[k] - R_stacked)
+//   u[k] = u[k-1] + ΔU*[0:m]
 //
 // Box constraints on Δu and u are handled by element-wise clamping of ΔU*.
 // For full QP constraint handling, replace the ldlt() solve with an active-set solver.
@@ -28,10 +28,10 @@ namespace ctrl
     // Tuning parameters.
     struct MPCParams
     {
-        int Np = 10;         // Prediction horizon (steps) — covers ≈ settling time
-        int Nc = 3;          // Control horizon  (steps, Nc ≤ Np) — fewer = smoother
-        double rho_y = 1.0;  // Output tracking weight  (Q_y = ρ_y·I_{Np·p})
-        double rho_u = 0.1;  // Move suppression weight (R_u = ρ_u·I_{Nc·m})
+        int Np = 10;         // Prediction horizon (steps) - covers approx = settling time
+        int Nc = 3;          // Control horizon  (steps, Nc <= Np) - fewer = smoother
+        double rho_y = 1.0;  // Output tracking weight  (Q_y = ρ_y.I_{Np.p})
+        double rho_u = 0.1;  // Move suppression weight (R_u = ρ_u.I_{Nc.m})
         double uMin = -1e9;  // Hard lower limit on u
         double uMax = 1e9;   // Hard upper limit on u
         double duMin = -1e9; // Hard lower limit on Δu
@@ -71,20 +71,20 @@ namespace ctrl
         MPCParams p_;
         double Ts_;
         Eigen::VectorXd x_hat_;  // open-loop state estimate
-        Eigen::VectorXd u_prev_; // u[k−1] for incremental form
+        Eigen::VectorXd u_prev_; // u[k-1] for incremental form
 
         // Pre-computed condensed prediction matrices
-        Eigen::MatrixXd F_;   // (Np·p) × n
-        Eigen::MatrixXd Phi_; // (Np·p) × (Nc·m)
-        Eigen::MatrixXd H_;   // (Φ'·Q_y·Φ + R_u) — precomputed Hessian
-        Eigen::MatrixXd Qy_;  // (Np·p) × (Np·p)
-        Eigen::MatrixXd Ru_;  // (Nc·m) × (Nc·m)
+        Eigen::MatrixXd F_;   // (Np.p) * n
+        Eigen::MatrixXd Phi_; // (Np.p) * (Nc.m)
+        Eigen::MatrixXd H_;   // (Φ'.Q_y.Φ + R_u) - precomputed Hessian
+        Eigen::MatrixXd Qy_;  // (Np.p) * (Np.p)
+        Eigen::MatrixXd Ru_;  // (Nc.m) * (Nc.m)
 
-        // Pre-allocated work vectors — eliminate per-step heap allocation in computeRef()
-        Eigen::VectorXd R_stack_;  // Np·p
-        Eigen::VectorXd pred_err_; // Np·p
-        Eigen::VectorXd grad_;     // Nc·m  (Φ'·Qy·pred_err)
-        Eigen::VectorXd DeltaU_;   // Nc·m
+        // Pre-allocated work vectors - eliminate per-step heap allocation in computeRef()
+        Eigen::VectorXd R_stack_;  // Np.p
+        Eigen::VectorXd pred_err_; // Np.p
+        Eigen::VectorXd grad_;     // Nc.m  (Φ'.Qy.pred_err)
+        Eigen::VectorXd DeltaU_;   // Nc.m
 
         void buildCondensedMatrices();
     };

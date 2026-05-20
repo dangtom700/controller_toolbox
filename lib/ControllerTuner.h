@@ -10,35 +10,35 @@
 #include <functional>
 
 // ============================================================
-//  ControllerTuner.h  — Offline and online tuning utilities
+//  ControllerTuner.h  - Offline and online tuning utilities
 //
 //  Every tuner exposes two interfaces:
 //
-//    tuneImpl(...)        — unchecked, for internal use or when
+//    tuneImpl(...)        - unchecked, for internal use or when
 //                           the controller type is already known.
 //
-//    tuneFor<C>(...)      — template wrapper; triggers a
+//    tuneFor<C>(...)      - template wrapper; triggers a
 //                           static_assert (hard compiler error)
 //                           when C is incompatible, with a
 //                           diagnostic naming the correct tuner.
 //
 //  Existing tuners (RelayAutoTuner, StepResponseTuner,
 //  LQRWeightTuner, MPCHorizonTuner) gain an additional
-//  *For<C>() overload — their original methods are unchanged.
+//  *For<C>() overload - their original methods are unchanged.
 //
 //  New tuners added here:
-//    ZieglerNicholsTuner  — standalone ZN from (Ku, Tu)
-//    CohenCoonTuner       — FOPDT-based PID (Cohen & Coon 1953)
-//    LoopShapingTuner     — crossover freq + phase margin → LeadLagParams
-//    KalmanWeightTuner    — noise levels → Qf / Rf for DiscreteLQG
+//    ZieglerNicholsTuner  - standalone ZN from (Ku, Tu)
+//    CohenCoonTuner       - FOPDT-based PID (Cohen & Coon 1953)
+//    LoopShapingTuner     - crossover freq + phase margin -> LeadLagParams
+//    KalmanWeightTuner    - noise levels -> Qf / Rf for DiscreteLQG
 //
 //  Strategies from the literature that require external solvers
 //  or adaptive runtime infrastructure are NOT implemented here:
-//    H∞ / μ-synthesis   → requires SLICOT, Python-control, or MATLAB
-//    QFT                → requires CAD tool (QFT Toolbox, QDESIGN)
-//    GA / PSO / DE      → use an optimisation framework (Optuna, DEAP)
-//    Bayesian opt.      → use BoTorch / GPyOpt / scikit-optimize
-//    MRAC / STR / IFT / VRFT → adaptive control; separate library
+//    Hinf / mu-synthesis   -> requires SLICOT, Python-control, or MATLAB
+//    QFT                -> requires CAD tool (QFT Toolbox, QDESIGN)
+//    GA / PSO / DE      -> use an optimisation framework (Optuna, DEAP)
+//    Bayesian opt.      -> use BoTorch / GPyOpt / scikit-optimize
+//    MRAC / STR / IFT / VRFT -> adaptive control; separate library
 //
 //  Ref: Åström & Hägglund (1988, 2006); Bryson & Ho (1975);
 //       Cohen & Coon (1953); Rivera, Morari & Skogestad (1986);
@@ -52,18 +52,18 @@ namespace ctrl
     // ============================================================
     enum class PIDTuningRule
     {
-        ZieglerNichols, // Classic ZN — fast, ~25 % overshoot  (Ziegler & Nichols 1942)
-        TyreusLuyben,   // Conservative ZN variant — better load rejection (Tyreus & Luyben 1992)
-        IMC,            // Internal Model Control (lambda-tuning) — needs FOPDT model + λ
+        ZieglerNichols, // Classic ZN - fast, ~25 % overshoot  (Ziegler & Nichols 1942)
+        TyreusLuyben,   // Conservative ZN variant - better load rejection (Tyreus & Luyben 1992)
+        IMC,            // Internal Model Control (lambda-tuning) - needs FOPDT model + lambda
         AMIGO           // Approximate M-constrained Integral Gain Optimisation (Åström 2006)
     };
 
     // ============================================================
-    // Relay Auto-Tuner  (Åström–Hägglund relay feedback test)
+    // Relay Auto-Tuner  (Åström-Hägglund relay feedback test)
     // ============================================================
-    // Applies a relay ±d to the closed plant, records the resulting limit cycle,
+    // Applies a relay +/-d to the closed plant, records the resulting limit cycle,
     // then derives ultimate gain Ku and ultimate period Tu.
-    //   Ku = (4·d) / (π·a_y)   where a_y = peak-to-peak output amplitude / 2
+    //   Ku = (4.d) / (pi.a_y)   where a_y = peak-to-peak output amplitude / 2
     //   Tu = average oscillation period from zero-crossing times
     //
     // Usage pattern (simulation loop):
@@ -75,7 +75,7 @@ namespace ctrl
     // ============================================================
     struct RelayTunerConfig
     {
-        double relayAmplitude = 1.0; // Relay output amplitude ±d
+        double relayAmplitude = 1.0; // Relay output amplitude +/-d
         double hysteresis = 0.0;     // Dead-band to prevent noise-driven chatter
         int cyclesRequired = 3;      // Stable oscillation cycles needed before exit
     };
@@ -90,7 +90,7 @@ namespace ctrl
 
         bool isDone() const { return done_; }
 
-        // Original unchecked method — unchanged for backward compatibility.
+        // Original unchecked method - unchanged for backward compatibility.
         PIDParams computePIDParams(PIDTuningRule rule = PIDTuningRule::TyreusLuyben,
                                    double lambda = -1.0) const;
 
@@ -140,7 +140,7 @@ namespace ctrl
     // ============================================================
     // Fits a First-Order Plus Dead-Time (FOPDT) model to open-loop
     // step response data using the process-reaction-curve tangent method.
-    //   G(s) ≈ K·e^{−θs} / (τs + 1)
+    //   G(s) approx = K.e^{-θs} / (τs + 1)
     // ============================================================
     class StepResponseTuner
     {
@@ -156,7 +156,7 @@ namespace ctrl
                                    const std::vector<double> &output,
                                    double stepMagnitude);
 
-        // Original unchecked method — unchanged.
+        // Original unchecked method - unchanged.
         static PIDParams computePIDParams(const FOPDTModel &model,
                                           double Ts,
                                           PIDTuningRule rule = PIDTuningRule::IMC,
@@ -193,7 +193,7 @@ namespace ctrl
     class LQRWeightTuner
     {
     public:
-        // Original unchecked methods — unchanged.
+        // Original unchecked methods - unchanged.
         static LQRParams brysonMethod(const Eigen::VectorXd &maxStateDeviation,
                                       const Eigen::VectorXd &maxControlEffort);
 
@@ -223,7 +223,7 @@ namespace ctrl
 
         // Type-checked wrapper for pole-placement hint.
         // Emits a [[deprecated]] WARNING (not error) when C = DiscreteLQG,
-        // because pole placement only tunes the LQR part — the Kalman
+        // because pole placement only tunes the LQR part - the Kalman
         // observer gains (Qf, Rf) still need separate attention.
         template <typename C>
         static LQRParams polePlacementHintFor(const StateSpace &plant,
@@ -267,7 +267,7 @@ namespace ctrl
 
         static double estimateSettlingTime(const StateSpace &plant, int maxSteps = 5000);
 
-        // Original unchecked method — unchanged.
+        // Original unchecked method - unchanged.
         static Recommendation recommend(const StateSpace &plant,
                                         double Ts,
                                         double rho_y = 1.0,
@@ -300,20 +300,20 @@ namespace ctrl
     };
 
     // ============================================================
-    // KalmanNoiseParams — output of KalmanWeightTuner
+    // KalmanNoiseParams - output of KalmanWeightTuner
     // ============================================================
     struct KalmanNoiseParams
     {
-        Eigen::MatrixXd Qf; // process noise covariance  (n×n)
-        Eigen::MatrixXd Rf; // measurement noise covariance (p×p)
+        Eigen::MatrixXd Qf; // process noise covariance  (n*n)
+        Eigen::MatrixXd Rf; // measurement noise covariance (p*p)
         Eigen::MatrixXd P0; // initial state covariance estimate
     };
 
     // ============================================================
-    // Ziegler–Nichols Tuner  (standalone, from relay-test data)
+    // Ziegler-Nichols Tuner  (standalone, from relay-test data)
     // ============================================================
     // Classic ZN rules derived from ultimate gain Ku and period Tu.
-    // Produces aggressive settings; consider de-tuning Kp by 20–30 %
+    // Produces aggressive settings; consider de-tuning Kp by 20-30 %
     // or switching to TyreusLuyben / AMIGO for better robustness.
     //
     // Ref: Ziegler & Nichols "Optimum Settings for Automatic Controllers" (1942).
@@ -327,7 +327,7 @@ namespace ctrl
             double Tu; // ultimate period [s]
         };
 
-        // Unchecked — for internal delegation or when C is known externally.
+        // Unchecked - for internal delegation or when C is known externally.
         static PIDParams tuneImpl(const Input &in);
 
         // Type-checked: hard compiler error for non-PID controllers.
@@ -354,14 +354,14 @@ namespace ctrl
     };
 
     // ============================================================
-    // Cohen–Coon Tuner  (FOPDT process-reaction-curve method)
+    // Cohen-Coon Tuner  (FOPDT process-reaction-curve method)
     // ============================================================
     // More accurate than ZN for processes where dead time θ is a
     // significant fraction of the lag τ (θ/τ in [0.1, 1.0]).
     //
     // Formulas (PID, Cohen & Coon 1953):
-    //   Kp = (τ / (K·θ)) · (4/3 + r/4)    where r = θ/τ
-    //   Ti = θ · (32 + 6r) / (13 + 8r)
+    //   Kp = (τ / (K.θ)) . (4/3 + r/4)    where r = θ/τ
+    //   Ti = θ . (32 + 6r) / (13 + 8r)
     //   Td = 4θ / (11 + 2r)
     //
     // Ref: Cohen & Coon "Theoretical Consideration of Retarded Control" (1953).
@@ -395,17 +395,17 @@ namespace ctrl
     };
 
     // ============================================================
-    // Loop-Shaping Tuner  (frequency-domain → LeadLagParams)
+    // Loop-Shaping Tuner  (frequency-domain -> LeadLagParams)
     // ============================================================
-    // Designs a lead compensator C(s) = K·(s+z)/(s+p) so that:
-    //   • The gain crossover occurs at omega_c  (|L(j·omega_c)| = 1)
-    //   • The compensator contributes phase_add_deg of phase lead at omega_c
+    // Designs a lead compensator C(s) = K.(s+z)/(s+p) so that:
+    //   - The gain crossover occurs at omega_c  (|L(j.omega_c)| = 1)
+    //   - The compensator contributes phase_add_deg of phase lead at omega_c
     //
     // Derivation (lead, phase_add_deg > 0):
-    //   β = sin(φ),   α = (1+β)/(1−β)
-    //   z = ω_c/√α,   p = ω_c·√α,   K = √α / |G(j·ω_c)|
+    //   beta = sin(φ),   alpha = (1+beta)/(1-beta)
+    //   z = omega_c/√alpha,   p = omega_c.√alpha,   K = √alpha / |G(j.omega_c)|
     //
-    // where |G(j·ω_c)| = gain_at_wc (open-loop plant magnitude before
+    // where |G(j.omega_c)| = gain_at_wc (open-loop plant magnitude before
     // adding the compensator).
     //
     // Ref: Franklin, Powell & Emami-Naeini "Feedback Control of Dynamic
@@ -418,7 +418,7 @@ namespace ctrl
         {
             double omega_c;       // desired gain crossover frequency [rad/s]
             double phase_add_deg; // phase lead to add at omega_c [deg], must be in (0, 90)
-            double gain_at_wc;    // open-loop |G(j·omega_c)| without the compensator
+            double gain_at_wc;    // open-loop |G(j.omega_c)| without the compensator
         };
 
         static LeadLagParams tuneImpl(const Input &in);
@@ -451,12 +451,12 @@ namespace ctrl
     // Kalman Weight Tuner  (noise covariance selection for DiscreteLQG)
     // ============================================================
     // Provides heuristic starting points for Qf (process noise covariance)
-    // and Rf (measurement noise covariance).  Both scale as σ², where σ is
+    // and Rf (measurement noise covariance).  Both scale as sigma^2, where sigma is
     // the expected noise standard deviation per channel.
     //
     // Bryson-like rule:
-    //   Qf = diag(σ_process_i²),   Rf = diag(σ_meas_j²)
-    //   P0 = Qf   (initial uncertainty ≈ process noise level)
+    //   Qf = diag(sigma_process_i^2),   Rf = diag(sigma_meas_j^2)
+    //   P0 = Qf   (initial uncertainty approx = process noise level)
     //
     // The separation principle guarantees that the LQR and Kalman gains
     // can be tuned independently; use LQRWeightTuner for the LQR part.
@@ -466,11 +466,11 @@ namespace ctrl
     class KalmanWeightTuner
     {
     public:
-        // Per-channel noise: Qf = diag(maxProcessNoise²), Rf = diag(maxMeasNoise²).
+        // Per-channel noise: Qf = diag(maxProcessNoise^2), Rf = diag(maxMeasNoise^2).
         static KalmanNoiseParams fromNoise(const Eigen::VectorXd &maxProcessNoise,
                                            const Eigen::VectorXd &maxMeasNoise);
 
-        // Isotropic (scalar) noise: Qf = σp²·I, Rf = σm²·I.
+        // Isotropic (scalar) noise: Qf = sigmap^2.I, Rf = sigmam^2.I.
         static KalmanNoiseParams isotropic(int nStates,
                                            int nOutputs,
                                            double sigmaProcess,

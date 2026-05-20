@@ -1,29 +1,29 @@
 /*
- * siso_unknown.cpp — Unknown SISO Plant: System ID + Fuzzy Performance
+ * siso_unknown.cpp - Unknown SISO Plant: System ID + Fuzzy Performance
  * ======================================================================
  * Case 3b: SISO plant assumed unknown. Model estimated entirely from I/O
  * data; no a-priori knowledge of plant order, gain, or time constants.
  *
  * Identification workflow:
  *   1. Read PRBS excitation from CSV (Python-generated) or generate via LFSR.
- *   2. Relay feedback test → Åström-Hägglund ultimate gain Ku and period Tu.
- *   3. Unit-step test → FOPDT via 28.3%/63.2% tangent method.
- *   4. ARX(2,2) batch LS on PRBS I/O data → cross-validate NRMSE ≤ 5%.
- *   5. Apply ALL PID tuning rules (ZN, IMC×3 λ, Cohen-Coon, NM) to FOPDT.
+ *   2. Relay feedback test -> Åström-Hägglund ultimate gain Ku and period Tu.
+ *   3. Unit-step test -> FOPDT via 28.3%/63.2% tangent method.
+ *   4. ARX(2,2) batch LS on PRBS I/O data -> cross-validate NRMSE <= 5%.
+ *   5. Apply ALL PID tuning rules (ZN, IMC*3 lambda, Cohen-Coon, NM) to FOPDT.
  *   6. Apply SMC tuned from ARX bandwidth estimate + NM-optimised variant.
  *   7. Apply ADRC with b0 from ARX high-frequency gain + NM-optimised.
- *   8. Rank by composite cost J = ISE + 0.1·ITAE + 0.01·∫u² dt.
+ *   8. Rank by composite cost J = ISE + 0.1.ITAE + 0.01.∫u^2 dt.
  *   9. Fuzzy performance evaluation on every controller.
  *
  * Identification tolerances:
- *   ARX NRMSE ≤ 5 %   (hard gate: [PASS] / [FAIL] printed for each metric)
- *   |Ku_relay − Ku_bode| / Ku_bode ≤ 15 %   (relay fidelity check)
+ *   ARX NRMSE <= 5 %   (hard gate: [PASS] / [FAIL] printed for each metric)
+ *   |Ku_relay - Ku_bode| / Ku_bode <= 15 %   (relay fidelity check)
  *
  * Expected output (per controller):
- *   — Identified parameters, ISE, ITAE, energy, OS%, settle_time, J, fuzzy grade
- *   — [PASS/FAIL] on NRMSE and relay fidelity
- *   — Optimal controller highlighted
- *   — Results → siso_unknown_results.csv
+ *   - Identified parameters, ISE, ITAE, energy, OS%, settle_time, J, fuzzy grade
+ *   - [PASS/FAIL] on NRMSE and relay fidelity
+ *   - Optimal controller highlighted
+ *   - Results -> siso_unknown_results.csv
  *
  * Build: see examples/CMakeLists.txt  (add_cpp_example(siso_unknown))
  * Python data: examples/python/generate_unknown_data.py
@@ -49,7 +49,7 @@ using namespace ctrl;
 
 // =========================================================================
 // True plant (internally known; not referenced by identification code)
-// G(s) = 1/(s²+1.5s+1), ZOH Ts=0.01 s
+// G(s) = 1/(s^2+1.5s+1), ZOH Ts=0.01 s
 // =========================================================================
 static constexpr double Ts        = 0.01;
 static constexpr double UMAX      = 10.0;
@@ -63,7 +63,7 @@ inline StateSpace make_true_plant() {
 }
 
 // =========================================================================
-// One-step helper: scalar input → scalar output, state updated in-place
+// One-step helper: scalar input -> scalar output, state updated in-place
 // =========================================================================
 inline double plant_step(const StateSpace& sys, Eigen::VectorXd& x, double u) {
     Eigen::VectorXd uv(1); uv << u;
@@ -71,7 +71,7 @@ inline double plant_step(const StateSpace& sys, Eigen::VectorXd& x, double u) {
 }
 
 // =========================================================================
-// PRBS 10-bit LFSR (amplitude ±amp)
+// PRBS 10-bit LFSR (amplitude +/-amp)
 // =========================================================================
 static std::vector<double> lfsr_prbs(int N, double amp, unsigned seed = 42) {
     unsigned st = seed & 0x3FFu; if (!st) st = 1u;
@@ -102,7 +102,7 @@ static std::vector<double> load_or_generate_prbs(const std::string& path, int N)
             u.resize(N); return u;
         }
     }
-    std::cout << "  CSV not found or short — generating PRBS via 10-bit LFSR\n";
+    std::cout << "  CSV not found or short - generating PRBS via 10-bit LFSR\n";
     return lfsr_prbs(N, 0.5, 42);
 }
 
@@ -148,7 +148,7 @@ static void print_metrics(const std::string& name, const Metrics& m,
 }
 
 // =========================================================================
-// Generic closed-loop simulation: ctrl_fn(ref, y_prev, k) → u
+// Generic closed-loop simulation: ctrl_fn(ref, y_prev, k) -> u
 // =========================================================================
 template<typename CtrlFn>
 static Metrics sim(CtrlFn ctrl_fn, double ref = 1.0) {
@@ -165,7 +165,7 @@ static Metrics sim(CtrlFn ctrl_fn, double ref = 1.0) {
 }
 
 // =========================================================================
-// Nelder-Mead (α=1, γ=2, ρ=0.5, σ=0.5)
+// Nelder-Mead (alpha=1, γ=2, ρ=0.5, sigma=0.5)
 // =========================================================================
 static std::vector<double>
 nm(std::function<double(const std::vector<double>&)> f,
@@ -222,11 +222,11 @@ nm(std::function<double(const std::vector<double>&)> f,
 // =========================================================================
 int main() {
     std::cout << "=================================================================\n";
-    std::cout << " SISO Unknown Case — System ID + Fuzzy Performance\n";
-    std::cout << " Plant treated as a black box (G(s)=1/(s²+1.5s+1) internally)\n";
+    std::cout << " SISO Unknown Case - System ID + Fuzzy Performance\n";
+    std::cout << " Plant treated as a black box (G(s)=1/(s^2+1.5s+1) internally)\n";
     std::cout << "=================================================================\n";
 
-    const double ise_worst = 1.0 * SIM_STEPS * Ts; // open-loop integral of 1² dt
+    const double ise_worst = 1.0 * SIM_STEPS * Ts; // open-loop integral of 1^2 dt
     auto fuzzy_score = [&](const Metrics& m) {
         double ise_n = std::min(m.ISE / ise_worst, 1.0);
         double st_n  = std::min(m.settle_time / (SIM_STEPS * Ts), 1.0);
@@ -247,7 +247,7 @@ int main() {
         y_id[k] = plant_step(plant_id, x_id, u_id[k]);
 
     // =======================================================================
-    // Step 2: Relay feedback → Ku, Tu
+    // Step 2: Relay feedback -> Ku, Tu
     // =======================================================================
     std::cout << "[2] Relay feedback test (d=0.5, up to 6000 steps)\n";
     double relay_Ku = 1.0, relay_Tu = 1.0;
@@ -269,19 +269,19 @@ int main() {
         std::cout << "  Ku=" << std::setprecision(4) << relay_Ku
                   << "  Tu=" << relay_Tu << " s\n";
 
-        // Relay fidelity: analytic Ku_bode = 1.5 for G(s)=1/(s²+1.5s+1)
-        // (ω_pc = 1 rad/s, |G(j1)| = 1/|1-1+j·1.5| = 1/1.5)
+        // Relay fidelity: analytic Ku_bode = 1.5 for G(s)=1/(s^2+1.5s+1)
+        // (omega_pc = 1 rad/s, |G(j1)| = 1/|1-1+j.1.5| = 1/1.5)
         constexpr double Ku_bode = 1.5;
         double relay_err = std::abs(relay_Ku - Ku_bode) / Ku_bode * 100.0;
         std::cout << "  Relay fidelity: |Ku_relay - Ku_bode|/Ku_bode = "
                   << std::setprecision(1) << relay_err << "%  "
-                  << (relay_err < 15.0 ? "[PASS ≤15%]" : "[FAIL >15%]") << "\n";
+                  << (relay_err < 15.0 ? "[PASS <=15%]" : "[FAIL >15%]") << "\n";
     }
 
     // =======================================================================
-    // Step 3: Open-loop step response → FOPDT (28.3%/63.2% tangent method)
+    // Step 3: Open-loop step response -> FOPDT (28.3%/63.2% tangent method)
     // =======================================================================
-    std::cout << "[3] Step response identification → FOPDT\n";
+    std::cout << "[3] Step response identification -> FOPDT\n";
     double K_fopdt = 1.0, tau_fopdt = 1.0, theta_fopdt = 0.01;
     {
         StateSpace sp = make_true_plant();
@@ -328,7 +328,7 @@ int main() {
                   << "  a2=" << a2_id
                   << "  b1=" << b1_id << "  b2=" << b2_id << "\n"
                   << "  NRMSE (in-sample) = " << std::setprecision(2) << nrmse << "%  "
-                  << (nrmse < 5.0 ? "[PASS ≤5%]" : "[FAIL >5%]") << "\n";
+                  << (nrmse < 5.0 ? "[PASS <=5%]" : "[FAIL >5%]") << "\n";
 
         // Validation on a fresh PRBS sequence
         auto u_val = lfsr_prbs(1500, 0.5, 999);
@@ -349,7 +349,7 @@ int main() {
                          - *std::min_element(y_val.begin(), y_val.end());
         double nrmse_val = std::sqrt(sse_val / 1498) / std::max(val_range, 1e-12) * 100.0;
         std::cout << "  NRMSE (validation) = " << nrmse_val << "%  "
-                  << (nrmse_val < 5.0 ? "[PASS ≤5%]" : "[FAIL >5%]") << "\n";
+                  << (nrmse_val < 5.0 ? "[PASS <=5%]" : "[FAIL >5%]") << "\n";
     }
 
     // =======================================================================
@@ -386,7 +386,7 @@ int main() {
         double Ti = tau_fopdt + half_th;
         double Td = tau_fopdt * theta_fopdt / (2.0*tau_fopdt + theta_fopdt);
         DiscretePID pid = make_pid(Kp, Kp/Ti, Kp*Td);
-        std::string tag = "PID-IMC(λ=" + std::to_string(lam).substr(0,3) + ")";
+        std::string tag = "PID-IMC(lambda=" + std::to_string(lam).substr(0,3) + ")";
         auto m = sim([&](double r, double y, int) { return pid.compute(r-y); });
         add(tag, m, fuzzy_score(m));
     }
@@ -430,17 +430,17 @@ int main() {
     }
 
     // =======================================================================
-    // Step 6: SMC — bandwidth from ARX model + NM-optimised
+    // Step 6: SMC - bandwidth from ARX model + NM-optimised
     // =======================================================================
-    std::cout << "\n[6] SMC — bandwidth from ARX model\n";
+    std::cout << "\n[6] SMC - bandwidth from ARX model\n";
     {
         // Estimate closed-loop bandwidth from ARX eigenvalue magnitude
-        // ARX denominator polynomial: z² + a1_id*z + a2_id = 0
-        // (theta stores coefficients as -a1, -a2, but product a1*a2 gives |eig|²)
+        // ARX denominator polynomial: z^2 + a1_id*z + a2_id = 0
+        // (theta stores coefficients as -a1, -a2, but product a1*a2 gives |eig|^2)
         double disc = a1_id*a1_id - 4.0*a2_id;
         double omega_est = 1.0; // fallback [rad/s]
         if (disc < 0)
-            omega_est = std::sqrt(std::abs(a2_id)) / Ts; // discrete → continuous
+            omega_est = std::sqrt(std::abs(a2_id)) / Ts; // discrete -> continuous
         double ce = 1.0, cde = std::clamp(omega_est * Ts * 5.0, 0.1, 20.0);
 
         SMCParams sp; sp.c_e=ce; sp.c_de=cde; sp.K=5.0; sp.phi=0.1;
@@ -478,9 +478,9 @@ int main() {
     }
 
     // =======================================================================
-    // Step 7: ADRC — b0 estimated from ARX high-frequency gain + NM-optimised
+    // Step 7: ADRC - b0 estimated from ARX high-frequency gain + NM-optimised
     // =======================================================================
-    std::cout << "[7] ADRC — b0 from ARX high-frequency gain\n";
+    std::cout << "[7] ADRC - b0 from ARX high-frequency gain\n";
     {
         double b0_est = std::max(std::abs(b1_id / Ts), 1e-6);
         ADRCParams ap; ap.omega_o=15.0; ap.omega_c=3.5; ap.b0=b0_est;
@@ -508,8 +508,8 @@ int main() {
             return J;
         };
         auto xopt=nm(cost,{15.0,3.5,1e-4},{{1.0,100},{0.5,20},{1e-6,1e-2}},400);
-        std::cout << "  NM-ADRC: ωo=" << std::setprecision(4) << xopt[0]
-                  << " ωc=" << xopt[1] << " b0=" << xopt[2] << "\n";
+        std::cout << "  NM-ADRC: omegao=" << std::setprecision(4) << xopt[0]
+                  << " omegac=" << xopt[1] << " b0=" << xopt[2] << "\n";
         ADRCParams ap; ap.omega_o=xopt[0]; ap.omega_c=xopt[1]; ap.b0=xopt[2];
         ap.uMin=-UMAX; ap.uMax=UMAX;
         DiscreteADRC adrc(ap, Ts);
@@ -564,7 +564,7 @@ int main() {
                << results[i].settle_time << "," << results[i].J  << ","
                << fr.score          << "," << fr.grade            << "\n";
         }
-        std::cout << "\n  Results saved → siso_unknown_results.csv\n";
+        std::cout << "\n  Results saved -> siso_unknown_results.csv\n";
     }
     return 0;
 }

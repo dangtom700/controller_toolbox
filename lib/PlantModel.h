@@ -10,18 +10,18 @@ namespace ctrl
 {
 
     // ---------------------------------------------------------------------------
-    // Discrete-time transfer function H(z⁻¹) = (b₀ + b₁z⁻¹ + … + bₘz⁻ᵐ)
-    //                                         / (1  + a₁z⁻¹ + … + aₙz⁻ⁿ)
+    // Discrete-time transfer function H(z⁻¹) = (b₀ + b₁z⁻¹ + ... + bₘz⁻ᵐ)
+    //                                         / (1  + a₁z⁻¹ + ... + aₙz⁻ⁿ)
     //
-    // num = {b0, b1, …, bm}  — numerator coefficients
-    // den = {1,  a1, …, an}  — monic denominator (den[0] must equal 1)
+    // num = {b0, b1, ..., bm}  - numerator coefficients
+    // den = {1,  a1, ..., an}  - monic denominator (den[0] must equal 1)
     //
     // Equivalent MATLAB:  G = tf(num, den, Ts, 'Variable', 'z^-1')
     // ---------------------------------------------------------------------------
     struct TransferFunction
     {
-        std::vector<double> num; // numerator  [b0, b1, …, bm]
-        std::vector<double> den; // denominator [1,  a1, …, an], den[0] == 1
+        std::vector<double> num; // numerator  [b0, b1, ..., bm]
+        std::vector<double> den; // denominator [1,  a1, ..., an], den[0] == 1
 
         double Ts; // sample time (s)
 
@@ -39,17 +39,17 @@ namespace ctrl
 
     // ---------------------------------------------------------------------------
     // Discrete-time state-space model
-    //   x[k+1] = A·x[k] + B·u[k]
-    //   y[k]   = C·x[k] + D·u[k]
+    //   x[k+1] = A.x[k] + B.u[k]
+    //   y[k]   = C.x[k] + D.u[k]
     //
     // Equivalent MATLAB:  sys = ss(A, B, C, D, Ts)
     // ---------------------------------------------------------------------------
     struct StateSpace
     {
-        Eigen::MatrixXd A; // n × n state-transition matrix
-        Eigen::MatrixXd B; // n × m input matrix
-        Eigen::MatrixXd C; // p × n output matrix
-        Eigen::MatrixXd D; // p × m feedthrough matrix
+        Eigen::MatrixXd A; // n * n state-transition matrix
+        Eigen::MatrixXd B; // n * m input matrix
+        Eigen::MatrixXd C; // p * n output matrix
+        Eigen::MatrixXd D; // p * m feedthrough matrix
         double Ts;
 
         StateSpace(Eigen::MatrixXd a,
@@ -67,7 +67,7 @@ namespace ctrl
     };
 
     // ---------------------------------------------------------------------------
-    // Convert SISO discrete transfer function → state-space (controllable canonical form).
+    // Convert SISO discrete transfer function -> state-space (controllable canonical form).
     // Equivalent MATLAB:  [A,B,C,D] = tf2ss(num, den)  applied to the z⁻¹ polynomial.
     // Ref: Ogata "Modern Control Engineering", MATLAB tf2ss documentation.
     // ---------------------------------------------------------------------------
@@ -75,8 +75,8 @@ namespace ctrl
 
     // ---------------------------------------------------------------------------
     // Simulate one step of a state-space model (in-place state update).
-    //   1. Compute y[k] = C·x[k] + D·u[k]
-    //   2. Advance  x[k+1] = A·x[k] + B·u[k]
+    //   1. Compute y[k] = C.x[k] + D.u[k]
+    //   2. Advance  x[k+1] = A.x[k] + B.u[k]
     // Returns y[k].  x is updated in-place to x[k+1].
     // ---------------------------------------------------------------------------
     // x accepts both fixed-size (Vector2d) and dynamic (VectorXd) columns;

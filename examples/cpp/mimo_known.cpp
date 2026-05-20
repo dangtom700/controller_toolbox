@@ -1,28 +1,28 @@
 /*
- * mimo_known.cpp — MIMO Known-Plant: Full Suite of Tuning Methods
+ * mimo_known.cpp - MIMO Known-Plant: Full Suite of Tuning Methods
  * ================================================================
  * Case 1: Strong cross-coupling MIMO plant (Coupled Mass-Spring-Damper, 2-mass)
  *
- * Plant: G(s) 2×2, states [x1,ẋ1,x2,ẋ2]', inputs [F1,F2]', outputs [x1,x2]'
- * Cross-coupling RGA ≈ [1.22, -0.22; -0.22, 1.22] (non-trivial pairing effect)
+ * Plant: G(s) 2*2, states [x1,ẋ1,x2,ẋ2]', inputs [F1,F2]', outputs [x1,x2]'
+ * Cross-coupling RGA approx = [1.22, -0.22; -0.22, 1.22] (non-trivial pairing effect)
  *
  * Controllers evaluated (all tuned for identical reference [1, 1]'):
- *   A. Decentralized PID    — two independent loops; IMC tuned on diagonal channels
- *   B. Decentralized PID    — Nelder-Mead optimized composite ISE cost
- *   C. Full-state LQR       — Bryson's Rule (xmax=[1,1,1,1], umax=[10,10])
- *   D. Full-state LQR       — Nelder-Mead weight optimization
- *   E. LQG (LQR + Kalman)  — Bryson + isotropic process/measurement noise
- *   F. MIMO MPC             — Np=20, Nc=10, Q=I, R=0.01*I
- *   G. MIMO MPC             — Nelder-Mead horizon/weight optimization
+ *   A. Decentralized PID    - two independent loops; IMC tuned on diagonal channels
+ *   B. Decentralized PID    - Nelder-Mead optimized composite ISE cost
+ *   C. Full-state LQR       - Bryson's Rule (xmax=[1,1,1,1], umax=[10,10])
+ *   D. Full-state LQR       - Nelder-Mead weight optimization
+ *   E. LQG (LQR + Kalman)  - Bryson + isotropic process/measurement noise
+ *   F. MIMO MPC             - Np=20, Nc=10, Q=I, R=0.01*I
+ *   G. MIMO MPC             - Nelder-Mead horizon/weight optimization
  *
  * Cost function for Nelder-Mead (J):
  *   J = ISE_y1 + ISE_y2 + 0.1*(ITAE_y1 + ITAE_y2) + 0.01*(E_u1 + E_u2)
  *
  * Expected output:
- *   — System equations and RGA printed to stdout
- *   — Per-method table: ISE_y1, ISE_y2, ITAE_y1, ITAE_y2, E_u1, E_u2, OS[%], J
- *   — Pareto-optimal method identified (lowest J)
- *   — All results saved to examples/data/mimo_known_results.csv
+ *   - System equations and RGA printed to stdout
+ *   - Per-method table: ISE_y1, ISE_y2, ITAE_y1, ITAE_y2, E_u1, E_u2, OS[%], J
+ *   - Pareto-optimal method identified (lowest J)
+ *   - All results saved to examples/data/mimo_known_results.csv
  *
  * Build: see examples/cpp/CMakeLists.txt
  * Run:   ./mimo_known
@@ -55,7 +55,7 @@ static constexpr double REF1 = 1.0, REF2 = 1.0;
 static constexpr double DIST_STEP = 2000;  // disturbance at k=2000
 static constexpr double DIST_MAG  = 0.2;
 
-// Run simulation; returns [Y(N×2), U(N×2)]
+// Run simulation; returns [Y(N*2), U(N*2)]
 static std::pair<Eigen::MatrixXd, Eigen::MatrixXd>
 run_sim(std::function<Eigen::VectorXd(const Eigen::VectorXd& /*y*/,
                                       const Eigen::VectorXd& /*u_prev*/)> ctrl,
@@ -146,7 +146,7 @@ nelder_mead(std::function<double(const std::vector<double>&)> f,
 }
 
 // =========================================================================
-// A. Decentralized PID — IMC-tuned on diagonal FOPDT channels
+// A. Decentralized PID - IMC-tuned on diagonal FOPDT channels
 // =========================================================================
 // Identify diagonal channels via step response, fit FOPDT, apply IMC rule.
 static MIMOMetrics run_decentralized_pid_imc() {
@@ -213,7 +213,7 @@ static MIMOMetrics run_decentralized_pid_imc() {
 }
 
 // =========================================================================
-// B. Decentralized PID — Nelder-Mead optimised
+// B. Decentralized PID - Nelder-Mead optimised
 // =========================================================================
 static MIMOMetrics run_decentralized_pid_opt() {
     auto cost = [](const std::vector<double>& p) -> double {
@@ -267,7 +267,7 @@ static MIMOMetrics run_decentralized_pid_opt() {
 }
 
 // =========================================================================
-// C. Full-state LQR — Bryson's Rule
+// C. Full-state LQR - Bryson's Rule
 // =========================================================================
 static MIMOMetrics run_lqr_bryson() {
     MIMOStateSpace ref = make_plant();
@@ -307,7 +307,7 @@ static MIMOMetrics run_lqr_bryson() {
 }
 
 // =========================================================================
-// D. Full-state LQR — Nelder-Mead weight optimisation
+// D. Full-state LQR - Nelder-Mead weight optimisation
 // =========================================================================
 static MIMOMetrics run_lqr_opt() {
     // Optimise 2 diagonal Q multipliers and 1 R multiplier (log-scale)
@@ -361,7 +361,7 @@ static MIMOMetrics run_lqr_opt() {
 }
 
 // =========================================================================
-// E. LQG — Bryson LQR + isotropic Kalman
+// E. LQG - Bryson LQR + isotropic Kalman
 // =========================================================================
 static MIMOMetrics run_lqg() {
     MIMOStateSpace ref = make_plant();
@@ -401,7 +401,7 @@ static MIMOMetrics run_lqg() {
 }
 
 // =========================================================================
-// F. MIMO MPC — condensed QP (unconstrained closed-form)
+// F. MIMO MPC - condensed QP (unconstrained closed-form)
 // =========================================================================
 static MIMOMetrics run_mpc(int Np = 20, int Nc = 10, double Qw = 1.0, double Rw = 0.01) {
     MIMOStateSpace ref = make_plant();
@@ -438,7 +438,7 @@ static MIMOMetrics run_mpc(int Np = 20, int Nc = 10, double Qw = 1.0, double Rw 
 }
 
 // =========================================================================
-// G. MIMO MPC — Nelder-Mead optimised Q/R weights
+// G. MIMO MPC - Nelder-Mead optimised Q/R weights
 // =========================================================================
 static MIMOMetrics run_mpc_opt() {
     auto cost = [](const std::vector<double>& p) {
@@ -496,7 +496,7 @@ static void save_csv(const std::string& path,
           << m.OS_y1   << "," << m.OS_y2   << ","
           << m.total_cost() << "\n";
     }
-    std::cout << "\n  Results saved → " << path << "\n";
+    std::cout << "\n  Results saved -> " << path << "\n";
 }
 
 // =========================================================================
@@ -504,7 +504,7 @@ static void save_csv(const std::string& path,
 // =========================================================================
 int main() {
     std::cout << "=================================================================\n";
-    std::cout << " MIMO Known Case — All Tuning Methods\n";
+    std::cout << " MIMO Known Case - All Tuning Methods\n";
     std::cout << " Coupled Mass-Spring-Damper (2-mass, 2-input, 2-output)\n";
     std::cout << "=================================================================\n";
 

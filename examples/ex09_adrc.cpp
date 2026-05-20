@@ -17,7 +17,7 @@ int main()
 {
     const double Ts = 0.01;
 
-    // ---- Plant: G(s) = 1/(s²+2s+1) (actual dynamics, unknown to ADRC) ----
+    // ---- Plant: G(s) = 1/(s^2+2s+1) (actual dynamics, unknown to ADRC) ----
     Eigen::Matrix2d Ac; Ac <<  0.0, 1.0,
                               -1.0, -2.0;
     Eigen::Vector2d Bc; Bc << 0.0, 1.0;

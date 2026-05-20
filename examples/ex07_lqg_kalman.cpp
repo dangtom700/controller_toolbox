@@ -4,8 +4,8 @@
 //  process noise and noisy output measurements.
 //
 //  Compares:
-//    (A) Full-state LQR   — ideal, no noise
-//    (B) LQG output-feedback — realistic, noisy y
+//    (A) Full-state LQR   - ideal, no noise
+//    (B) LQG output-feedback - realistic, noisy y
 //
 //  MATLAB equivalent:
 //    sys = ss(A,B,C,D,Ts);
@@ -23,7 +23,7 @@ int main()
     const double Ts = 0.01;
 
     // ---- Plant: 2nd-order system (discretised with Euler) ----
-    // Continuous: ẍ + 0.4ẋ + 4x = u  (underdamped, ωn=2, ζ=0.1)
+    // Continuous: ẍ + 0.4ẋ + 4x = u  (underdamped, omegan=2, ζ=0.1)
     Eigen::Matrix2d Ac; Ac << 0.0, 1.0, -4.0, -0.4;
     Eigen::Vector2d Bc; Bc << 0.0, 1.0;
     Eigen::RowVector2d Cc; Cc << 1.0, 0.0; // only position measured
@@ -40,7 +40,7 @@ int main()
 
     // ---- Noise covariances ----
     Eigen::Matrix2d Qn = 0.001 * Eigen::Matrix2d::Identity(); // process noise
-    Eigen::MatrixXd Rn(1, 1); Rn << 0.01;                     // measurement noise σ=0.1
+    Eigen::MatrixXd Rn(1, 1); Rn << 0.01;                     // measurement noise sigma=0.1
 
     // ---- Construct LQG ----
     ctrl::DiscreteLQG lqg(plant, lqr_p, Qn, Rn);

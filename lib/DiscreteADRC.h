@@ -2,27 +2,27 @@
 #include "IController.h"
 #include <Eigen/Dense>
 
-// Active Disturbance Rejection Controller — 2nd-order Linear ADRC (LADRC).
+// Active Disturbance Rejection Controller - 2nd-order Linear ADRC (LADRC).
 //
 // Models the controlled plant as a double integrator with unknown total disturbance:
-//   ÿ = f(y, ẏ, d, t) + b₀·u    (b₀ is an approximate input gain)
+//   ÿ = f(y, ẏ, d, t) + b₀.u    (b₀ is an approximate input gain)
 //
 // A 3rd-order Extended State Observer (ESO) estimates:
-//   z₁ ≈ y          (output)
-//   z₂ ≈ ẏ          (rate)
-//   z₃ ≈ f(…)       (total disturbance — lumped unknown dynamics + external)
+//   z₁ approx = y          (output)
+//   z₂ approx = ẏ          (rate)
+//   z₃ approx = f(...)       (total disturbance - lumped unknown dynamics + external)
 //
-// ESO (bandwidth-parameterised, forward Euler, bandwidth ω₀):
-//   z₁[k+1] = z₁[k] + Ts·(z₂[k] + β₁·ε[k])
-//   z₂[k+1] = z₂[k] + Ts·(z₃[k] + β₂·ε[k] + b₀·u[k])
-//   z₃[k+1] = z₃[k] + Ts·β₃·ε[k]
-//   ε[k]    = y[k] − z₁[k]   (observer error)
+// ESO (bandwidth-parameterised, forward Euler, bandwidth omega₀):
+//   z₁[k+1] = z₁[k] + Ts.(z₂[k] + beta₁.epsilon[k])
+//   z₂[k+1] = z₂[k] + Ts.(z₃[k] + beta₂.epsilon[k] + b₀.u[k])
+//   z₃[k+1] = z₃[k] + Ts.beta₃.epsilon[k]
+//   epsilon[k]    = y[k] - z₁[k]   (observer error)
 //
-//   β₁ = 3ω₀,  β₂ = 3ω₀²,  β₃ = ω₀³   (characteristic poly (s+ω₀)³)
+//   beta₁ = 3omega₀,  beta₂ = 3omega₀^2,  beta₃ = omega₀^3   (characteristic poly (s+omega₀)^3)
 //
-// PD control + disturbance cancellation (bandwidth ω_c):
-//   u₀[k]  = ω_c²·(r[k] − z₁[k]) − 2ω_c·z₂[k]
-//   u[k]   = (u₀[k] − z₃[k]) / b₀
+// PD control + disturbance cancellation (bandwidth omega_c):
+//   u₀[k]  = omega_c^2.(r[k] - z₁[k]) - 2omega_c.z₂[k]
+//   u[k]   = (u₀[k] - z₃[k]) / b₀
 //
 // IMPORTANT: compute(y) takes the raw plant output y (NOT the error).
 //            Call setReference(r) before each step or use computeTracking(y,r).
@@ -34,7 +34,7 @@ namespace ctrl
 
     struct ADRCParams
     {
-        double omega_o = 20.0; // ESO bandwidth     [rad/s] — typically 3–10× ω_c
+        double omega_o = 20.0; // ESO bandwidth     [rad/s] - typically 3-10* omega_c
         double omega_c = 5.0;  // Controller BW     [rad/s]
         double b0 = 1.0;       // Approximate plant input gain (b₀ = Km/J for motors)
         double uMin = -1e9;

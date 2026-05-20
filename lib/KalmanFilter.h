@@ -5,18 +5,18 @@
 // Discrete-time Linear Kalman Filter (LKF).
 //
 // Plant model (linear, discrete):
-//   x[k+1] = A·x[k] + B·u[k] + w[k],   w ~ N(0, Q_noise)
-//   y[k]   = C·x[k] + D·u[k] + v[k],   v ~ N(0, R_noise)
+//   x[k+1] = A.x[k] + B.u[k] + w[k],   w ~ N(0, Q_noise)
+//   y[k]   = C.x[k] + D.u[k] + v[k],   v ~ N(0, R_noise)
 //
 // Predict step (called with control input u[k-1]):
-//   x̂[k|k-1]  = A·x̂[k-1|k-1] + B·u[k-1]
-//   P[k|k-1]   = A·P[k-1|k-1]·A' + Q
+//   x̂[k|k-1]  = A.x̂[k-1|k-1] + B.u[k-1]
+//   P[k|k-1]   = A.P[k-1|k-1].A' + Q
 //
 // Update step (called with measurement y[k]):
-//   S[k]        = C·P[k|k-1]·C' + R
-//   K_kf[k]     = P[k|k-1]·C'·S⁻¹
-//   x̂[k|k]     = x̂[k|k-1] + K_kf·(y[k] − C·x̂[k|k-1] − D·u[k])
-//   P[k|k]      = (I − K_kf·C)·P[k|k-1]   (Joseph form for numerical stability)
+//   S[k]        = C.P[k|k-1].C' + R
+//   K_kf[k]     = P[k|k-1].C'.S⁻¹
+//   x̂[k|k]     = x̂[k|k-1] + K_kf.(y[k] - C.x̂[k|k-1] - D.u[k])
+//   P[k|k]      = (I - K_kf.C).P[k|k-1]   (Joseph form for numerical stability)
 //
 // Combined one-call step: step(y, u_prev) = predict(u_prev) + update(y)
 //
@@ -29,9 +29,9 @@ namespace ctrl
     {
     public:
         // plant:   linear discrete-time model (A,B,C,D)
-        // Q_noise: process noise covariance  (n×n, positive semi-definite)
-        // R_noise: measurement noise covariance (p×p, positive definite)
-        // P0:      initial error covariance (n×n, default = I)
+        // Q_noise: process noise covariance  (n*n, positive semi-definite)
+        // R_noise: measurement noise covariance (p*p, positive definite)
+        // P0:      initial error covariance (n*n, default = I)
         KalmanFilter(const StateSpace &plant,
                      const Eigen::MatrixXd &Q_noise,
                      const Eigen::MatrixXd &R_noise,

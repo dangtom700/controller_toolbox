@@ -6,7 +6,7 @@
 #include <functional>
 #include <stdexcept>
 
-// ControllerStack — runs multiple discrete controllers in supervisory or complementary modes.
+// ControllerStack - runs multiple discrete controllers in supervisory or complementary modes.
 //
 // StackMode::Supervisory
 //   Only one controller is active per step.  Entries are evaluated in insertion order;
@@ -19,7 +19,7 @@
 //   Use for: inner/outer cascade (fast PID + slow MPC trim), complementary power splitting.
 //
 // StackMode::Weighted
-//   Weighted sum of all enabled entries: u = Σ wᵢ · uᵢ(e)
+//   Weighted sum of all enabled entries: u = Σ wᵢ . uᵢ(e)
 //   Use for: blended controller transitions, fuzzy membership weighting.
 //
 // Ref: Åström "Control System Design" Ch 9 (Gain Scheduling);
@@ -52,7 +52,7 @@ namespace ctrl
         explicit ControllerStack(StackMode mode, double sampleTime);
 
         // Register a controller at the end of the priority queue.
-        // condition = nullptr  →  always eligible.
+        // condition = nullptr  ->  always eligible.
         void addController(std::shared_ptr<IController> controller,
                            const std::string &name,
                            double weight = 1.0,

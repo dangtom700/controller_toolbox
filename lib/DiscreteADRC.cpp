@@ -35,14 +35,14 @@ namespace ctrl
     }
 
     // ESO forward-Euler update (Gao 2003 bandwidth-parameterisation):
-    //   ε    = y − z₁
-    //   z₁  += Ts·(z₂ + β₁·ε)
-    //   z₂  += Ts·(z₃ + β₂·ε + b₀·u)
-    //   z₃  += Ts·β₃·ε
+    //   epsilon    = y - z₁
+    //   z₁  += Ts.(z₂ + beta₁.epsilon)
+    //   z₂  += Ts.(z₃ + beta₂.epsilon + b₀.u)
+    //   z₃  += Ts.beta₃.epsilon
     //
     // PD + disturbance cancellation:
-    //   u₀   = ω_c²·(r − z₁) − 2·ω_c·z₂
-    //   u    = (u₀ − z₃) / b₀
+    //   u₀   = omega_c^2.(r - z₁) - 2.omega_c.z₂
+    //   u    = (u₀ - z₃) / b₀
     double DiscreteADRC::computeTracking(double y, double r)
     {
         if (!std::isfinite(y) || !std::isfinite(r))

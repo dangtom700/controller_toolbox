@@ -56,7 +56,7 @@ namespace ctrl
 
         y_prev_ = y;
 
-        // Need 2·cyclesRequired crossings for stable period estimate
+        // Need 2.cyclesRequired crossings for stable period estimate
         const int needed = 2 * cfg_.cyclesRequired;
         if (!done_ && static_cast<int>(crossTimes_.size()) >= needed)
         {
@@ -103,7 +103,7 @@ namespace ctrl
             break;
 
         case PIDTuningRule::IMC:
-            // IMC from relay test: approximate tau ≈ Tu/(2π), theta ≈ Ts
+            // IMC from relay test: approximate tau approx = Tu/(2pi), theta approx = Ts
             {
                 const double tau_est = Tu_ / (2.0 * M_PI);
                 const double lam = (lambda > 0) ? lambda : tau_est;
@@ -114,7 +114,7 @@ namespace ctrl
             break;
         }
 
-        p.N = 10.0 / (Tu_ / (2.0 * M_PI)); // derivative filter: cutoff ~ 10× nominal BW
+        p.N = 10.0 / (Tu_ / (2.0 * M_PI)); // derivative filter: cutoff ~ 10* nominal BW
         p.Kb = std::sqrt(p.Ki * p.Kd + 1e-12);
         return p;
     }
@@ -161,7 +161,7 @@ namespace ctrl
             throw std::runtime_error("StepResponseTuner: output did not reach 63.2 % of steady state.");
 
         // Process-reaction-curve method (Åström & Hägglund):
-        //   τ = 1.5·(t63.2 − t28.3),   θ = t63.2 − τ
+        //   τ = 1.5.(t63.2 - t28.3),   θ = t63.2 - τ
         const double tau = 1.5 * (t632 - t283);
         const double theta = std::max(0.0, t632 - tau);
 
@@ -198,7 +198,7 @@ namespace ctrl
             break;
 
         case PIDTuningRule::AMIGO:
-            // AMIGO (Åström & Hägglund 2006) — optimised for robustness
+            // AMIGO (Åström & Hägglund 2006) - optimised for robustness
             {
                 const double ratio = m.theta / m.tau;
                 p.Kp = (1.0 / m.K) * (0.2 + 0.45 * m.tau / m.theta);
@@ -210,7 +210,7 @@ namespace ctrl
             break;
         }
 
-        p.N = 10.0 / m.theta; // derivative filter ~10× dead-time frequency
+        p.N = 10.0 / m.theta; // derivative filter ~10* dead-time frequency
         p.Kb = std::sqrt(std::abs(p.Ki * p.Kd) + 1e-12);
         return p;
     }
@@ -380,7 +380,7 @@ namespace ctrl
         lp.continuousZero = in.omega_c / sqrtA; // z = omega_c / sqrt(alpha)
         lp.continuousPole = in.omega_c * sqrtA; // p = omega_c * sqrt(alpha)
         lp.gain = (in.gain_at_wc > 1e-12)
-                      ? sqrtA / in.gain_at_wc // K = sqrt(alpha) / |G(jω_c)|
+                      ? sqrtA / in.gain_at_wc // K = sqrt(alpha) / |G(jomega_c)|
                       : sqrtA;
         return lp;
     }

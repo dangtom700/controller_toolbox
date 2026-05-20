@@ -9,15 +9,15 @@
 // converge to the extremum of an unknown static (or slowly varying) cost surface.
 //
 // Signal chain per sample k:
-//   1. Dither:        d[k]     = a · sin(2π·f_p·k·Ts)
+//   1. Dither:        d[k]     = a . sin(2pi.f_p.k.Ts)
 //   2. Plant input:   u[k]     = θ[k] + d[k]
 //   3. HPF on y:      y_h[k]   (removes DC/slow bias)
-//   4. Demodulate:    ξ[k]     = y_h[k] · sin(2π·f_p·k·Ts)
-//   5. LPF:           ĝ[k]     (gradient estimate — low-frequency content only)
-//   6. Integrate:     θ[k+1]   = θ[k] − sign · k_int · Ts · ĝ[k]
-//        sign = −1 for minimum seeking, +1 for maximum seeking
+//   4. Demodulate:    ξ[k]     = y_h[k] . sin(2pi.f_p.k.Ts)
+//   5. LPF:           ĝ[k]     (gradient estimate - low-frequency content only)
+//   6. Integrate:     θ[k+1]   = θ[k] - sign . k_int . Ts . ĝ[k]
+//        sign = -1 for minimum seeking, +1 for maximum seeking
 //
-// Dither frequency must satisfy: plant bandwidth << f_p << 1/(Ts · N_filter)
+// Dither frequency must satisfy: plant bandwidth << f_p << 1/(Ts . N_filter)
 // so the plant behaves quasi-statically at the dither frequency.
 //
 // Ref: Ariyur & Krstic "Real-Time Optimisation by Extremum-Seeking Control" (2003);
@@ -28,12 +28,12 @@ namespace ctrl
 
     struct ExtremumSeekerParams
     {
-        double perturbAmp = 0.1;  // Dither amplitude  a      — larger = faster, more perturbation
-        double perturbFreq = 1.0; // Dither frequency  f_p [Hz] — well above closed-loop BW
-        double lpfCutoff = 0.1;   // Low-pass filter   f_lpf [Hz] — gradient smoothing
-        double hpfCutoff = 0.05;  // High-pass filter  f_hpf [Hz] — DC removal
+        double perturbAmp = 0.1;  // Dither amplitude  a      - larger = faster, more perturbation
+        double perturbFreq = 1.0; // Dither frequency  f_p [Hz] - well above closed-loop BW
+        double lpfCutoff = 0.1;   // Low-pass filter   f_lpf [Hz] - gradient smoothing
+        double hpfCutoff = 0.05;  // High-pass filter  f_hpf [Hz] - DC removal
         double integGain = 1.0;   // Gradient integrator gain k_int
-        bool seekMinimum = true;  // true → seek minimum;  false → seek maximum
+        bool seekMinimum = true;  // true -> seek minimum;  false -> seek maximum
     };
 
     class ExtremumSeeker : public IController

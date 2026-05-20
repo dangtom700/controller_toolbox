@@ -23,7 +23,7 @@ int main()
         {1.0, -2.4, 1.91, -0.504},    // denominator (monic)
         Ts);
 
-    // ---- TF → SS conversion (controllable canonical form) ----
+    // ---- TF -> SS conversion (controllable canonical form) ----
     ctrl::StateSpace plant = ctrl::tf2ss(plant_tf);
 
     std::cout << "3rd-order plant (tf2ss):\n"

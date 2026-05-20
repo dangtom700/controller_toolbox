@@ -9,8 +9,8 @@ namespace ctrl
 
     // ---------------------------------------------------------------------------
     // PBH (Popov-Belevitch-Hautus) stabilizability test for discrete-time (A, B).
-    // A system is stabilisable iff for every eigenvalue λ of A with |λ| ≥ 1,
-    // rank([λI − A, B]) = n.  Returns false if any unstable mode is uncontrollable.
+    // A system is stabilisable iff for every eigenvalue lambda of A with |lambda| >= 1,
+    // rank([lambdaI - A, B]) = n.  Returns false if any unstable mode is uncontrollable.
     // ---------------------------------------------------------------------------
     static bool isPBHStabilizable(const Eigen::MatrixXd &A, const Eigen::MatrixXd &B)
     {
@@ -20,9 +20,9 @@ namespace ctrl
 
         for (int i = 0; i < eigs.size(); ++i)
         {
-            if (std::abs(eigs[i]) < 1.0) continue; // stable mode — skip
+            if (std::abs(eigs[i]) < 1.0) continue; // stable mode - skip
 
-            // Build [λI − A | B] and check its rank
+            // Build [lambdaI - A | B] and check its rank
             Eigen::MatrixXcd PBH(n, n + B.cols());
             PBH.leftCols(n)  = eigs[i] * Eigen::MatrixXcd::Identity(n, n)
                                - A.cast<std::complex<double>>();
@@ -38,8 +38,8 @@ namespace ctrl
 
     // ---------------------------------------------------------------------------
     // Value-iteration DARE solver
-    //   P_{t+1} = A'P_t A − (A'P_t B)(R + B'P_t B)⁻¹(B'P_t A) + Q
-    // Converges to the stabilising solution P∞ for stabilisable (A,B) + detectable (A,Q½).
+    //   P_{t+1} = A'P_t A - (A'P_t B)(R + B'P_t B)⁻¹(B'P_t A) + Q
+    // Converges to the stabilising solution Pinf for stabilisable (A,B) + detectable (A,Q½).
     // Ref: Bertsekas "Dynamic Programming and Optimal Control" Vol 1, §1.3.
     // ---------------------------------------------------------------------------
     DareResult DiscreteLQR::solveDARE(const Eigen::MatrixXd &A,
@@ -78,7 +78,7 @@ namespace ctrl
         if (!isPBHStabilizable(plant.A, plant.B))
         {
             std::cerr << "[DiscreteLQR] WARNING: (A,B) failed the PBH stabilizability test. "
-                      << "DARE may not converge — check that all unstable modes are controllable.\n";
+                      << "DARE may not converge - check that all unstable modes are controllable.\n";
         }
 
         DareResult res = solveDARE(plant.A, plant.B, params.Q, params.R);
@@ -89,7 +89,7 @@ namespace ctrl
         {
             std::cerr << "[DiscreteLQR] WARNING: DARE did not converge in "
                       << res.iterations << " iterations. "
-                      << "Using last iterate — verify (A,B) is stabilisable "
+                      << "Using last iterate - verify (A,B) is stabilisable "
                       << "and (A,sqrt(Q)) is detectable.\n";
         }
 
@@ -98,7 +98,7 @@ namespace ctrl
         K_ = S.ldlt().solve(plant.B.transpose() * P_ * plant.A);
     }
 
-    // u[k] = −K*(x − x_ref) + u_ff
+    // u[k] = -K*(x - x_ref) + u_ff
     Eigen::VectorXd DiscreteLQR::compute(const Eigen::VectorXd &x,
                                          const Eigen::VectorXd &x_ref,
                                          const Eigen::VectorXd &u_ff) const

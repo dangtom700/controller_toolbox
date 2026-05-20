@@ -38,7 +38,7 @@ namespace ctrl
         // Innovation covariance
         const Eigen::MatrixXd S = C * P_ * C.transpose() + R_safe;
 
-        // Kalman gain — skip update entirely if S is numerically singular
+        // Kalman gain - skip update entirely if S is numerically singular
         const auto ldlt = S.ldlt();
         if (ldlt.info() != Eigen::Success)
             return;
@@ -49,7 +49,7 @@ namespace ctrl
         const Eigen::VectorXd innov = y - C * x_hat_ - D * u_current;
         x_hat_ += Kf * innov;
 
-        // Covariance update — Joseph form: P = (I−KC)·P·(I−KC)' + K·R·K'
+        // Covariance update - Joseph form: P = (I-KC).P.(I-KC)' + K.R.K'
         const Eigen::MatrixXd IKC = Eigen::MatrixXd::Identity(n, n) - Kf * C;
         P_ = IKC * P_ * IKC.transpose() + Kf * R_safe * Kf.transpose();
     }

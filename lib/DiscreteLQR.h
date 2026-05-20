@@ -8,10 +8,10 @@
 // Discrete-time Linear Quadratic Regulator (LQR).
 //
 // Offline: solves the Discrete Algebraic Riccati Equation (DARE) via value iteration.
-//   P∞ = A'P∞A − (A'P∞B)(R + B'P∞B)⁻¹(B'P∞A) + Q
-//   K*  = (R + B'P∞B)⁻¹ B'P∞A
+//   Pinf = A'PinfA - (A'PinfB)(R + B'PinfB)⁻¹(B'PinfA) + Q
+//   K*  = (R + B'PinfB)⁻¹ B'PinfA
 //
-// Online: u[k] = −K*·(x[k] − x_ref) + u_ff
+// Online: u[k] = -K*.(x[k] - x_ref) + u_ff
 //
 // For output feedback, first reconstruct the state with an observer (e.g., Kalman filter)
 // before calling compute().
@@ -21,7 +21,7 @@
 namespace ctrl
 {
 
-    // Result returned by the DARE solver — carries the solution, convergence flag, and
+    // Result returned by the DARE solver - carries the solution, convergence flag, and
     // iteration count so callers can decide whether to accept an approximate result.
     struct DareResult
     {
@@ -33,10 +33,10 @@ namespace ctrl
     // Tuning weights.
     struct LQRParams
     {
-        Eigen::MatrixXd Q; // State cost  (n×n, positive semi-definite)
-                           //   → increase Q_ii to tighten tracking of state i
-        Eigen::MatrixXd R; // Control cost (m×m, positive definite)
-                           //   → increase R_jj to penalise actuator j
+        Eigen::MatrixXd Q; // State cost  (n*n, positive semi-definite)
+                           //   -> increase Q_ii to tighten tracking of state i
+        Eigen::MatrixXd R; // Control cost (m*m, positive definite)
+                           //   -> increase R_jj to penalise actuator j
     };
 
     class DiscreteLQR
@@ -46,7 +46,7 @@ namespace ctrl
         // Warns to stderr if DARE does not converge; uses the best available iterate.
         DiscreteLQR(const StateSpace &plant, const LQRParams &params);
 
-        // Compute u[k] = −K*(x − x_ref) + u_ff.
+        // Compute u[k] = -K*(x - x_ref) + u_ff.
         // x_ref and u_ff default to zero when empty.
         Eigen::VectorXd compute(const Eigen::VectorXd &x,
                                 const Eigen::VectorXd &x_ref = Eigen::VectorXd(),
@@ -59,14 +59,14 @@ namespace ctrl
         double sampleTime() const { return Ts_; }
 
     private:
-        Eigen::MatrixXd K_; // optimal feedback gain (m×n)
-        Eigen::MatrixXd P_; // DARE stabilising solution (n×n)
+        Eigen::MatrixXd K_; // optimal feedback gain (m*n)
+        Eigen::MatrixXd P_; // DARE stabilising solution (n*n)
         double Ts_;
         int n_, m_;
         bool dare_converged_;
         int  dare_iterations_;
 
-        // Value-iteration DARE solver — returns DareResult (never throws).
+        // Value-iteration DARE solver - returns DareResult (never throws).
         static DareResult solveDARE(const Eigen::MatrixXd &A,
                                     const Eigen::MatrixXd &B,
                                     const Eigen::MatrixXd &Q,
@@ -74,7 +74,7 @@ namespace ctrl
     };
 
     // ---------------------------------------------------------------------------
-    // LQRAdapter — wraps DiscreteLQR as an IController for use in ControllerStack.
+    // LQRAdapter - wraps DiscreteLQR as an IController for use in ControllerStack.
     // Callers supply state and reference via std::function callbacks.
     // For SISO plants the scalar IController::compute() interface is used; the
     // adapter extracts the first element of the LQR control vector.
@@ -82,8 +82,8 @@ namespace ctrl
     class LQRAdapter : public IController
     {
     public:
-        // stateProvider()  → current state vector x[k]  (n×1)
-        // refProvider()    → reference state x_ref[k]   (n×1), may return empty for zero ref
+        // stateProvider()  -> current state vector x[k]  (n*1)
+        // refProvider()    -> reference state x_ref[k]   (n*1), may return empty for zero ref
         LQRAdapter(DiscreteLQR &lqr,
                    std::function<Eigen::VectorXd()> stateProvider,
                    std::function<Eigen::VectorXd()> refProvider = {})

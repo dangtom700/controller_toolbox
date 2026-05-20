@@ -2,7 +2,7 @@
 #include <atomic>
 #include <array>
 
-// AtomicParamBuffer<Params> — lock-free double-buffer for controller parameter updates.
+// AtomicParamBuffer<Params> - lock-free double-buffer for controller parameter updates.
 //
 // Problem:
 //   A background thread (gain scheduler, auto-tuner, telemetry) needs to push
@@ -58,7 +58,7 @@ public:
     }
 
     // Real-time thread: read the current parameter set.
-    // Returns a const reference to the active buffer — zero copy, no allocation.
+    // Returns a const reference to the active buffer - zero copy, no allocation.
     const Params& read() const
     {
         return bufs_[active_.load(std::memory_order_acquire)];

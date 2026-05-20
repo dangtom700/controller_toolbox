@@ -4,18 +4,18 @@
 // Discrete First-Order Sliding Mode Controller (SMC).
 //
 // Sliding surface (SISO, error-based, 1st order):
-//   s[k] = c_e · e[k] + c_de · (e[k] − e[k-1])
+//   s[k] = c_e . e[k] + c_de . (e[k] - e[k-1])
 //         = proportional error + rate-of-error term
 //
 // Control law (boundary-layer saturation to reduce chattering):
-//   u[k] = −K · sat(s[k] / φ)
-//   sat(x) = x        if |x| ≤ 1   (linear PD inside boundary layer)
+//   u[k] = -K . sat(s[k] / φ)
+//   sat(x) = x        if |x| <= 1   (linear PD inside boundary layer)
 //   sat(x) = sign(x)  if |x| > 1   (relay switching outside)
 //
-// Inside boundary layer (|s| ≤ φ): equivalent to a PD controller.
-// Outside (|s| > φ): full switching control — robust to matched disturbances.
+// Inside boundary layer (|s| <= φ): equivalent to a PD controller.
+// Outside (|s| > φ): full switching control - robust to matched disturbances.
 //
-// Setting φ → 0 recovers ideal SMC with chattering.
+// Setting φ -> 0 recovers ideal SMC with chattering.
 // Setting φ large gives a soft PD approximation.
 //
 // Ref: Utkin "Sliding Modes in Control and Optimization" (1992);
@@ -36,7 +36,7 @@ class DiscreteSMC : public IController {
 public:
     explicit DiscreteSMC(const SMCParams& params, double sampleTime);
 
-    // Compute u[k] from error e[k] = r[k] − y[k].
+    // Compute u[k] from error e[k] = r[k] - y[k].
     double compute(double error) override;
 
     void   reset()             override;

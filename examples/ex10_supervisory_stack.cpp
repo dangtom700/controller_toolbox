@@ -1,8 +1,8 @@
 // ============================================================
 //  ex10_supervisory_stack.cpp
 //  ControllerStack in Supervisory mode:
-//    • Large error  (|e| > 0.3): SMC handles the fast, nonlinear regime
-//    • Small error  (|e| ≤ 0.3): LQR takes over for near-optimal regulation
+//    - Large error  (|e| > 0.3): SMC handles the fast, nonlinear regime
+//    - Small error  (|e| <= 0.3): LQR takes over for near-optimal regulation
 //
 //  The stack evaluates activation conditions in insertion order and
 //  selects the first eligible controller.
@@ -30,7 +30,7 @@ int main()
     sp.c_e = 1.0; sp.c_de = 0.5; sp.K = 8.0; sp.phi = 0.3;
     sp.uMin = -10.0; sp.uMax = 10.0;
 
-    // ---- LQR via adapter (active when |error| ≤ 0.3) ----
+    // ---- LQR via adapter (active when |error| <= 0.3) ----
     Eigen::Vector2d xmax_v; xmax_v << 1.0, 1.0;
     Eigen::VectorXd umax_v(1); umax_v << 10.0;
     ctrl::LQRParams lqr_p = ctrl::LQRWeightTuner::brysonMethod(xmax_v, umax_v);

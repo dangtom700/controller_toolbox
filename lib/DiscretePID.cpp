@@ -11,14 +11,14 @@ namespace ctrl
         reset();
     }
 
-    // Discrete PID — backward Euler integral + backward-Euler filtered derivative.
+    // Discrete PID - backward Euler integral + backward-Euler filtered derivative.
     //
-    // Derivative filter recurrence (derived from C_D(s) = Kd·N·s/(s+N), backward Euler):
-    //   α     = 1 / (1 + N·Ts)
-    //   d[k]  = α·d[k-1] + Kd·N·α·(e[k] − e[k-1])
+    // Derivative filter recurrence (derived from C_D(s) = Kd.N.s/(s+N), backward Euler):
+    //   alpha     = 1 / (1 + N.Ts)
+    //   d[k]  = alpha.d[k-1] + Kd.N.alpha.(e[k] - e[k-1])
     //
     // Anti-windup back-calculation (Åström & Wittenmark):
-    //   I[k+1] = I[k] + Ki·Ts·e[k] + Kb·(u_sat[k] − u_unsat[k])
+    //   I[k+1] = I[k] + Ki.Ts.e[k] + Kb.(u_sat[k] - u_unsat[k])
     double DiscretePID::compute(double error)
     {
         // Hold last output on bad measurement rather than corrupting integral state

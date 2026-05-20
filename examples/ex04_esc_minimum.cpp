@@ -1,7 +1,7 @@
 // ============================================================
 //  ex04_esc_minimum.cpp
 //  Extremum Seeking Control on a static quadratic cost surface.
-//  Goal: find the unknown minimum of J(u) = (u − 3.5)² + 5
+//  Goal: find the unknown minimum of J(u) = (u - 3.5)^2 + 5
 //  without knowing where 3.5 is.
 //
 //  MATLAB equivalent:
@@ -18,7 +18,7 @@ int main()
 
     ctrl::ExtremumSeekerParams ep;
     ep.perturbAmp  = 0.2;   // dither amplitude
-    ep.perturbFreq = 5.0;   // 5 Hz dither — well above gradient bandwidth
+    ep.perturbFreq = 5.0;   // 5 Hz dither - well above gradient bandwidth
     ep.lpfCutoff   = 0.2;   // gradient LPF
     ep.hpfCutoff   = 0.1;   // DC removal
     ep.integGain   = 2.0;   // how fast the operating point moves

@@ -1,37 +1,37 @@
 /*
- * siso_coupled.cpp — Coupled SISO Known-Plant: Full Suite of Methods
+ * siso_coupled.cpp - Coupled SISO Known-Plant: Full Suite of Methods
  * ====================================================================
  * Case 2: Strongly coupled second-order SISO plant
  *
- * Plant: G(s) = 1 / (s² + 1.5s + 1)
+ * Plant: G(s) = 1 / (s^2 + 1.5s + 1)
  *   State-space (controllable canonical form, ZOH Ts=0.01 s):
  *     A = [ 1.98511  -0.98522 ]    B = [ 4.9625e-5 ]
  *         [ 1.0       0.0    ]        [ 4.9125e-5 ]
  *     C = [ 1.0  0.0 ]               D = [ 0 ]
- *   Eigenvalues: −0.75±0.9614j  (continuous)  →  lightly underdamped
+ *   Eigenvalues: -0.75+/-0.9614j  (continuous)  ->  lightly underdamped
  *   DC gain: 1.0
  *
  * "Coupled" refers to the strong internal-state coupling: the off-diagonal
  * elements of A couple position-like and velocity-like states, causing
  * every control action to excite both modes simultaneously.
  *
- * All controllers evaluated on unit-step reference, u ∈ [−10, 10]:
- *   PID:  ZN (relay), IMC (λ=0.3,0.5,1.0), Cohen-Coon, NM-optimised
+ * All controllers evaluated on unit-step reference, u ∈ [-10, 10]:
+ *   PID:  ZN (relay), IMC (lambda=0.3,0.5,1.0), Cohen-Coon, NM-optimised
  *   LQR:  Bryson, NM-optimised
  *   SMC:  default params, NM-optimised
  *   ADRC: Gao bandwidth params, NM-optimised
- *   LeadLag: loop-shaping (ωc=2, φ=50°)
+ *   LeadLag: loop-shaping (omegac=2, φ=50°)
  *   Smith Predictor: IMC inner PID + 3-step delay model
  *
- * Cost: J = ISE + 0.1·ITAE + 0.01·∫u²dt
+ * Cost: J = ISE + 0.1.ITAE + 0.01.∫u^2dt
  * Pareto analysis: ranks all methods by J, fuzzy score for each.
  *
  * Expected output:
- *   — System equations and eigenvalues
- *   — Per-method table: ISE, ITAE, OS[%], T_settle, ∫u², J
- *   — Pareto-optimal highlighted
- *   — Fuzzy score for each method
- *   — Results → siso_coupled_results.csv
+ *   - System equations and eigenvalues
+ *   - Per-method table: ISE, ITAE, OS[%], T_settle, ∫u^2, J
+ *   - Pareto-optimal highlighted
+ *   - Fuzzy score for each method
+ *   - Results -> siso_coupled_results.csv
  *
  * Build: see examples/CMakeLists.txt
  */
@@ -54,7 +54,7 @@
 using namespace ctrl;
 
 // =========================================================================
-// Plant constants (G(s)=1/(s²+1.5s+1), Ts=0.01 s, ZOH)
+// Plant constants (G(s)=1/(s^2+1.5s+1), Ts=0.01 s, ZOH)
 // =========================================================================
 static constexpr double Ts       = 0.01;
 static constexpr double UMAX     = 10.0;
@@ -69,7 +69,7 @@ inline StateSpace make_plant() {
 }
 
 // =========================================================================
-// One-step helper: scalar input → scalar output, state updated in-place
+// One-step helper: scalar input -> scalar output, state updated in-place
 // =========================================================================
 inline double plant_step(const StateSpace& sys, Eigen::VectorXd& x, double u) {
     Eigen::VectorXd uv(1); uv << u;
@@ -127,7 +127,7 @@ static void print_metrics(const std::string& name, const SISOMetrics& m) {
 }
 
 // =========================================================================
-// Nelder-Mead (α=1, γ=2, ρ=0.5, σ=0.5 — matches lib/TunerSuite.cpp)
+// Nelder-Mead (alpha=1, γ=2, ρ=0.5, sigma=0.5 - matches lib/TunerSuite.cpp)
 // =========================================================================
 static std::vector<double>
 nelder_mead(std::function<double(const std::vector<double>&)> f,
@@ -184,7 +184,7 @@ nelder_mead(std::function<double(const std::vector<double>&)> f,
 }
 
 // =========================================================================
-// Generic simulation runner: ctrl_fn(ref, y_prev, k) → u
+// Generic simulation runner: ctrl_fn(ref, y_prev, k) -> u
 // =========================================================================
 template<typename CtrlFn>
 static SISOMetrics sim(CtrlFn ctrl_fn, double ref = 1.0) {
@@ -202,7 +202,7 @@ static SISOMetrics sim(CtrlFn ctrl_fn, double ref = 1.0) {
 }
 
 // =========================================================================
-// A. PID helper — build from gains, simulate, print
+// A. PID helper - build from gains, simulate, print
 // =========================================================================
 static SISOMetrics pid_rule(double Kp, double Ki, double Kd, const std::string& tag) {
     PIDParams pp;
@@ -235,13 +235,13 @@ static StepResponseTuner::FOPDTModel identify_fopdt(double step_mag = 1.0,
 // =========================================================================
 int main() {
     std::cout << "=================================================================\n";
-    std::cout << " Coupled SISO — All Tuning Methods\n";
-    std::cout << " G(s) = 1/(s²+1.5s+1), Ts=0.01s, u ∈ [−10,10]\n";
+    std::cout << " Coupled SISO - All Tuning Methods\n";
+    std::cout << " G(s) = 1/(s^2+1.5s+1), Ts=0.01s, u ∈ [-10,10]\n";
     std::cout << "=================================================================\n";
     std::cout << "\n  Plant discrete SS (ZOH, Ts=0.01 s):\n"
               << "    A = [1.98511, -0.98522; 1.0, 0.0]\n"
               << "    B = [4.9625e-5; 4.9125e-5],  C = [1.0, 0.0]\n"
-              << "  DC gain: 1.0   Eigenvalues: −0.75±0.961j (continuous)\n\n";
+              << "  DC gain: 1.0   Eigenvalues: -0.75+/-0.961j (continuous)\n\n";
 
     std::vector<std::string> labels;
     std::vector<SISOMetrics> results;
@@ -250,7 +250,7 @@ int main() {
     };
 
     // -----------------------------------------------------------------------
-    // A1. PID — Relay → Ziegler-Nichols
+    // A1. PID - Relay -> Ziegler-Nichols
     // -----------------------------------------------------------------------
     {
         RelayTunerConfig rcfg;
@@ -270,13 +270,13 @@ int main() {
         // Classic ZN PID formula
         double Kp = 0.6*Ku, Ki = Kp/(0.5*Tu), Kd = Kp*(0.125*Tu);
         std::cout << "  ZN relay: Ku=" << std::setprecision(4) << Ku
-                  << " Tu=" << Tu << " → Kp=" << Kp
+                  << " Tu=" << Tu << " -> Kp=" << Kp
                   << " Ki=" << Ki << " Kd=" << Kd << "\n";
         add("PID-ZN", pid_rule(Kp, Ki, Kd, "PID-ZN"));
     }
 
     // -----------------------------------------------------------------------
-    // A2. PID — IMC (λ = 0.3, 0.5, 1.0)
+    // A2. PID - IMC (lambda = 0.3, 0.5, 1.0)
     // -----------------------------------------------------------------------
     {
         auto fopdt = identify_fopdt();
@@ -295,7 +295,7 @@ int main() {
     }
 
     // -----------------------------------------------------------------------
-    // A3. PID — Cohen-Coon
+    // A3. PID - Cohen-Coon
     // -----------------------------------------------------------------------
     {
         auto fopdt = identify_fopdt();
@@ -309,7 +309,7 @@ int main() {
     }
 
     // -----------------------------------------------------------------------
-    // A4. PID — Nelder-Mead optimised (ISE+ITAE+energy)
+    // A4. PID - Nelder-Mead optimised (ISE+ITAE+energy)
     // -----------------------------------------------------------------------
     {
         auto cost = [](const std::vector<double>& p) -> double {
@@ -336,7 +336,7 @@ int main() {
     }
 
     // -----------------------------------------------------------------------
-    // B1. LQR — Bryson's Rule (Q=I, R=0.04)
+    // B1. LQR - Bryson's Rule (Q=I, R=0.04)
     // -----------------------------------------------------------------------
     {
         StateSpace plant_ref = make_plant();
@@ -344,7 +344,7 @@ int main() {
         lp.Q = Eigen::Matrix2d::Identity();
         lp.R = 0.04 * Eigen::Matrix<double,1,1>::Identity();
         DiscreteLQR lqr(plant_ref, lp);
-        Eigen::MatrixXd K = lqr.gainMatrix(); // 1×2
+        Eigen::MatrixXd K = lqr.gainMatrix(); // 1*2
 
         // Feedforward Nbar for setpoint tracking: Nbar = -1/(C*(A_cl-I)^{-1}*B)
         Eigen::MatrixXd A_cl = plant_ref.A - plant_ref.B * K;
@@ -368,7 +368,7 @@ int main() {
     }
 
     // -----------------------------------------------------------------------
-    // B2. LQR — Nelder-Mead optimised (q1, q2, r in natural scale)
+    // B2. LQR - Nelder-Mead optimised (q1, q2, r in natural scale)
     // -----------------------------------------------------------------------
     {
         auto cost = [](const std::vector<double>& p) -> double {
@@ -418,7 +418,7 @@ int main() {
     }
 
     // -----------------------------------------------------------------------
-    // C1. SMC — default params
+    // C1. SMC - default params
     // -----------------------------------------------------------------------
     {
         SMCParams sp; sp.c_e=1.0; sp.c_de=10.0; sp.K=5.0; sp.phi=0.1;
@@ -429,7 +429,7 @@ int main() {
     }
 
     // -----------------------------------------------------------------------
-    // C2. SMC — Nelder-Mead optimised
+    // C2. SMC - Nelder-Mead optimised
     // -----------------------------------------------------------------------
     {
         auto cost = [](const std::vector<double>& p) -> double {
@@ -460,7 +460,7 @@ int main() {
     }
 
     // -----------------------------------------------------------------------
-    // D1. ADRC — Gao bandwidth params
+    // D1. ADRC - Gao bandwidth params
     // -----------------------------------------------------------------------
     {
         ADRCParams ap; ap.omega_o=20.0; ap.omega_c=4.0; ap.b0=1e-4;
@@ -471,7 +471,7 @@ int main() {
     }
 
     // -----------------------------------------------------------------------
-    // D2. ADRC — Nelder-Mead optimised
+    // D2. ADRC - Nelder-Mead optimised
     // -----------------------------------------------------------------------
     {
         auto cost = [](const std::vector<double>& p) -> double {
@@ -492,8 +492,8 @@ int main() {
         };
         auto xopt=nelder_mead(cost,{20.0,4.0,1e-4},
                               {{1.0,100},{0.5,20},{1e-6,1e-2}},400);
-        std::cout<<"  NM-ADRC: ωo="<<std::setprecision(4)<<xopt[0]
-                 <<" ωc="<<xopt[1]<<" b0="<<xopt[2]<<"\n";
+        std::cout<<"  NM-ADRC: omegao="<<std::setprecision(4)<<xopt[0]
+                 <<" omegac="<<xopt[1]<<" b0="<<xopt[2]<<"\n";
         ADRCParams ap; ap.omega_o=xopt[0]; ap.omega_c=xopt[1]; ap.b0=xopt[2];
         ap.uMin=-UMAX; ap.uMax=UMAX;
         DiscreteADRC adrc2(ap, Ts);
@@ -502,15 +502,15 @@ int main() {
     }
 
     // -----------------------------------------------------------------------
-    // E. Lead-Lag — frequency-domain loop shaping (ωc=2 rad/s, φ=50°)
+    // E. Lead-Lag - frequency-domain loop shaping (omegac=2 rad/s, φ=50°)
     // -----------------------------------------------------------------------
     {
-        // |G(j·2)| for G(s)=1/(s²+1.5s+1): |G(j2)| = 1/|((j2)²+1.5(j2)+1)|
-        // = 1/|(-4+1+3j)| = 1/|(-3+3j)| = 1/(3√2) ≈ 0.2357
+        // |G(j.2)| for G(s)=1/(s^2+1.5s+1): |G(j2)| = 1/|((j2)^2+1.5(j2)+1)|
+        // = 1/|(-4+1+3j)| = 1/|(-3+3j)| = 1/(3√2) approx = 0.2357
         LoopShapingTuner::Input lsin;
         lsin.omega_c       = 2.0;
         lsin.phase_add_deg = 50.0;
-        lsin.gain_at_wc    = 1.0 / std::sqrt(9.0 + 9.0); // |G(j2)| ≈ 0.2357
+        lsin.gain_at_wc    = 1.0 / std::sqrt(9.0 + 9.0); // |G(j2)| approx = 0.2357
         auto llp = LoopShapingTuner::tuneImpl(lsin);
         DiscreteLeadLag ll(llp, Ts);
         auto m = sim([&](double r, double y, int) { return ll.compute(r-y); });
@@ -520,7 +520,7 @@ int main() {
     }
 
     // -----------------------------------------------------------------------
-    // F. Smith Predictor — IMC inner PID + 3-step delay model
+    // F. Smith Predictor - IMC inner PID + 3-step delay model
     // -----------------------------------------------------------------------
     {
         auto fopdt = identify_fopdt();
@@ -554,7 +554,7 @@ int main() {
     // =========================================================================
     // Summary: Pareto ranking by composite cost J
     // =========================================================================
-    std::cout << "\n=== Pareto Summary (J = ISE + 0.1·ITAE + 0.01·Energy) ===\n";
+    std::cout << "\n=== Pareto Summary (J = ISE + 0.1.ITAE + 0.01.Energy) ===\n";
     // Build sorted index
     std::vector<size_t> rank_idx(results.size());
     std::iota(rank_idx.begin(), rank_idx.end(), 0);
@@ -589,6 +589,6 @@ int main() {
         f << labels[i] << "," << results[i].ISE << "," << results[i].ITAE << ","
           << results[i].energy << "," << results[i].overshoot_pct << ","
           << results[i].settle_time << "," << results[i].J << "\n";
-    std::cout << "\n  Results saved → siso_coupled_results.csv\n";
+    std::cout << "\n  Results saved -> siso_coupled_results.csv\n";
     return 0;
 }

@@ -1,6 +1,6 @@
 // ============================================================
 //  example_pid_feedback.cpp
-//  Demonstrates: define plant → relay-tune PID → closed-loop simulation
+//  Demonstrates: define plant -> relay-tune PID -> closed-loop simulation
 //
 //  Equivalent MATLAB/Simulink workflow:
 //    G = tf([1], [1 1.5 1]);           % second-order plant
@@ -15,9 +15,9 @@
 int main()
 {
     // -------------------------------------------------------
-    // 1. Plant: continuous G(s) = 1/(s² + 1.5s + 1)
+    // 1. Plant: continuous G(s) = 1/(s^2 + 1.5s + 1)
     //    Discretised with ZOH at Ts = 0.01 s (MATLAB c2d result):
-    //    G(z⁻¹) = (4.99e-5 + 4.95e-5·z⁻¹) / (1 − 1.985·z⁻¹ + 0.985·z⁻²)
+    //    G(z⁻¹) = (4.99e-5 + 4.95e-5.z⁻¹) / (1 - 1.985.z⁻¹ + 0.985.z⁻^2)
     // -------------------------------------------------------
     const double Ts = 0.01; // 10 ms sample time
 
@@ -30,7 +30,7 @@ int main()
     Eigen::VectorXd  x        = Eigen::VectorXd::Zero(plant_ss.stateSize());
 
     // -------------------------------------------------------
-    // 2. Relay auto-tuner — identifies ultimate gain / period
+    // 2. Relay auto-tuner - identifies ultimate gain / period
     //    (run open-loop relay test on the plant in simulation)
     // -------------------------------------------------------
     ctrl::RelayTunerConfig relay_cfg;
@@ -47,11 +47,11 @@ int main()
         y_tune = ctrl::ssStep(plant_ss, x_tune, uv)(0);
     }
 
-    std::cout << "Relay test → Ku = " << std::fixed << std::setprecision(4)
+    std::cout << "Relay test -> Ku = " << std::fixed << std::setprecision(4)
               << tuner.ultimateGain() << ", Tu = " << tuner.ultimatePeriod() << " s\n";
 
     // -------------------------------------------------------
-    // 3. PID parameters via Tyreus–Luyben rule
+    // 3. PID parameters via Tyreus-Luyben rule
     // -------------------------------------------------------
     ctrl::PIDParams pid_p = tuner.computePIDParams(ctrl::PIDTuningRule::TyreusLuyben);
     pid_p.uMin = -20.0;
@@ -64,7 +64,7 @@ int main()
 
     // -------------------------------------------------------
     // 4. Build a ControllerStack (Supervisory, single PID entry).
-    //    Adding MPC or LQR later only requires addController() — loop unchanged.
+    //    Adding MPC or LQR later only requires addController() - loop unchanged.
     // -------------------------------------------------------
     ctrl::ControllerStack stack(ctrl::StackMode::Supervisory, Ts);
     stack.addController(std::make_shared<ctrl::DiscretePID>(pid_p, Ts), "PID_primary");

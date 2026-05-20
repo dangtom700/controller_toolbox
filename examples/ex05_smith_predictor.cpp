@@ -42,8 +42,8 @@ int main()
     const double Ts = 0.1;
     const int    d  = 8;   // 8-sample = 0.8 s dead-time
 
-    // Delay-free plant G(s) = 1/(s+0.5) → ZOH at Ts=0.1:
-    // G(z) = 0.3935 / (z − 0.9512)  →  num={0,0.3935}, den={1,−0.9512}
+    // Delay-free plant G(s) = 1/(s+0.5) -> ZOH at Ts=0.1:
+    // G(z) = 0.3935 / (z - 0.9512)  ->  num={0,0.3935}, den={1,-0.9512}
     ctrl::TransferFunction tf_nodelay({ 0.0, 0.3935 }, { 1.0, -0.9512 }, Ts);
     ctrl::StateSpace       ss_nodelay = ctrl::tf2ss(tf_nodelay);
 

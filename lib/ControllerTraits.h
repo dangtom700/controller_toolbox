@@ -9,12 +9,12 @@
 //
 //  Two enforcement levels:
 //
-//   Hard error  (static_assert) — tuner<C>() in ControllerTuner.h
+//   Hard error  (static_assert) - tuner<C>() in ControllerTuner.h
 //       fires when ControllerTraits<C>::supports_<X> == false.
 //       The message names the compatible controllers and
 //       suggests the correct tuner to use instead.
 //
-//   Soft warning ([[deprecated]] struct) — instantiated inside
+//   Soft warning ([[deprecated]] struct) - instantiated inside
 //       an `if constexpr` branch in the tuner template method.
 //       Warns without blocking compilation when a strategy is
 //       technically valid but leaves part of the controller
@@ -80,7 +80,7 @@ namespace ctrl
         template <typename T>
         [[deprecated(
             "\n[LQRWeightTuner::polePlacementHintFor<DiscreteLQG>]"
-            " Partial tuning — observer gains not addressed.\n"
+            " Partial tuning - observer gains not addressed.\n"
             "  Pole placement steers LQR closed-loop eigenvalues via Q/R.\n"
             "  The Kalman observer gains depend on Qf, Rf (noise covariances),\n"
             "  which are NOT set by this method.\n"
@@ -92,7 +92,7 @@ namespace ctrl
 
     } // namespace detail
 
-    // ── Primary template — undefined for unknown types ────────────
+    // ── Primary template - undefined for unknown types ────────────
     // Any use of ControllerTraits<T> for an unregistered T triggers
     // a clear compile error that names the missing specialisation.
     template <typename C>

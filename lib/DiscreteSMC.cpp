@@ -11,11 +11,11 @@ namespace ctrl
         reset();
     }
 
-    // Sliding surface: s[k] = c_e·e[k] + c_de·(e[k] − e[k-1])
+    // Sliding surface: s[k] = c_e.e[k] + c_de.(e[k] - e[k-1])
     //
     // Boundary layer saturation avoids chattering:
-    //   |s| ≤ φ  →  continuous PD law (sat = s/φ)
-    //   |s| > φ  →  full relay switching  (sat = sign(s))
+    //   |s| <= φ  ->  continuous PD law (sat = s/φ)
+    //   |s| > φ  ->  full relay switching  (sat = sign(s))
     double DiscreteSMC::compute(double error)
     {
         if (!std::isfinite(error))

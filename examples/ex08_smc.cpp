@@ -1,10 +1,10 @@
 // ============================================================
 //  ex08_smc.cpp
 //  Sliding Mode Controller on a 2nd-order plant with
-//  ±30 % parameter uncertainty. Compares SMC vs PID.
+//  +/-30 % parameter uncertainty. Compares SMC vs PID.
 //
-//  Nominal plant: G(s) = 1/(s²+2s+1)
-//  Perturbed:     G'(s) = 1.3/(s²+1.4s+0.7)   (gain +30%, poles shifted)
+//  Nominal plant: G(s) = 1/(s^2+2s+1)
+//  Perturbed:     G'(s) = 1.3/(s^2+1.4s+0.7)   (gain +30%, poles shifted)
 //
 //  MATLAB equivalent:
 //    % Sliding mode is in Simulink Variable Structure Control library
@@ -24,7 +24,7 @@ int main()
         { 1.0, -1.9800,   0.9802  }, Ts);
     ctrl::StateSpace nom = ctrl::tf2ss(tf_nom);
 
-    // ---- Perturbed plant (for simulation) — ±30% uncertainty ----
+    // ---- Perturbed plant (for simulation) - +/-30% uncertainty ----
     ctrl::TransferFunction tf_pert(
         { 0.0, 6.45e-5, 6.35e-5 },
         { 1.0, -1.9860, 0.9862  }, Ts);
@@ -35,7 +35,7 @@ int main()
     sp.c_e  = 1.0;
     sp.c_de = 0.8;
     sp.K    = 6.0;
-    sp.phi  = 0.4;   // boundary layer — avoids chattering
+    sp.phi  = 0.4;   // boundary layer - avoids chattering
     sp.uMin = -10.0;
     sp.uMax =  10.0;
 

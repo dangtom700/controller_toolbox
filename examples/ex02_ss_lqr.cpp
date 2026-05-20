@@ -4,9 +4,9 @@
 //  LQR designed with Bryson's method, full state feedback.
 //
 //  DC motor (continuous):
-//    J·dω/dt = -b·ω + Km·i
-//    L·di/dt = -Km·ω - R·i + V
-//    y = ω  (angular velocity)
+//    J.domega/dt = -b.omega + Km.i
+//    L.di/dt = -Km.omega - R.i + V
+//    y = omega  (angular velocity)
 //
 //  Discretised with Euler forward at Ts = 0.001 s.
 //
@@ -24,7 +24,7 @@
 int main()
 {
     // ---- DC motor parameters ----
-    const double J = 0.001;  // rotor inertia  [kg.m²]
+    const double J = 0.001;  // rotor inertia  [kg.m^2]
     const double b = 0.1;    // viscous friction [N.m.s/rad]
     const double Km = 0.01;  // motor / back-EMF constant
     const double R = 1.0;    // armature resistance [Ω]
@@ -68,7 +68,7 @@ int main()
     ctrl::DiscreteLQR lqr(plant, lqr_p);
     std::cout << "Gain K = " << lqr.gainMatrix() << "\n\n";
 
-    // ---- Reference state: ω_ref = 50 rad/s, i_ref = 0 ----
+    // ---- Reference state: omega_ref = 50 rad/s, i_ref = 0 ----
     Eigen::Vector2d x_ref;
     x_ref << 50.0, 0.0;
 
@@ -83,7 +83,7 @@ int main()
     for (int k = 0; k <= 1000; ++k)
     {
         Eigen::VectorXd u = lqr.compute(x, x_ref);
-        // Saturate voltage to ±12 V
+        // Saturate voltage to +/-12 V
         u(0) = std::max(-12.0, std::min(12.0, u(0)));
 
         ctrl::ssStep(plant, x, u); // x updated in-place to x[k+1]

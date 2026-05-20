@@ -1,7 +1,7 @@
 // ============================================================
 //  ex01_tf_pid.cpp
 //  Plant defined as a discrete Transfer Function.
-//  Tuning: open-loop step response → StepResponseTuner (FOPDT fit) → IMC-PID.
+//  Tuning: open-loop step response -> StepResponseTuner (FOPDT fit) -> IMC-PID.
 //  Closed-loop unit-step response.
 //
 //  MATLAB equivalent:
@@ -19,7 +19,7 @@
 
 int main()
 {
-    // ---- Plant: G(s) = 1/(s²+1.5s+1) → ZOH at Ts=0.01s ----
+    // ---- Plant: G(s) = 1/(s^2+1.5s+1) -> ZOH at Ts=0.01s ----
     const double Ts = 0.01;
     ctrl::TransferFunction plant_tf(
         {0.0, 4.9625e-5, 4.9125e-5}, // num: [b0, b1, b2]

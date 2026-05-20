@@ -42,7 +42,7 @@ namespace ctrl
             m.peakOvershoot = 0.0;
         }
 
-        // Settling Time (2% band) — scan backward to find last sample outside the band
+        // Settling Time (2% band) - scan backward to find last sample outside the band
         double lower_bound = reference * 0.98;
         double upper_bound = reference * 1.02;
         int settle_idx = -1; // -1 = signal never entered the 2% band

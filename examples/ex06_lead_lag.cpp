@@ -20,13 +20,13 @@ int main()
 {
     const double Ts = 0.05;
 
-    // ---- Plant G(s) = 1/(s+0.2) → ZOH ----
-    // G(z⁻¹) ≈ (0.00995) / (1 - 0.99z⁻¹)
+    // ---- Plant G(s) = 1/(s+0.2) -> ZOH ----
+    // G(z⁻¹) approx = (0.00995) / (1 - 0.99z⁻¹)
     ctrl::TransferFunction tf({ 0.0, 0.00995 }, { 1.0, -0.990 }, Ts);
     ctrl::StateSpace plant = ctrl::tf2ss(tf);
 
     // ---- Lead compensator C(s) = K*(s+z_c)/(s+p_c) ----
-    // z_c=2, p_c=20, K=1 → adds ~45° at ~6 rad/s crossover
+    // z_c=2, p_c=20, K=1 -> adds ~45° at ~6 rad/s crossover
     ctrl::LeadLagParams llp;
     llp.continuousZero = 2.0;
     llp.continuousPole = 20.0;
@@ -72,7 +72,7 @@ int main()
 
         for (int k = 0; k <= 300; ++k) {
             double e       = 1.0 - y;
-            double u_lead  = lead.compute(e);   // error → lead filter → plant
+            double u_lead  = lead.compute(e);   // error -> lead filter -> plant
             double u       = Kp * u_lead;
             Eigen::VectorXd uv(1); uv << u;
             y = ctrl::ssStep(plant, x, uv)(0);

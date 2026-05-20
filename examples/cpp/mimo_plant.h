@@ -1,5 +1,5 @@
 /*
- * mimo_plant.h — Coupled 2-Mass-Spring-Damper MIMO Plant
+ * mimo_plant.h - Coupled 2-Mass-Spring-Damper MIMO Plant
  * =======================================================
  * Physical system: Two masses on a frictionless surface, each attached to a
  * wall by a spring and damper, and coupled together by a coupling spring and
@@ -9,7 +9,7 @@
  * Parameters:
  *   m1 = m2 = 1 kg
  *   k1 = k2 = 4 N/m   (wall springs)
- *   kc = 3 N/m         (coupling spring — gives RGA ≈ [1.22, -0.22; -0.22, 1.22])
+ *   kc = 3 N/m         (coupling spring - gives RGA approx = [1.22, -0.22; -0.22, 1.22])
  *   c1 = c2 = 0.5 Ns/m (wall dampers)
  *   cc = 0.5 Ns/m      (coupling damper)
  *
@@ -26,8 +26,8 @@
  *
  * C = [1, 0, 0, 0;  0, 0, 1, 0]     D = 0
  *
- * Continuous eigenvalues: -0.25 ± 1.98j (slow), -0.75 ± 3.07j (fast)
- * DC gain: G(0) = C*(-A_ct)^{-1}*B_ct ≈ [0.175, 0.075; 0.075, 0.175]
+ * Continuous eigenvalues: -0.25 +/- 1.98j (slow), -0.75 +/- 3.07j (fast)
+ * DC gain: G(0) = C*(-A_ct)^{-1}*B_ct approx = [0.175, 0.075; 0.075, 0.175]
  *
  * ZOH discretization at Ts = 0.01 s via matrix exponential of the augmented
  * system [A, B; 0, 0] * Ts (see zoh() below).
@@ -48,7 +48,7 @@ constexpr int    Ny = 2;      // output dimension
 
 // -------------------------------------------------------------------------
 // Matrix exponential via 20-term Taylor series.
-// Convergence is assured when ||M||_F << 1 (here ||A_ct||*Ts ≈ 0.1).
+// Convergence is assured when ||M||_F << 1 (here ||A_ct||*Ts approx = 0.1).
 // -------------------------------------------------------------------------
 inline Eigen::MatrixXd matexp(const Eigen::MatrixXd& M, int order = 20) {
     Eigen::MatrixXd R = Eigen::MatrixXd::Identity(M.rows(), M.cols());
@@ -62,7 +62,7 @@ inline Eigen::MatrixXd matexp(const Eigen::MatrixXd& M, int order = 20) {
 }
 
 // -------------------------------------------------------------------------
-// Zero-order hold discretization: Ad, Bd ← (Ac, Bc, Ts)
+// Zero-order hold discretization: Ad, Bd <- (Ac, Bc, Ts)
 // Uses the augmented matrix exponential:
 //   exp([Ac, Bc; 0, 0] * Ts) = [Ad, Bd; 0, I]
 // -------------------------------------------------------------------------
@@ -141,12 +141,12 @@ inline void print_plant_info(const MIMOStateSpace& plant) {
     std::cout << "  Ts = " << Ts << " s   (ZOH discretization)\n\n";
     std::cout << "  DC Gain G(1) =\n" << std::fixed << std::setprecision(5) << Gdc << "\n\n";
     std::cout << "  Relative Gain Array (RGA) =\n" << RGA << "\n";
-    std::cout << "  RGA note: diagonal > 1 → coupling exists; "
-              << "pair (u1→y1) and (u2→y2) is recommended.\n\n";
+    std::cout << "  RGA note: diagonal > 1 -> coupling exists; "
+              << "pair (u1->y1) and (u2->y2) is recommended.\n\n";
 }
 
 // -------------------------------------------------------------------------
-// DARE via value iteration (supports MIMO: B is n×m, R is m×m)
+// DARE via value iteration (supports MIMO: B is n*m, R is m*m)
 // Solves: P = Q + A'PA - A'PB(R + B'PB)^{-1}B'PA
 // -------------------------------------------------------------------------
 inline Eigen::MatrixXd dare(const Eigen::MatrixXd& A, const Eigen::MatrixXd& B,
@@ -179,7 +179,7 @@ inline Eigen::MatrixXd lqr_gain(const Eigen::MatrixXd& A, const Eigen::MatrixXd&
 // -------------------------------------------------------------------------
 struct MIMOMetrics {
     double ISE_y1, ISE_y2, ITAE_y1, ITAE_y2;
-    double E_u1, E_u2;   // control energy ∫u²dt
+    double E_u1, E_u2;   // control energy ∫u^2dt
     double OS_y1, OS_y2; // overshoot [%]
 
     double total_cost(double w_ise  = 1.0,
@@ -209,8 +209,8 @@ struct MIMOMetrics {
 // Compute performance metrics from y1, y2, u1, u2 trajectories
 // ref1, ref2 = reference setpoints (assumed constant step)
 // -------------------------------------------------------------------------
-inline MIMOMetrics compute_metrics(const Eigen::MatrixXd& Y,  // STEPS × 2
-                                   const Eigen::MatrixXd& U,  // STEPS × 2
+inline MIMOMetrics compute_metrics(const Eigen::MatrixXd& Y,  // STEPS * 2
+                                   const Eigen::MatrixXd& U,  // STEPS * 2
                                    double ref1, double ref2) {
     int N = (int)Y.rows();
     MIMOMetrics m{};

@@ -7,7 +7,7 @@
 //  2. System Identification: Identify a nominal FOPDT model from data.
 //  3. Controller Design: Implement PID, LQR+I, MPC, and ADRC based on the identified model.
 //  4. Monte Carlo Robustness: Estimate model tolerance by perturbing the true plant
-//     (±20% parametric uncertainty) and evaluating all controllers.
+//     (+/-20% parametric uncertainty) and evaluating all controllers.
 //  5. Performance vs Cost: Calculate Integral Squared Error (ISE), Steady-State Error (SSE),
 //     and Control Effort (Cost) to determine the optimal strategy.
 // ============================================================

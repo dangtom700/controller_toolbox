@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 
-// Smith Predictor — compensates for pure integer dead-time in discrete plants.
+// Smith Predictor - compensates for pure integer dead-time in discrete plants.
 //
 // Replaces the dead-time delay in the feedback path with a prediction from
 // an internal model, so the inner controller C(z) sees a delay-free loop.
@@ -14,9 +14,9 @@
 //            = error + (current model output - d-step-delayed model output)
 //
 // Signal-flow equivalent (ref: Smith 1957):
-//   Inner loop: C(z) → P₀(z) · z⁻ᵈ   (plant with delay)
-//   Model:      ŷ    = P₀(z) · u       (model without delay)
-//   Correction: c    = ŷ − z⁻ᵈŷ       (delay-induced error cancelled)
+//   Inner loop: C(z) -> P₀(z) . z⁻ᵈ   (plant with delay)
+//   Model:      ŷ    = P₀(z) . u       (model without delay)
+//   Correction: c    = ŷ - z⁻ᵈŷ       (delay-induced error cancelled)
 //
 // Requirements: plant model P₀ must represent the delay-FREE dynamics.
 // Ref: Smith (1957); Åström & Wittenmark "Computer Controlled Systems" §6.4;

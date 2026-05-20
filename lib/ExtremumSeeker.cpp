@@ -10,22 +10,22 @@ namespace ctrl
     }
 
     // ---------------------------------------------------------------------------
-    // ESC step — perturbation + demodulation + gradient integration.
+    // ESC step - perturbation + demodulation + gradient integration.
     //
     // HPF (backward Euler first-order, removes DC offset from y):
-    //   α_h     = 1 / (1 + ω_h·Ts)
-    //   y_h[k]  = α_h·(y_h[k-1] + y[k] − y[k-1])
+    //   alpha_h     = 1 / (1 + omega_h.Ts)
+    //   y_h[k]  = alpha_h.(y_h[k-1] + y[k] - y[k-1])
     //
-    // Demodulate by multiplying with reference dither sin(ω_p·k·Ts):
-    //   ξ[k] = y_h[k] · sin(ω_p·k·Ts)
-    //   After LPF: ĝ ≈ J'(θ)·a/2   (gradient of cost w.r.t. operating point)
+    // Demodulate by multiplying with reference dither sin(omega_p.k.Ts):
+    //   ξ[k] = y_h[k] . sin(omega_p.k.Ts)
+    //   After LPF: ĝ approx = J'(θ).a/2   (gradient of cost w.r.t. operating point)
     //
     // LPF (backward Euler first-order):
-    //   α_l     = ω_l·Ts / (1 + ω_l·Ts)
-    //   ĝ[k]   = (1−α_l)·ĝ[k-1] + α_l·ξ[k]
+    //   alpha_l     = omega_l.Ts / (1 + omega_l.Ts)
+    //   ĝ[k]   = (1-alpha_l).ĝ[k-1] + alpha_l.ξ[k]
     //
     // Operating-point update (gradient descent / ascent):
-    //   θ[k+1] = θ[k] − sign · k_int · Ts · ĝ[k]
+    //   θ[k+1] = θ[k] - sign . k_int . Ts . ĝ[k]
     // ---------------------------------------------------------------------------
     double ExtremumSeeker::compute(double y)
     {

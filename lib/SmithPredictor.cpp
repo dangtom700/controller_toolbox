@@ -11,12 +11,12 @@ namespace ctrl
           buf_head_(0)
     {
         x_model_ = Eigen::VectorXd::Zero(model_.stateSize());
-        // Pre-allocate fixed buffer at construction — no heap allocation in compute()
+        // Pre-allocate fixed buffer at construction - no heap allocation in compute()
         if (d_ > 0) y_buf_.assign(d_, 0.0);
     }
 
-    // Modified error:  e_sp = (r−y) + (ŷ_now − ŷ_delayed)
-    //                        = error + ŷ_now − ŷ_now[k−d]
+    // Modified error:  e_sp = (r-y) + (ŷ_now - ŷ_delayed)
+    //                        = error + ŷ_now - ŷ_now[k-d]
     //
     // The correction term removes the delay from the error signal presented to
     // the inner controller, giving it an effectively delay-free closed loop.
@@ -26,7 +26,7 @@ namespace ctrl
         const double y_now = (model_.C * x_model_ + model_.D *
                                                         Eigen::VectorXd::Zero(model_.inputSize()))(0);
 
-        // d-step delayed model output — read oldest slot from the circular buffer
+        // d-step delayed model output - read oldest slot from the circular buffer
         double y_delayed = y_now; // no delay when d_ == 0
         if (d_ > 0)
         {
@@ -41,7 +41,7 @@ namespace ctrl
         // Compute control action via the inner controller
         const double u = inner_->compute(e_sp);
 
-        // Advance internal model state: x̂[k+1] = A·x̂[k] + B·u[k]
+        // Advance internal model state: x̂[k+1] = A.x̂[k] + B.u[k]
         Eigen::VectorXd uv(model_.inputSize());
         uv.fill(u);
         x_model_ = model_.A * x_model_ + model_.B * uv;

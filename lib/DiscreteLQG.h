@@ -7,8 +7,8 @@
 // Discrete-time Linear Quadratic Gaussian (LQG) Controller.
 //
 // Combines:
-//   • DiscreteLQR  — optimal state-feedback gain K (solved offline via DARE)
-//   • KalmanFilter — optimal state estimator (handles noisy / partial observations)
+//   - DiscreteLQR  - optimal state-feedback gain K (solved offline via DARE)
+//   - KalmanFilter - optimal state estimator (handles noisy / partial observations)
 //
 // Separation principle: the LQR and Kalman filter can be designed independently
 // and combined without loss of optimality (Wonham 1968).
@@ -16,7 +16,7 @@
 // Control law:
 //   1. Kalman predict:  x̂[k|k-1] from u[k-1]
 //   2. Kalman update:   x̂[k|k]   from y[k]
-//   3. LQR control:     u[k]      = −K·(x̂[k|k] − x_ref)
+//   3. LQR control:     u[k]      = -K.(x̂[k|k] - x_ref)
 //
 // step(y, u_prev, x_ref) performs all three in the correct order.
 //
@@ -33,8 +33,8 @@ namespace ctrl
     public:
         // plant:   discrete-time model (A,B,C,D,Ts)
         // lqr_p:   LQR cost weights (Q,R)
-        // Q_noise: process noise covariance (n×n)
-        // R_noise: measurement noise covariance (p×p)
+        // Q_noise: process noise covariance (n*n)
+        // R_noise: measurement noise covariance (p*p)
         // P0:      initial Kalman error covariance (defaults to I)
         DiscreteLQG(const StateSpace &plant,
                     const LQRParams &lqr_p,

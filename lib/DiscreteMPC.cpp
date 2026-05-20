@@ -15,11 +15,11 @@ namespace ctrl
     // ---------------------------------------------------------------------------
     // Build condensed prediction matrices F and Φ.
     //
-    //   F(i·p : (i+1)·p, :) = C · A^{i+1}        i = 0…Np−1
-    //   Φ(i·p, j·m)          = C · A^{i-j} · B   j ≤ i, 0 otherwise
+    //   F(i.p : (i+1).p, :) = C . A^{i+1}        i = 0...Np-1
+    //   Φ(i.p, j.m)          = C . A^{i-j} . B   j <= i, 0 otherwise
     //
     // Then precompute the Hessian:
-    //   H = (Φ'·Q_y·Φ + R_u)
+    //   H = (Φ'.Q_y.Φ + R_u)
     // ---------------------------------------------------------------------------
     void DiscreteMPC::buildCondensedMatrices()
     {
@@ -35,12 +35,12 @@ namespace ctrl
         for (int k = 1; k <= Np; ++k)
             Apow[k] = plant_.A * Apow[k - 1];
 
-        // F: (Np·p) × n
+        // F: (Np.p) * n
         F_.resize(Np * p, n);
         for (int i = 0; i < Np; ++i)
             F_.block(i * p, 0, p, n) = plant_.C * Apow[i + 1];
 
-        // Φ: (Np·p) × (Nc·m)
+        // Φ: (Np.p) * (Nc.m)
         Phi_.resize(Np * p, Nc * m);
         Phi_.setZero();
         for (int i = 0; i < Np; ++i)
@@ -61,11 +61,11 @@ namespace ctrl
         DeltaU_.resize(Nc * m);
     }
 
-    // IController wrapper — reconstructs reference from error and delegates to computeRef.
+    // IController wrapper - reconstructs reference from error and delegates to computeRef.
     double DiscreteMPC::compute(double error)
     {
         const Eigen::VectorXd y_hat = plant_.C * x_hat_ + plant_.D * u_prev_;
-        const Eigen::VectorXd r_ref = y_hat.array() + error; // r = y + (r − y)
+        const Eigen::VectorXd r_ref = y_hat.array() + error; // r = y + (r - y)
         return computeRef(x_hat_, r_ref)(0);
     }
 
@@ -82,7 +82,7 @@ namespace ctrl
         for (int i = 0; i < Np; ++i)
             R_stack_.segment(i * p, p) = r_ref;
 
-        // Unconstrained optimal ΔU* = −H⁻¹·Φ'·Q_y·(F·x − R_stack)
+        // Unconstrained optimal ΔU* = -H⁻¹.Φ'.Q_y.(F.x - R_stack)
         pred_err_.noalias() = F_ * x - R_stack_;
         const auto ldlt = H_.ldlt();
         if (ldlt.info() != Eigen::Success)

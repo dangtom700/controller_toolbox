@@ -16,7 +16,7 @@ namespace ctrl
         u_prev_ = Eigen::VectorXd::Zero(plant.inputSize());
     }
 
-    // Full step: KF predict → KF update → LQR control.
+    // Full step: KF predict -> KF update -> LQR control.
     Eigen::VectorXd DiscreteLQG::step(const Eigen::VectorXd &y,
                                       const Eigen::VectorXd &u_prev,
                                       const Eigen::VectorXd &x_ref)
