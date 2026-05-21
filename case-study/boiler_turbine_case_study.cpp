@@ -450,7 +450,7 @@ void ss_lqg_kalman(const LinearStateSpace &ss, const operating_point &op, const 
     std::ofstream f(fname);
     f << "Time,y1,y2,y3,u1,u2,u3,du1,du2,du3,dx1_est,dx2_est,dx3_est,u1_ideal,u2_ideal,u3_ideal\n";
 
-    int spacing[] = {5, 8, 9, 9, 9, 8, 8, 8, 9, 9, 9};
+    int spacing[] = {8, 10, 9, 9, 9, 8, 8, 8, 9, 9, 9};
     int sum_spacing = 0;
     for (size_t i = 0; i < sizeof(spacing) / sizeof(spacing[0]); ++i)
         sum_spacing += spacing[i];
@@ -538,6 +538,275 @@ void ss_lqg_kalman(const LinearStateSpace &ss, const operating_point &op, const 
     std::cout << "LQG data written to " << fname << "\n";
 }
 
+void ss_PID(const LinearStateSpace &ss, const operating_point &op, const std::string &label, float Ts = 1.0f, int update_freq = 10, int sim_steps = 2000)
+{
+    (void)ss;
+    std::cout << "\n=== PID @ Operating Point " << label << " ===\n";
+
+    // Three decentralised SISO PIDs: y1->u1, y2->u2, y3->u3
+    // Output is a deviation du; absolute valve = u0 + du, clamped to [0,1]
+    ctrl::PIDParams p;
+    p.Kp = 0.05;
+    p.Ki = 0.002;
+    p.Kd = 0.02;
+    p.N = 5.0;
+    p.uMin = -0.5;
+    p.uMax = 0.5;
+
+    ctrl::DiscretePID pid1(p, Ts), pid2(p, Ts), pid3(p, Ts);
+
+    BoilerTurbine bt;
+    bt.x1 = op.x1 + 5.0f;
+    bt.x2 = op.x2 + 3.0f;
+    bt.x3 = op.x3 - 10.0f;
+    bt.u1 = op.u1;
+    bt.u2 = op.u2;
+    bt.u3 = op.u3;
+
+    bt.y1 = bt.x1;
+    bt.y2 = bt.x2;
+    {
+        float acs = ((1.0f - 0.001538f * bt.x3) * 0.8f * bt.x1 - 25.6f) /
+                    (bt.x3 * (1.0394f - 0.0012304f * bt.x1));
+        float qe = (0.854f * bt.u2 - 0.147f) * bt.x1 + 45.59f * bt.u1 - 2.514f * bt.u3 - 2.096f;
+        bt.y3 = 0.05f * (0.13073f * bt.x3 + 100.0f * acs + qe / 9.0f - 67.975f);
+    }
+
+    float u1_prev = op.u1, u2_prev = op.u2, u3_prev = op.u3;
+
+    const std::string fname = "pid_op_" + label + ".csv";
+    std::ofstream f(fname);
+    f << "Time,y1,y2,y3,u1,u2,u3,du1,du2,du3\n";
+
+    int spacing[] = {8, 10, 9, 9, 9, 8, 8, 8};
+    int sum_spacing = 0;
+    for (size_t i = 0; i < sizeof(spacing) / sizeof(spacing[0]); ++i)
+        sum_spacing += spacing[i];
+
+    std::cout << std::setw(spacing[0]) << "k"
+              << std::setw(spacing[1]) << "t[s]"
+              << std::setw(spacing[2]) << "y1"
+              << std::setw(spacing[3]) << "y2"
+              << std::setw(spacing[4]) << "y3"
+              << std::setw(spacing[5]) << "u1"
+              << std::setw(spacing[6]) << "u2"
+              << std::setw(spacing[7]) << "u3" << "\n";
+    std::cout << std::string(sum_spacing, '-') << "\n";
+
+    for (int k = 0; k <= sim_steps; ++k)
+    {
+        // Regulate dy -> 0: error = -(y - y_op)
+        bt.u1 = std::clamp(static_cast<float>(op.u1 + pid1.compute(-(bt.y1 - op.y1))), 0.0f, 1.0f);
+        bt.u2 = std::clamp(static_cast<float>(op.u2 + pid2.compute(-(bt.y2 - op.y2))), 0.0f, 1.0f);
+        bt.u3 = std::clamp(static_cast<float>(op.u3 + pid3.compute(-(bt.y3 - op.y3))), 0.0f, 1.0f);
+
+        const float du1 = bt.u1 - u1_prev;
+        const float du2 = bt.u2 - u2_prev;
+        const float du3 = bt.u3 - u3_prev;
+        u1_prev = bt.u1;
+        u2_prev = bt.u2;
+        u3_prev = bt.u3;
+
+        f << k * Ts << ","
+          << bt.y1 << "," << bt.y2 << "," << bt.y3 << ","
+          << bt.u1 << "," << bt.u2 << "," << bt.u3 << ","
+          << du1 << "," << du2 << "," << du3 << "\n";
+
+        if (k % update_freq == 0)
+            std::cout << std::setw(spacing[0]) << k
+                      << std::fixed << std::setprecision(3)
+                      << std::setw(spacing[1]) << k * Ts
+                      << std::setw(spacing[2]) << bt.y1
+                      << std::setw(spacing[3]) << bt.y2
+                      << std::setw(spacing[4]) << bt.y3
+                      << std::setw(spacing[5]) << bt.u1
+                      << std::setw(spacing[6]) << bt.u2
+                      << std::setw(spacing[7]) << bt.u3 << "\n";
+
+        bt.update();
+    }
+
+    std::cout << "PID data written to " << fname << "\n";
+}
+
+void ss_SMC(const LinearStateSpace &ss, const operating_point &op, const std::string &label, float Ts = 1.0f, int update_freq = 10, int sim_steps = 2000)
+{
+    (void)ss;
+    std::cout << "\n=== SMC @ Operating Point " << label << " ===\n";
+
+    // Three decentralised SISO SMCs: y1->u1, y2->u2, y3->u3
+    ctrl::SMCParams p;
+    p.c_e = 1.0;
+    p.c_de = 0.2;
+    p.K = 0.05;
+    p.phi = 0.3;
+    p.uMin = -0.5;
+    p.uMax = 0.5;
+
+    ctrl::DiscreteSMC smc1(p, Ts), smc2(p, Ts), smc3(p, Ts);
+
+    BoilerTurbine bt;
+    bt.x1 = op.x1 + 5.0f;
+    bt.x2 = op.x2 + 3.0f;
+    bt.x3 = op.x3 - 10.0f;
+    bt.u1 = op.u1;
+    bt.u2 = op.u2;
+    bt.u3 = op.u3;
+
+    bt.y1 = bt.x1;
+    bt.y2 = bt.x2;
+    {
+        float acs = ((1.0f - 0.001538f * bt.x3) * 0.8f * bt.x1 - 25.6f) /
+                    (bt.x3 * (1.0394f - 0.0012304f * bt.x1));
+        float qe = (0.854f * bt.u2 - 0.147f) * bt.x1 + 45.59f * bt.u1 - 2.514f * bt.u3 - 2.096f;
+        bt.y3 = 0.05f * (0.13073f * bt.x3 + 100.0f * acs + qe / 9.0f - 67.975f);
+    }
+
+    float u1_prev = op.u1, u2_prev = op.u2, u3_prev = op.u3;
+
+    const std::string fname = "smc_op_" + label + ".csv";
+    std::ofstream f(fname);
+    f << "Time,y1,y2,y3,u1,u2,u3,du1,du2,du3\n";
+
+    int spacing[] = {8, 10, 9, 9, 9, 8, 8, 8};
+    int sum_spacing = 0;
+    for (size_t i = 0; i < sizeof(spacing) / sizeof(spacing[0]); ++i)
+        sum_spacing += spacing[i];
+
+    std::cout << std::setw(spacing[0]) << "k"
+              << std::setw(spacing[1]) << "t[s]"
+              << std::setw(spacing[2]) << "y1"
+              << std::setw(spacing[3]) << "y2"
+              << std::setw(spacing[4]) << "y3"
+              << std::setw(spacing[5]) << "u1"
+              << std::setw(spacing[6]) << "u2"
+              << std::setw(spacing[7]) << "u3" << "\n";
+    std::cout << std::string(sum_spacing, '-') << "\n";
+
+    for (int k = 0; k <= sim_steps; ++k)
+    {
+        bt.u1 = std::clamp(static_cast<float>(op.u1 + smc1.compute(-(bt.y1 - op.y1))), 0.0f, 1.0f);
+        bt.u2 = std::clamp(static_cast<float>(op.u2 + smc2.compute(-(bt.y2 - op.y2))), 0.0f, 1.0f);
+        bt.u3 = std::clamp(static_cast<float>(op.u3 + smc3.compute(-(bt.y3 - op.y3))), 0.0f, 1.0f);
+
+        const float du1 = bt.u1 - u1_prev;
+        const float du2 = bt.u2 - u2_prev;
+        const float du3 = bt.u3 - u3_prev;
+        u1_prev = bt.u1;
+        u2_prev = bt.u2;
+        u3_prev = bt.u3;
+
+        f << k * Ts << ","
+          << bt.y1 << "," << bt.y2 << "," << bt.y3 << ","
+          << bt.u1 << "," << bt.u2 << "," << bt.u3 << ","
+          << du1 << "," << du2 << "," << du3 << "\n";
+
+        if (k % update_freq == 0)
+            std::cout << std::setw(spacing[0]) << k
+                      << std::fixed << std::setprecision(3)
+                      << std::setw(spacing[1]) << k * Ts
+                      << std::setw(spacing[2]) << bt.y1
+                      << std::setw(spacing[3]) << bt.y2
+                      << std::setw(spacing[4]) << bt.y3
+                      << std::setw(spacing[5]) << bt.u1
+                      << std::setw(spacing[6]) << bt.u2
+                      << std::setw(spacing[7]) << bt.u3 << "\n";
+
+        bt.update();
+    }
+
+    std::cout << "SMC data written to " << fname << "\n";
+}
+
+void ss_extremum_seeker(const LinearStateSpace &ss, const operating_point &op, const std::string &label, float Ts = 1.0f, int update_freq = 10, int sim_steps = 2000)
+{
+    (void)ss;
+    std::cout << "\n=== Extremum Seeker @ Operating Point " << label << " ===\n";
+
+    // ESC optimises u3 (feedwater flow) to maximise y3 (boiler efficiency).
+    // u1, u2 held at operating point; ESC returns absolute u3 = theta + dither.
+    // Starts at operating point (no kick): ESC assumes quasi-static plant behaviour.
+    ctrl::ExtremumSeekerParams p;
+    p.perturbAmp = 0.005; // small dither on feedwater valve
+    p.perturbFreq = 0.02; // Hz — 1 cycle per 50 s at Ts=1
+    p.lpfCutoff = 0.005;  // Hz — gradient smoothing
+    p.hpfCutoff = 0.002;  // Hz — DC removal
+    p.integGain = 0.5;
+    p.seekMinimum = false; // maximise y3
+
+    ctrl::ExtremumSeeker esc(p, Ts);
+
+    BoilerTurbine bt;
+    bt.x1 = op.x1;
+    bt.x2 = op.x2;
+    bt.x3 = op.x3; // start at equilibrium
+    bt.u1 = op.u1;
+    bt.u2 = op.u2;
+    bt.u3 = op.u3;
+
+    bt.y1 = bt.x1;
+    bt.y2 = bt.x2;
+    {
+        float acs = ((1.0f - 0.001538f * bt.x3) * 0.8f * bt.x1 - 25.6f) /
+                    (bt.x3 * (1.0394f - 0.0012304f * bt.x1));
+        float qe = (0.854f * bt.u2 - 0.147f) * bt.x1 + 45.59f * bt.u1 - 2.514f * bt.u3 - 2.096f;
+        bt.y3 = 0.05f * (0.13073f * bt.x3 + 100.0f * acs + qe / 9.0f - 67.975f);
+    }
+
+    float u3_prev = op.u3;
+
+    const std::string fname = "esc_op_" + label + ".csv";
+    std::ofstream f(fname);
+    f << "Time,y1,y2,y3,u1,u2,u3,du3,theta\n";
+
+    int spacing[] = {8, 10, 9, 9, 9, 8, 8, 8, 9};
+    int sum_spacing = 0;
+    for (size_t i = 0; i < sizeof(spacing) / sizeof(spacing[0]); ++i)
+        sum_spacing += spacing[i];
+
+    std::cout << std::setw(spacing[0]) << "k"
+              << std::setw(spacing[1]) << "t[s]"
+              << std::setw(spacing[2]) << "y1"
+              << std::setw(spacing[3]) << "y2"
+              << std::setw(spacing[4]) << "y3"
+              << std::setw(spacing[5]) << "u1"
+              << std::setw(spacing[6]) << "u2"
+              << std::setw(spacing[7]) << "u3"
+              << std::setw(spacing[8]) << "theta" << "\n";
+    std::cout << std::string(sum_spacing, '-') << "\n";
+
+    for (int k = 0; k <= sim_steps; ++k)
+    {
+        bt.u1 = op.u1;
+        bt.u2 = op.u2;
+        bt.u3 = std::clamp(static_cast<float>(esc.compute(bt.y3)), 0.0f, 1.0f);
+
+        const float du3 = bt.u3 - u3_prev;
+        u3_prev = bt.u3;
+
+        f << k * Ts << ","
+          << bt.y1 << "," << bt.y2 << "," << bt.y3 << ","
+          << bt.u1 << "," << bt.u2 << "," << bt.u3 << ","
+          << du3 << "," << esc.currentEstimate() << "\n";
+
+        if (k % update_freq == 0)
+            std::cout << std::setw(spacing[0]) << k
+                      << std::fixed << std::setprecision(4)
+                      << std::setw(spacing[1]) << k * Ts
+                      << std::setw(spacing[2]) << bt.y1
+                      << std::setw(spacing[3]) << bt.y2
+                      << std::setw(spacing[4]) << bt.y3
+                      << std::setw(spacing[5]) << bt.u1
+                      << std::setw(spacing[6]) << bt.u2
+                      << std::setw(spacing[7]) << bt.u3
+                      << std::setw(spacing[8]) << esc.currentEstimate() << "\n";
+
+        bt.update();
+    }
+
+    std::cout << "ESC data written to " << fname << "\n";
+}
+
 void run_case_study(const operating_point &op, const std::string &label, const float Ts, int sim_steps = 2000, int update_freq = 10)
 {
     LinearStateSpace ss_op = linearize(op, Ts);
@@ -545,6 +814,9 @@ void run_case_study(const operating_point &op, const std::string &label, const f
     ss_lqr(ss_op, op, label, Ts, update_freq, sim_steps);
     ss_mpc(ss_op, op, label, Ts, update_freq, sim_steps);
     ss_lqg_kalman(ss_op, op, label, Ts, update_freq, sim_steps);
+    ss_PID(ss_op, op, label, Ts, update_freq, sim_steps);
+    ss_SMC(ss_op, op, label, Ts, update_freq, sim_steps);
+    ss_extremum_seeker(ss_op, op, label, Ts, update_freq, sim_steps);
 }
 
 int main()
@@ -552,7 +824,7 @@ int main()
     plant_model_data();
     int update_freq = 60; // print every N steps
     int sim_steps = 3600; // simulate for M steps
-    float Ts = 0.25f;     // sample time of 1 s (matches the system's natural timescale)
+    float Ts = 1.0f;      // sample time of 1 s (matches the system's natural timescale)
     run_case_study(op_A, "A - Low Load", Ts, sim_steps, update_freq);
     run_case_study(op_B, "B - Medium Load", Ts, sim_steps, update_freq);
     run_case_study(op_C, "C - High Load", Ts, sim_steps, update_freq);
