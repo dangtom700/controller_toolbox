@@ -32,11 +32,17 @@ jobs:
         if: runner.os == 'Linux'
         run: sudo apt-get install -y --no-install-recommends libeigen3-dev ninja-build
 
-      # ── Eigen (Windows) — vcpkg is pre-installed on windows-latest ─────────
+      # ── Eigen (Windows) — download 3.4.0 directly; avoids vcpkg version drift ─
       - name: Install Eigen (Windows)
         if: runner.os == 'Windows'
-        run: vcpkg install eigen3:x64-windows
         shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.zip" -OutFile eigen.zip
+          Expand-Archive eigen.zip -DestinationPath C:\eigen
+          cmake -B C:\eigen\eigen-3.4.0\build -S C:\eigen\eigen-3.4.0 `
+                -DCMAKE_INSTALL_PREFIX=C:\eigen\install `
+                -DBUILD_TESTING=OFF
+          cmake --install C:\eigen\eigen-3.4.0\build
 
       - name: Configure CMake (Linux)
         if: runner.os == 'Linux'
@@ -48,13 +54,13 @@ jobs:
 
       - name: Configure CMake (Windows)
         if: runner.os == 'Windows'
+        shell: pwsh
         run: >
           cmake -B build
           -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
           -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
           -DCMAKE_BUILD_TYPE=Release
-          -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
-        shell: pwsh
+          -DEigen3_DIR=C:/eigen/install/share/eigen3/cmake
 
       - name: Build
         run: cmake --build build --config Release
